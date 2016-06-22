@@ -1,5 +1,5 @@
 # Workforce Scripts
-A set of python scripts to help administer Workforce
+A set of python scripts to help administer Workforce projects and services
 
 Supports Python 2.7+ and Python 3.4+
 
