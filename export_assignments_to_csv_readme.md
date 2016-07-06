@@ -17,7 +17,7 @@ This script queries the assignment feature layer and exports the results to a CS
 
 Example Usage:
 ```python
-python export_assignments_to_csv.py -outCSV "../exported_assignments.csv" -u username -p password -url "https://nitro.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -logFile "../log.txt" -outSR 10200 -where "priority=1" -dateFormat "%m/%d/%Y"
+python export_assignments_to_csv.py -outCSV "../exported_assignments.csv" -u username -p password -url "https://<org>.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -logFile "../log.txt" -outSR 10200 -where "status=1" -dateFormat "%m/%d/%Y"
 ```
 
 ## What it does

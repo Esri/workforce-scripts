@@ -20,7 +20,7 @@ This script relies on a JSON configuration file that maps the original field nam
 
 Example Usage:
 ```python
-python check_completion_location.py -configFile "../sample_data/fieldMappings.json" -u username -p password -url "https://nitro.maps.arcgis.com" -targetFL "http://services.arcgis.com/N4jtru9dctSQR53c/arcgis/rest/services/AssignmentsArchives/FeatureServer/0" -where "1=1" -pid "e2293b52beef439ca475427287969466" -log "log.txt" -worker worker_1 -timeTol 5 -distTol 100 -minAccuracy 25
+python check_completion_location.py -configFile "../sample_data/fieldMappings.json" -u username -p password -url "https://<org>.maps.arcgis.com" -targetFL "http://services.arcgis.com/<server>/arcgis/rest/services/AssignmentsArchives/FeatureServer/0" -where "1=1" -pid "e2293b52beef439ca475427287969466" -log "log.txt" -workers worker_1 -timeTol 5 -distTol 100 -minAccuracy 25
 ```
 
 ## What it does

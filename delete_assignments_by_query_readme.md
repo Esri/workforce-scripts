@@ -19,12 +19,12 @@ This script deletes assignments based a query or list of OBJECTIDs. The script u
 
 Example Usage (OBJECTIDs):
 ```python
-python delete_assignments.py -u username -p password -url "https://nitro.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -logFile "../log.txt" -objectIDs 50 51
+python delete_assignments.py -u username -p password -url "https://<org>.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -logFile "../log.txt" -objectIDs 50 51
 ```
 
 Example Usage (where):
 ```python
-python delete_assignments.py -u username -p password -url "https://nitro.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -logFile "../log.txt" -where "priority = 1"
+python delete_assignments.py -u username -p password -url "https://<org>.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -logFile "../log.txt" -where "priority = 1"
 ```
 
 ## What it does

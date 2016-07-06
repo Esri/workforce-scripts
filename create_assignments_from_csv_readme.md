@@ -34,7 +34,7 @@ Due to the various naming conventions organizations may have, this script has ma
 
 Example Usage:
 ```python
-python create_assignments_form_csv.py -csvFile "../sample_data/assignments.csv" -u username -p password -url "https://nitro.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -xField "xField" -yField "yField" -assignmentTypeField "Type" -locationField "Location" -descriptionField "Description" -priorityField "Priority" -workOrderIdField "Work Order Id" -dueDateField "Due Date" -attachmentFileField "Attachment" -wkid 102100 -logFile "../log.txt"
+python create_assignments_from_csv.py -csvFile "../sample_data/assignments.csv" -u username -p password -url "https://<org>.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -xField "xField" -yField "yField" -assignmentTypeField "Type" -locationField "Location" -descriptionField "Description" -priorityField "Priority" -workOrderIdField "Work Order Id" -dueDateField "Due Date" -attachmentFileField "Attachment" -wkid 102100 -logFile "../log.txt"
 ```
 
 ## What it does
