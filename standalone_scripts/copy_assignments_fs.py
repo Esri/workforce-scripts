@@ -152,7 +152,7 @@ def main(args):
     logging.getLogger().info("Validating field mappings...")
     if validate_config(field_mappings, target_fl_url, token):
         # Copy the assignments
-        copy_assignments(assignment_fl_url, target_fl_url, field_mappings, token)
+        copy_assignments(assignment_fl_url, target_fl_url, field_mappings, token, where=args.where)
         logging.getLogger().info("Completed")
     else:
         logging.getLogger().critical("Invalid field mappings detected")
