@@ -6,7 +6,9 @@ Supports Python 2.7+, 3.4+
 
 ----
 
-This script relies on a JSON configuration file that maps the original field names to the field names in the target feature service (fields may vary, change this config file as needed). An example is shown [here](../sample_data/fieldMappings.json) The script uses the following parameters:
+This script relies on a JSON configuration file that maps the original field names to the field names in the target feature service (fields may vary, change this config file as needed). An example is shown [here.](sample_data/fieldMappings.json) **The target OBJECTID and GlobalID fields must have different names such as Original_OBJECTID and Original_GlobalID, as these fields are auto-generated when creating a new feature. If you use a mapping like (OBJECTID => OBJECTID, GlobalID => GlobalID) rather than (OBJECTID => Original_OBJECTID, GlobalID => Original_Global_ID), then you may see duplicate items copied over, since the source GlobalID and OBJECTID values will not be stored in the target features. The OBJECTID field in the target feature layer should be an Integer, the GlobalID field in the target feature layer should be String.**
+
+The script uses the following parameters:
 
 - -configFile \<configFile\> The json file containing the field mappings
 - -logFile \<logFile\> The log file to use for logging messages
