@@ -33,11 +33,12 @@ import mimetypes
 import os
 import traceback
 import workforcehelpers
+import arrow
 
 
 def get_assignments_from_csv(csvFile, xField, yField, assignmentTypeField, locationField, dispatcherIdField=None,
                              descriptionField=None, priorityField=None, workOrderIdField=None, dueDateField=None,
-                             dateFormat=r"%m/%d/%Y", wkid=102100, attachmentFileField=None):
+                             dateFormat=r"%m/%d/%Y %H:%M", wkid=102100, attachmentFileField=None):
     """
     Creates a list of dictionary objects representing assignments
     :param csvFile: The CSV file to read
@@ -50,7 +51,7 @@ def get_assignments_from_csv(csvFile, xField, yField, assignmentTypeField, locat
     :param priorityField: The name of the field containing the priority
     :param workOrderIdField: The name of the filed containing the workOrderId
     :param dueDateField: The name of the field containing the dueDate
-    :param dateFormat: The format that the dueDate is in (defaults to %m/%d/%Y)
+    :param dateFormat: The format that the dueDate is in (defaults to %m/%d/%Y %H:%M)
     :param wkid: The wkid that the x,y values use (defaults to 102100 which matches assignments FS)
     :param attachmentFileField: The attachment file field to use
     :return: A list of dictionary objects representing assignments
@@ -79,9 +80,9 @@ def get_assignments_from_csv(csvFile, xField, yField, assignmentTypeField, locat
         if descriptionField: new_assignment["data"]["attributes"]["description"] = assignment[descriptionField]
         if priorityField: new_assignment["data"]["attributes"]["priority"] = int(assignment[priorityField])
         if workOrderIdField: new_assignment["data"]["attributes"]["workOrderId"] = int(assignment[workOrderIdField])
-        if dueDateField: new_assignment["data"]["attributes"]["dueDate"] = datetime.datetime.strptime(
+        if dueDateField: new_assignment["data"]["attributes"]["dueDate"] = arrow.Arrow.strptime(
             assignment[dueDateField],
-            dateFormat).strftime("%m/%d/%Y")
+            dateFormat).to('utc').strftime("%m/%d/%Y %H:%M")
         if attachmentFileField: new_assignment["attachmentFile"] = \
             assignment[attachmentFileField].strip().rstrip()
         assignments_out.append(new_assignment)
@@ -277,8 +278,8 @@ if __name__ == "__main__":
     parser.add_argument('-dueDateField', dest='dueDateField', help="The field that contains the dispatcherId")
     parser.add_argument('-attachmentFileField', dest='attachmentFileField',
                         help="The field that contains the file path to the attachment to upload")
-    parser.add_argument('-dateFormat', dest='dateFormat', default=r"%m/%d/%Y",
-                        help="The format to use for the date (eg. '%m/%d/%Y'")
+    parser.add_argument('-dateFormat', dest='dateFormat', default=r"%m/%d/%Y %H:%M",
+                        help="The format to use for the date (eg. '%m/%d/%Y %H:%M'")
     parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read")
     parser.add_argument('-wkid', dest='wkid', help='The wkid that the x,y values are use', type=int, default=4326)
     parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)

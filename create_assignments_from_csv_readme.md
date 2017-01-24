@@ -1,17 +1,20 @@
 ## Create Assignments From CSV
 
 This script reads a CSV file containing the required fields to add unassigned assignments to a workforce project. Attachments can also be uploaded if the path to the file is specified in the CSV file.
-
-Supports Python 2.7+, 3.4+
+This script supports time (hours and minute) and timezone offset. When loading data to ArcGIS Online hosted feature layer, time info is supposed to be in UTC (because date and time are stored in UTC).
+The script will convert data from csv file to UTC time zone so you don't have to worry about any offset between uploaded data and requested data form the workforce client app (web or mobile).
+For that the script uses a third party library : arrow (https://github.com/crsmithdev/arrow).
+This lib has to be installed before using the script (pip install arrow).
+Supports Python 3.4+
 
 ----
 
 Consider the following CSV example table that is to be imported into Workforce:
 
-| xField  | yField | Type | Location         | Dispatcher | Description      | Priority | Work Order Id | Due Date  | Attachment                           |
-|---------|--------|------|------------------|------------|------------------|----------|---------------|-----------|--------------------------------------|
-| -118.15 | 33.8   | 1    | 123 Street # 765 | 1          | Test Description | 4        | 1             | 4/28/2016 | ../sample_data/attachments/logo1.png |
-| -118.37 | 34.086 | 2    | 124 Street # 765 | 2          | Test Description | 3        | 2             | 4/29/2016 |                                      |
+| xField  | yField | Type | Location         | Dispatcher | Description      | Priority | Work Order Id | Due Date              | Attachment                           |
+|---------|--------|------|------------------|------------|------------------|----------|---------------|-----------------------|--------------------------------------|
+| -118.15 | 33.8   | 1    | 123 Street # 765 | 1          | Test Description | 4        | 1             | 4/28/2016 17:30 -0400 | ../sample_data/attachments/logo1.png |
+| -118.37 | 34.086 | 2    | 124 Street # 765 | 2          | Test Description | 3        | 2             | 4/29/2016 18:30 -0400 |                                      |
 
 
 Due to the various naming conventions organizations may have, this script has many options allowing the user to specify the names of each column as well as the date format. In addition to the authentication arguments, the script specific arguments are as follows:
@@ -29,12 +32,12 @@ Due to the various naming conventions organizations may have, this script has ma
 - -workOrderIdField \<workOrderIdField\> - The name of the field in the CSV file that contains the workerOrderId (Optional)
 - -dueDateField \<dueDateField\> - The name of the field in the CSV file that contains the dueDate (Optional)
 - -attachmentFileField \<attachmentFileField\> - The name of the CSV file that contains the file (if any) to upload with the assignmnent (Optional)
-- -dateFormat \<dateFormat\> - The date format to use (Optional - defaults to "%m/%d/%Y")
+- -dateFormat \<dateFormat\> - The date format to use (Optional - defaults to "%m/%d/%Y %H:%M %z")
 - -wkid \<wkid\> - The spatial reference wkid that the x and y fields are in (Optional - defaults to 4236 (GCS_WGS_1984))
 
 Example Usage:
 ```python
-python create_assignments_from_csv.py -csvFile "../sample_data/assignments.csv" -u username -p password -url "https://<org>.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -xField "xField" -yField "yField" -assignmentTypeField "Type" -locationField "Location" -descriptionField "Description" -priorityField "Priority" -workOrderIdField "Work Order Id" -dueDateField "Due Date" -attachmentFileField "Attachment" -wkid 102100 -logFile "../log.txt"
+python create_assignments_from_csv.py -csvFile "../sample_data/assignments.csv" -u username -p password -url "https://<org>.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -xField "xField" -yField "yField" -assignmentTypeField "Type" -locationField "Location" -descriptionField "Description" -priorityField "Priority" -workOrderIdField "Work Order Id" -dueDateField "Due Date" -attachmentFileField "Attachment" -dateFormat "%%d/%%m/%%Y %%H:%%M %%z" -wkid 102100 -logFile "../log.txt"
 ```
 
 ## What it does
