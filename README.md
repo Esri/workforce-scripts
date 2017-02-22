@@ -14,6 +14,8 @@ Two sets of scripts that do the same things are provided. [One](arcrest_scripts)
 | [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [ArcREST](arcrest_scripts/export_assignments_to_csv.py)  [Standalone](standalone_scripts/export_assignments_to_csv.py)     | export_assignments_to_csv.py   |
 | [Delete Assignments By Query](delete_assignments_by_query_readme.md) | [ArcREST](arcrest_scripts/delete_assignments_by_query.py)  [Standalone](standalone_scripts/delete_assignments_by_query.py) | delete_assignments_by_query.py |
 | [Check Assignment Completion ](check_completion_location.md)         | [ArcREST](arcrest_scripts/check_completion_location.py) [Standalone](standalone_scripts/check_completion_location.py)      | check_completion_location.py   |
+| [Create Assignment Types ](create_assignment_types.md)               | [Standalone](standalone_scripts/create_assignment_types.py)                                                                | create_assignment_types.py     |
+| [Import Workers](import_workers.md)                                  | [Standalone](standalone_scripts/import_workers.py)                                                                         | import_workers.py              |
 
 ## Instructions
 
