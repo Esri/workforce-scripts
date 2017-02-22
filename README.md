@@ -3,7 +3,7 @@ A set of python scripts to help administer Workforce projects and services
 
 Supports Python 2.7+ and Python 3.4+
 
-Two sets of scripts that do the same things are provided. [One](arcrest_scripts) relies on the [ArcREST](https://github.com/Esri/ArcREST) library (highly recommend to install latest master branch as recent changes have been made to fix bugs). The [other](standalone_scripts) set of scripts are standalone and uses [Requests](http://docs.python-requests.org/) to make GET and POST requests easily and to support Python 2 and 3. This 3rd party library has been bundled with the scripts.
+Two sets of scripts that do the same things are provided. [One](arcrest_scripts) relies on the [ArcREST](https://github.com/Esri/ArcREST) library. The [other](standalone_scripts) set of scripts are standalone and uses [Requests](http://docs.python-requests.org/) to make GET and POST requests easily and to support Python 2 and 3.
 
 ## Features
 
@@ -18,9 +18,11 @@ Two sets of scripts that do the same things are provided. [One](arcrest_scripts)
 ## Instructions
 
 1. Install Python 2.7.x or Python 3.4.x+ if not already installed
-2. Install [ArcREST](https://github.com/Esri/ArcREST) from source if you plan to use the scripts that rely on ArcREST
-3. Clone this repo or download as zip and extract
-4. Run the sample scripts with the sample data against your feature services and projects
+2. Install dependencies `pip install -r requirements.txt`
+  1. Installs [ArcREST](https://github.com/Esri/ArcREST)
+  2. Installs [Requests](http://docs.python-requests.org/en/master/user/install/#install)
+4. Clone this repo or download as zip and extract
+5. Run the sample scripts with the sample data against your feature services and projects
 
 ## Resources
 
