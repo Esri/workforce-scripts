@@ -115,6 +115,9 @@ def add_assignment_types(org_url, token, projectId, assignment_types):
     # clear out lastEditDate (otherwise ArcGIS online throws an error about it)
     if "editingInfo" in assignment_fl and "lastEditDate" in assignment_fl["editingInfo"]:
         del assignment_fl["editingInfo"]["lastEditDate"]
+    # clear out hasGeometry properties before submitting (known issue with FS)
+    if "hasGeometryProperties" in assignment_fl:
+        del assignment_fl["hasGeometryProperties"]
     # need to use the admin url to update a service definition
     index = assignments_url.index("/services/")
     update_definition_url = assignments_url[0:index] + "/admin" + assignments_url[index:] + "/updateDefinition"
