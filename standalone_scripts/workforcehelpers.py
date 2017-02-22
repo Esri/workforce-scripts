@@ -217,3 +217,21 @@ def initialize_logging(logFile):
     # Add the handlers to the root logger
     logger.addHandler(sh)
     logger.addHandler(rh)
+
+
+def get_group_id(org_url, token, projectId):
+    """
+        Gets the group id from the project ID
+        :param org_url: (string) The organizational url where the project resides and that the token is valid for
+        :param token:  (string) The authenticated token to use
+        :param projectId: (string) The project ID (from AGOL)
+        :return:
+        """
+    project_path = "{}/sharing/rest/content/items/{}/data".format(org_url, projectId)
+    params = {
+        "token": token,
+        "f": "json",
+        "referer": org_url
+    }
+    res = get(project_path, params)
+    return res["groupId"]

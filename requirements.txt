@@ -1,2 +1,0 @@
-arcrest_package>=3.5.3
-requests>=2.10.0

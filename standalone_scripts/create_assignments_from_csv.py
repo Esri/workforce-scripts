@@ -203,7 +203,7 @@ def add_attachments(org_url, token, projectId, assignments):
     :return:
     """
     assignment_fl_url = workforcehelpers.get_assignments_feature_layer_url(org_url, token, projectId)
-    logging.getLogger().debug("Adding Attachments...")
+    logging.getLogger().info("Adding Attachments...")
     for assignment in assignments:
         if assignment["attachmentFile"] and assignment["attachmentFile"] != "":
             # url to hit to add attachments (<feature-service-layer>/<object-id>/addAttachment)
@@ -217,7 +217,7 @@ def add_attachments(org_url, token, projectId, assignments):
                 'token': token
             }
             response = workforcehelpers.post(add_url, data, files)
-            logging.getLogger().debug(response)
+            logging.getLogger().info(response)
 
 
 def main(args):
