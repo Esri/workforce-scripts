@@ -75,10 +75,10 @@ def get_assignments_from_csv(csvFile, xField, yField, assignmentTypeField, locat
                                                   spatialReference=dict(wkid=int(wkid)))
         new_assignment["data"]["attributes"]["assignmentType"] = int(assignment[assignmentTypeField])
         new_assignment["data"]["attributes"]["location"] = assignment[locationField]
-        if dispatcherIdField: new_assignment["data"]["attributes"]["dispatcherId"] = assignment[dispatcherIdField]
+        if dispatcherIdField: new_assignment["data"]["attributes"]["dispatcherId"] = int(assignment[dispatcherIdField])
         if descriptionField: new_assignment["data"]["attributes"]["description"] = assignment[descriptionField]
         if priorityField: new_assignment["data"]["attributes"]["priority"] = int(assignment[priorityField])
-        if workOrderIdField: new_assignment["data"]["attributes"]["workOrderId"] = int(assignment[workOrderIdField])
+        if workOrderIdField: new_assignment["data"]["attributes"]["workOrderId"] = assignment[workOrderIdField]
         if dueDateField: new_assignment["data"]["attributes"]["dueDate"] = datetime.datetime.strptime(
             assignment[dueDateField],
             dateFormat).strftime("%m/%d/%Y")
