@@ -106,8 +106,6 @@ def validate_config(target_fl, field_mappings):
     return True
 
 
-
-
 def main(args):
     # initialize logging
     logger = initialize_logging(args.logFile)

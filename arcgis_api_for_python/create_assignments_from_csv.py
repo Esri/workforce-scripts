@@ -212,6 +212,7 @@ def main(args):
                 logger.info(response)
     logger.info("Completed")
 
+
 if __name__ == "__main__":
     # Get all of the commandline arguments
     parser = argparse.ArgumentParser("Add Assignments to Workforce Project")

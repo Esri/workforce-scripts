@@ -2,6 +2,8 @@
 
 This script reads a CSV file containing the assignment types to add to the workforce project.
 
+**This script requires the logged in user to be an admin or to be the owner of the project**
+
 Supports Python 2.7+, 3.4+
 
 ----
