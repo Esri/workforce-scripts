@@ -70,23 +70,6 @@ def initialize_logging(log_file):
     return logger
 
 
-def query_global(db, global_id):
-    """
-    Query the database for global ids
-    :param db: (string) the database to query
-    :param global_id: (string) the id to search for
-    :return: (int) number of items with matching id
-    """
-    conn = sqlite3.connect(db)
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM assignments where GlobalID = ?".format(
-        global_id
-    ))
-    count = c.fetchone()[0]
-    conn.close()
-    return count
-
-
 def initialize_db(db):
     """
     Initializes the database and creates the table if necessary
@@ -179,7 +162,7 @@ def get_global_ids(db):
 if __name__ == "__main__":
     # parse the config file
     config = configparser.ConfigParser()
-    config.read("my_config.ini")
+    config.read("config.ini")
 
     logger = initialize_logging(config["LOG"]["LOGFILE"])
     initialize_db(config["DB"]["DATABASE"])

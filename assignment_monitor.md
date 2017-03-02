@@ -1,7 +1,5 @@
-# workforce-slack-demo
-A demo showing how workforce assignments pushed to a slack channel
-
-This simple script polls a feature service for changes to a feature. It queries to see if an assignment (Feature) is completed and stores the assignment in a SQLite database. For each assignment that is completed, a slack message is sent using an incoming webhook.
+# Assignment Monitor
+A demo showing how completed assignments can be stored in SQLite database and pushed to a slack channel in near real-time.
 
 ## Installation
 
@@ -15,4 +13,15 @@ This simple script polls a feature service for changes to a feature. It queries 
 2. Open a workforce project as a worker on an android or ios device and complete an assignment. 
 3. The script polls the feature service every 5 seconds so you should see a slack notification on your designated channel within 5 seconds.
 
-Ideally, this script would run on a server. With a few modifications it could be set up as a scheduled task or cron job.
+In a real-world scenario, this script can be modified to run once (not loop forever). It would be called every so often (ie. once per minute) by a task scheduler such as Windows Task Scheduler or Cron.
+
+## What it does
+
+1. It creates a SQLite database and the required table (if necessary)
+2. It then loads into memory any GlobalID values stored in the database
+3. It queries the assignment feature service of the specified workforce project to find completed assignments
+4. It checks each assignment to see if it was already added to the database, if not, then it is inserted
+5. If there was a newly completed assignment, some details of it are posted to the configured slack channel.
+6. It then waits for 5 seconds and repeats steps 3-6 until manually stopped (CTRL-C)
+
+Info about Slack Webhooks can be found [here](https://api.slack.com/incoming-webhooks).
