@@ -63,10 +63,24 @@ def initialize_logging(log_file):
     return logger
 
 
-def get_assignments_from_csv(csv_file):
+def get_assignments_from_csv(csv_file, xField, yField, assignmentTypeField, locationField, dispatcherIdField=None,
+                             descriptionField=None, priorityField=None, workOrderIdField=None, dueDateField=None,
+                             dateFormat=r"%m/%d/%Y", wkid=102100, attachmentFileField=None):
     """
     Read the assignments from csv
     :param csv_file: (string) The csv file to read
+    :param xField: The name of field containing the x geometry
+    :param yField: The name of the field containing y geometry
+    :param assignmentTypeField: The name of the field containing the assignmentType
+    :param locationField: The name of the field containing the location
+    :param dispatcherIdField: The name of the field containing the dispatcherId
+    :param descriptionField: The name of the field containing the description
+    :param priorityField: The name of the field containing the priority
+    :param workOrderIdField: The name of the filed containing the workOrderId
+    :param dueDateField: The name of the field containing the dueDate
+    :param dateFormat: The format that the dueDate is in (defaults to %m/%d/%Y)
+    :param wkid: The wkid that the x,y values use (defaults to 102100 which matches assignments FS)
+    :param attachmentFileField: The attachment file field to use
     :return: List<dict> A list of dictionaries, which contain a Feature
     """
     # Parse CSV
@@ -83,26 +97,26 @@ def get_assignments_from_csv(csv_file):
         # Create the geometry
         # "Data" stores the actual attributes and geometry we want to push
         # Anything else at the top level dictionary is meta-data for the script
-        geometry = dict(x=float(assignment[args.xField]),
-                        y=float(assignment[args.yField]),
+        geometry = dict(x=float(assignment[xField]),
+                        y=float(assignment[yField]),
                         spatialReference=dict(
-                            wkid=int(args.wkid)))
-        attributes = dict(assignmentType=int(assignment[args.assignmentTypeField]),
-                          location=assignment[args.locationField],
+                            wkid=int(wkid)))
+        attributes = dict(assignmentType=int(assignment[assignmentTypeField]),
+                          location=assignment[locationField],
                           status=0,
                           assignmentRead=None)
-        if args.dispatcherIdField: attributes["dispatcherId"] = int(assignment[args.dispatcherIdField])
-        if args.descriptionField: attributes["description"] = assignment[args.descriptionField]
-        if args.priorityField: attributes["priority"] = int(assignment[args.priorityField])
-        if args.workOrderIdField: attributes["workOrderId"] = assignment[args.workOrderIdField]
+        if args.dispatcherIdField: attributes["dispatcherId"] = int(assignment[dispatcherIdField])
+        if args.descriptionField: attributes["description"] = assignment[descriptionField]
+        if args.priorityField: attributes["priority"] = int(assignment[priorityField])
+        if args.workOrderIdField: attributes["workOrderId"] = assignment[workOrderIdField]
         if args.dueDateField: attributes["dueDate"] = datetime.datetime.strptime(
-            assignment[args.dueDateField],
-            args.dateFormat).strftime("%m/%d/%Y")
+            assignment[dueDateField],
+            dateFormat).strftime("%m/%d/%Y")
         new_assignment = arcgis.features.Feature(geometry=geometry, attributes=attributes)
         # Need this extra dictionary so we can store the attachment file with the feature
         assignment_dict = (dict(assignment=new_assignment))
         if args.attachmentFileField:
-            assignment_dict["attachmentFile"] = assignment[args.attachmentFileField]
+            assignment_dict["attachmentFile"] = assignment[attachmentFileField]
         assignments_to_add.append(assignment_dict)
     return assignments_to_add
 
@@ -166,7 +180,10 @@ def main(args):
     workforce_project_data = workforce_project.get_data()
     assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
     dispatcher_fl = arcgis.features.FeatureLayer(workforce_project_data["dispatchers"]["url"], gis)
-    assignments = get_assignments_from_csv(args.csvFile)
+    assignments = get_assignments_from_csv(args.csvFile, args.xField, args.yField, args.assignmentTypeField,
+                                           args.locationField, args.dispatcherIdField, args.descriptionField,
+                                           args.priorityField, args.workOrderIdField, args.dueDateField,
+                                           args.dateFormat, args.wkid, args.attachmentFileField)
 
     # Set the dispatcher id
     id = None
