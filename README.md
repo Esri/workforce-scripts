@@ -16,13 +16,15 @@ Three sets of scripts that do the same things are provided. [One](arcrest_script
 | [Check Assignment Completion ](check_completion_location.md)         | [ArcGIS API For Python](arcgis_api_for_python/check_completion_location.py) <br> [ArcREST](arcrest_scripts/check_completion_location.py) <br> [Standalone](standalone_scripts/check_completion_location.py)      | check_completion_location.py   |
 | [Import Workers](import_workers.md)                                  | [ArcGIS API For Python](arcgis_api_for_python/import_workers.py) <br> [Standalone](standalone_scripts/import_workers.py)                                                                         | import_workers.py              |
 | [Create Assignment Types ](create_assignment_types.md)               | [Standalone](standalone_scripts/create_assignment_types.py)                                                                | create_assignment_types.py     |
+| [Delete Assignment Types ](delete_assignment_types.md)               | [Standalone](standalone_scripts/delete_assignment_types.py)                                                                | delete_assignment_types.py     |
+| [Assignment Monitor ](assignment_monitor.md)                         | [ArcGIS API For Python](arcgis_api_for_python/assignment_monitor/assignment_monitor.py)                                    | assignment_monitor.py          |
 
 
 ## Why are there so many choices?
 
 We provided three different options to use Python to help automate common workflows within Workforce For ArcGIS. 
 
-- If you plan to integrate Workforce with many other systems, it's probably best if you use the stand-a-lone scripts.
+- If you plan to integrate Workforce with many other systems or significantly modify these scripts, it's probably best if you use the stand-a-lone scripts.
 - If you have existing workflows that use ArcREST for other ArcGIS related scripts, it's probably best if you use the ArcREST scripts.
 - If you are relatively new to Python, have interest in using other geoprocessing analytics, or would like to use [Jupyter](https://jupyter.org/) notebooks, it's probably best if you use the ArcGIS API for Python scripts.
 
