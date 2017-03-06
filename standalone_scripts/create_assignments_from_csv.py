@@ -88,19 +88,19 @@ def get_assignments_from_csv(csvFile, xField, yField, assignmentTypeField, locat
     return assignments_out
 
 
-def validate_assignments(org_url, token, projectId, assignments):
+def validate_assignments(org_url, token, project_id, assignments):
     """
     Validates the provided values against the codedValues specified in the FS
     :param org_url: (string) The organization url to use
     :param token: (string) The token to use for authentication
-    :param projectId: (string) The project Id
+    :param project_id: (string) The project Id
     :param assignments: (string) The list of assignments to check
     :return: True if valid, False if not
     """
     # Grab the item
     logger = logging.getLogger()
-    assignment_fl = workforcehelpers.get_assignments_feature_layer_url(org_url, token, projectId)
-    dispatcher_fl = workforcehelpers.get_dispatchers_feature_layer_url(org_url, token, projectId)
+    assignment_fl = workforcehelpers.get_assignments_feature_layer_url(org_url, token, project_id)
+    dispatcher_fl = workforcehelpers.get_dispatchers_feature_layer_url(org_url, token, project_id)
     dispatchers = workforcehelpers.query_feature_layer(dispatcher_fl, token)
 
     statuses = []
@@ -144,18 +144,18 @@ def validate_assignments(org_url, token, projectId, assignments):
     return True
 
 
-def get_dispatcher_id(org_url, token, username, projectId):
+def get_dispatcher_id(org_url, token, username, project_id):
     """
     Get the logged in users dispatcher id
     :param org_url: (string) The organizational url to use
     :param token: (string) The token to authenticate with
-    :param projectId: (string) The projectId to use
+    :param project_id: (string) The projectId to use
     :param username: (string) The username of the logged in user
     :return: The OBJECTID of the specified dispatcher
     """
     logger = logging.getLogger()
     logger.debug("Getting dispatcher id for: {}...".format(username))
-    dispatcher_fl = workforcehelpers.get_dispatchers_feature_layer_url(org_url, token, projectId)
+    dispatcher_fl = workforcehelpers.get_dispatchers_feature_layer_url(org_url, token, project_id)
     dispatchers = workforcehelpers.query_feature_layer(dispatcher_fl, token, where="userId='{}'".format(username))
     if dispatchers["features"]:
         return dispatchers["features"][0]["attributes"]["OBJECTID"]
@@ -164,17 +164,17 @@ def get_dispatcher_id(org_url, token, username, projectId):
         return None
 
 
-def add_assignments(org_url, token, projectId, assignments):
+def add_assignments(org_url, token, project_id, assignments):
     """
     Adds the assignments to project
     :param org_url: (string) The organizational url to use
     :param token: (string) The token to authenticate with
-    :param projectId: (string) The project Id
+    :param project_id: (string) The project Id
     :param assignments: (list) The list of assignments to add
     :return: The json response of the addFeatures REST API Call
     """
     logger = logging.getLogger()
-    assignments_url = workforcehelpers.get_assignments_feature_layer_url(org_url, token, projectId)
+    assignments_url = workforcehelpers.get_assignments_feature_layer_url(org_url, token, project_id)
     assignment_to_post = [x["data"] for x in assignments]
     add_url = "{}/addFeatures".format(assignments_url)
     data = {
@@ -189,20 +189,20 @@ def add_assignments(org_url, token, projectId, assignments):
         assignments[i]["OBJECTID"] = response["addResults"][i]["objectId"]
     # Add the attachments
     if len(assignments) > 0 and "attachmentFile" in assignments[0]:
-        add_attachments(org_url, token, projectId, assignments)
+        add_attachments(org_url, token, project_id, assignments)
     return response
 
 
-def add_attachments(org_url, token, projectId, assignments):
+def add_attachments(org_url, token, project_id, assignments):
     """
     This adds attachments to the assignments if they have one
     :param org_url: The org url to use
     :param token: The token to authenticate with
-    :param projectId: The project Id to use
+    :param project_id: The project Id to use
     :param assignments: The list of assignment json objects
     :return:
     """
-    assignment_fl_url = workforcehelpers.get_assignments_feature_layer_url(org_url, token, projectId)
+    assignment_fl_url = workforcehelpers.get_assignments_feature_layer_url(org_url, token, project_id)
     logging.getLogger().info("Adding Attachments...")
     for assignment in assignments:
         if assignment["attachmentFile"] and assignment["attachmentFile"] != "":

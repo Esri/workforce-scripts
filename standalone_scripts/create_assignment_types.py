@@ -36,7 +36,7 @@ import workforcehelpers
 def get_assignment_types_from_csv(csv_file):
     """
     Creates a list of assignment types
-    :param csvFile: The CSV file to read
+    :param csv_file: The CSV file to read
     :return: A list assignment types
     """
     logger = logging.getLogger()
@@ -50,17 +50,17 @@ def get_assignment_types_from_csv(csv_file):
     return assignment_types
 
 
-def filter_assignment_types(org_url, token, projectId, assignment_types):
+def filter_assignment_types(org_url, token, project_id, assignment_types):
     """
     Filters the assignment type, so that we don't have duplicates
     :param org_url: (string) The organization url to use
     :param token: (string) The token to use for authentication
-    :param projectId: (string) The project Id
+    :param project_id: (string) The project Id
     :param assignment_types: (string) The list of assignment types to add
     :return: List<dict> The list of assignment types to add
     """
     logger = logging.getLogger()
-    assignments_url = workforcehelpers.get_assignments_feature_layer_url(org_url, token, projectId)
+    assignments_url = workforcehelpers.get_assignments_feature_layer_url(org_url, token, project_id)
     data = {
         'token': token,
         'f': 'json'
@@ -84,18 +84,18 @@ def filter_assignment_types(org_url, token, projectId, assignment_types):
     return assignment_types_to_add
 
 
-def add_assignment_types(org_url, token, projectId, assignment_types):
+def add_assignment_types(org_url, token, project_id, assignment_types):
     """
     Adds the assignments to project
     :param org_url: (string) The organizational url to use
     :param token: (string) The token to authenticate with
-    :param projectId: (string) The project Id
+    :param project_id: (string) The project Id
     :param assignment_types: (list) The list of assignment types to add
     :return: The json response of the addFeatures REST API Call
     """
     logger = logging.getLogger()
     # get the assignments feature layer
-    assignments_url = workforcehelpers.get_assignments_feature_layer_url(org_url, token, projectId)
+    assignments_url = workforcehelpers.get_assignments_feature_layer_url(org_url, token, project_id)
     data = {
         'token': token,
         'f': 'json'

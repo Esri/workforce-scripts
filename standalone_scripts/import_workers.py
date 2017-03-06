@@ -58,16 +58,14 @@ def get_workers_from_csv(csvFile, name_field="name", status_field="status", user
     new_workers = []
     for worker in workers:
         new_worker = dict(
-            data=dict(
-                attributes=dict(
-                    name=worker[name_field],
-                    status=worker[status_field],
-                    userId=worker[user_id_field]
-                )
+            attributes=dict(
+                name=worker[name_field],
+                status=worker[status_field],
+                userId=worker[user_id_field]
             )
         )
-        if title_field: new_worker["data"]["attributes"]["title"]=worker[title_field]
-        if contact_number_field: new_worker["data"]["attributes"]["contactNumber"]=worker[contact_number_field]
+        if title_field: new_worker["attributes"]["title"] = worker[title_field]
+        if contact_number_field: new_worker["attributes"]["contactNumber"] = worker[contact_number_field]
         new_workers.append(new_worker)
     return new_workers
 
@@ -90,26 +88,26 @@ def user_exists(org_url, token, username):
     return username in [x["username"] for x in search_results["results"]]
 
 
-def filter_workers(org_url, token, projectId, workers):
+def filter_workers(org_url, token, project_id, workers):
     """
     Ensures the worker is not already added and that the work has a named user
     :param org_url: (string) The organization url to use
     :param token: (string) The token to use for authentication
-    :param projectId: (string) The project Id
+    :param project_id: (string) The project Id
     :param workers: List<dict> The workers to add
     :return: List<dict> The list of workers to add
     """
     # Grab the item
     logger = logging.getLogger()
-    worker_fl_url = workforcehelpers.get_workers_feature_layer_url(org_url, token, projectId)
+    worker_fl_url = workforcehelpers.get_workers_feature_layer_url(org_url, token, project_id)
     worker_dict = workforcehelpers.query_feature_layer(worker_fl_url, token)
 
     workers_to_add = []
     for worker in workers:
-        if not user_exists(org_url, token, worker["data"]["attributes"]["userId"]):
-            logger.warning("User '{}' does not exist in your org and will not be added".format(worker["data"]["attributes"]["userId"]))
-        elif worker["data"]["attributes"]["userId"] in [feature["attributes"]["userId"] for feature in worker_dict["features"]]:
-            logger.warning("User '{}' is already part of this project and will not be added".format(worker["data"]["attributes"]["userId"]))
+        if not user_exists(org_url, token, worker["attributes"]["userId"]):
+            logger.warning("User '{}' does not exist in your org and will not be added".format(worker["attributes"]["userId"]))
+        elif worker["attributes"]["userId"] in [feature["attributes"]["userId"] for feature in worker_dict["features"]]:
+            logger.warning("User '{}' is already part of this project and will not be added".format(worker["attributes"]["userId"]))
         else:
             workers_to_add.append(worker)
     return workers_to_add
@@ -137,23 +135,22 @@ def add_users_to_group(org_url, token, users, group_id):
     return res
 
 
-def add_workers(org_url, token, projectId, workers):
+def add_workers(org_url, token, project_id, workers):
     """
     Adds the workers to project
     :param org_url: (string) The organizational url to use
     :param token: (string) The token to authenticate with
-    :param projectId: (string) The project Id
+    :param project_id: (string) The project Id
     :param workers: (list) The list of workers to add
     :return: The json response of the addFeatures REST API Call
     """
     logger = logging.getLogger()
-    workers_url = workforcehelpers.get_workers_feature_layer_url(org_url, token, projectId)
-    workers_to_post = [x["data"] for x in workers]
+    workers_url = workforcehelpers.get_workers_feature_layer_url(org_url, token, project_id)
     add_url = "{}/addFeatures".format(workers_url)
     data = {
         'token': token,
         'f': 'json',
-        'features': json.dumps(workers_to_post)
+        'features': json.dumps(workers)
     }
     logger.debug("Adding Workers...")
     response = workforcehelpers.post(add_url, data)
@@ -178,7 +175,7 @@ def main(args):
         logger.info(response)
         # Need to make sure the user is part of the workforce group
         group_id = workforcehelpers.get_group_id(args.org_url, token, args.project_id)
-        worker_ids = [x["data"]["attributes"]["userId"] for x in workers]
+        worker_ids = [x["attributes"]["userId"] for x in workers]
         response = add_users_to_group(args.org_url, token, worker_ids, group_id)
         logger.info(response)
         logger.info("Completed")

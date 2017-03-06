@@ -28,28 +28,30 @@ import sys
 import requests
 
 
-def post(url,data=None, files=None):
+def post(url, data=None, files=None):
     """
     Makes a POST request with the provided url and data
     :param url: (string) The url to post to
     :param data: (dictionary) The data (if any) to send
+    :param files: (dictionary) The json data the holds the file info
     :return:
     """
     logging.getLogger().debug("Posting to: {}".format(url))
-    response = requests.post(url,data, files=files).json()
+    response = requests.post(url, data, files=files).json()
     logging.getLogger().debug(response)
     return response
 
-def get(url,params=None):
+
+def get(url, params=None):
     """
     Makes a GET request with the provided url and parameters
     :param url: (string) The url to get
     :param params: (dictionary) The parameters to submit
     :return:
     """
-    params['f']='json'
+    params['f'] = 'json'
     logging.getLogger().debug("Getting: {}".format(url))
-    response = requests.get(url,params).json()
+    response = requests.get(url, params).json()
     logging.getLogger().debug(response)
     return response
 
@@ -64,16 +66,16 @@ def get_token(org_url,username, password, expiration=60):
     :return:
     """
     # Build the generate token url
-    url = "{}/{}".format(org_url.rstrip("/"),"sharing/rest/generateToken")
+    url = "{}/{}".format(org_url.rstrip("/"), "sharing/rest/generateToken")
     data = {
         'username': username,
         'password': password,
         'referer': org_url,
-        'f':'json',
-        'expiration':expiration
+        'f': 'json',
+        'expiration': expiration
     }
     # GET the token url and extract the token from the json/dict
-    response = post(url,data)
+    response = post(url, data)
     token = response["token"]
     return token
 
@@ -103,7 +105,7 @@ def query_feature_layer(feature_layer_url, token, where=None, oids=None, outSR=N
         params["where"] = "1=1"
     if outSR:
         params["outSR"] = outSR
-    response = get(query_url,params)
+    response = get(query_url, params)
     return response
 
 
@@ -118,7 +120,7 @@ def get_feature_layer(feature_layer_url, token):
         'token': token,
         'f': 'json'
     }
-    return get(feature_layer_url,params)
+    return get(feature_layer_url, params)
 
 
 def get_assignments_feature_layer_url(org_url, token, projectId):
@@ -139,15 +141,15 @@ def get_assignments_feature_layer_url(org_url, token, projectId):
     return res["assignments"]["url"]
 
 
-def get_workers_feature_layer_url(org_url, token, projectId):
+def get_workers_feature_layer_url(org_url, token, project_id):
     """
     Gets the workers url from the project ID
     :param org_url: (string) The organizational url where the project resides and that the token is valid for
     :param token:  (string) The authenticated token to use
-    :param projectId: (string) The project ID (from AGOL)
+    :param project_id: (string) The project ID (from AGOL)
     :return:
     """
-    project_path = "{}/sharing/rest/content/items/{}/data".format(org_url, projectId)
+    project_path = "{}/sharing/rest/content/items/{}/data".format(org_url, project_id)
     params = {
         "token": token,
         "f": "json",
@@ -157,15 +159,15 @@ def get_workers_feature_layer_url(org_url, token, projectId):
     return res["workers"]["url"]
 
 
-def get_dispatchers_feature_layer_url(org_url, token, projectId):
+def get_dispatchers_feature_layer_url(org_url, token, project_id):
     """
     Gets the dispatchers url from the project ID
     :param org_url: (string) The organizational url where the project resides and that the token is valid for
     :param token:  (string) The authenticated token to use
-    :param projectId: (string) The project ID (from AGOL)
+    :param project_id: (string) The project ID (from AGOL)
     :return:
     """
-    project_path = "{}/sharing/rest/content/items/{}/data".format(org_url, projectId)
+    project_path = "{}/sharing/rest/content/items/{}/data".format(org_url, project_id)
     params = {
         "token": token,
         "f": "json",
@@ -175,15 +177,15 @@ def get_dispatchers_feature_layer_url(org_url, token, projectId):
     return res["dispatchers"]["url"]
 
 
-def get_location_feature_layer_url(org_url, token, projectId):
+def get_location_feature_layer_url(org_url, token, project_id):
     """
     Gets the location url from the project ID
     :param org_url: (string) The organizational url where the project resides and that the token is valid for
     :param token:  (string) The authenticated token to use
-    :param projectId: (string) The project ID (from AGOL)
+    :param project_id: (string) The project ID (from AGOL)
     :return:
     """
-    project_path = "{}/sharing/rest/content/items/{}/data".format(org_url, projectId)
+    project_path = "{}/sharing/rest/content/items/{}/data".format(org_url, project_id)
     params = {
         "token": token,
         "f": "json",
@@ -193,10 +195,10 @@ def get_location_feature_layer_url(org_url, token, projectId):
     return res["tracks"]["url"]
 
 
-def initialize_logging(logFile):
+def initialize_logging(log_file):
     """
     Setup the root logger to print to the console and log to file
-    :param logFile: The log file to write to
+    :param log_file: The log file to write to
     :return:
     """
     # The format for the logs
@@ -211,7 +213,7 @@ def initialize_logging(logFile):
     sh.setFormatter(formatter)
     sh.setLevel(logging.INFO)
     # Create a handler to log to the specified file
-    rh = logging.handlers.RotatingFileHandler(logFile, mode='a', maxBytes=10485760)
+    rh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=10485760)
     rh.setFormatter(formatter)
     rh.setLevel(logging.DEBUG)
     # Add the handlers to the root logger
@@ -219,15 +221,15 @@ def initialize_logging(logFile):
     logger.addHandler(rh)
 
 
-def get_group_id(org_url, token, projectId):
+def get_group_id(org_url, token, project_id):
     """
         Gets the group id from the project ID
         :param org_url: (string) The organizational url where the project resides and that the token is valid for
         :param token:  (string) The authenticated token to use
-        :param projectId: (string) The project ID (from AGOL)
+        :param project_id: (string) The project ID (from AGOL)
         :return:
         """
-    project_path = "{}/sharing/rest/content/items/{}/data".format(org_url, projectId)
+    project_path = "{}/sharing/rest/content/items/{}/data".format(org_url, project_id)
     params = {
         "token": token,
         "f": "json",

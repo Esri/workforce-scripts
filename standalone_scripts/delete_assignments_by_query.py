@@ -51,7 +51,7 @@ def delete_assignments(assignment_fl_url, token, objectIDs, where):
 
 
 def main(args):
-    # Authenticate with AGOL and get the requried token
+    # Authenticate with AGOL and get the required token
     logging.getLogger().info("Authenticating...")
     token = workforcehelpers.get_token(args.org_url, args.username, args.password)
     # Get the assignments feature layer url

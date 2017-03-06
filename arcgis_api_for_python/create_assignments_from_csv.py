@@ -95,16 +95,16 @@ def get_assignments_from_csv(csv_file, xField, yField, assignmentTypeField, loca
     assignments_to_add = []
     for assignment in assignments_in_csv:
         # Create the geometry
-        # "Data" stores the actual attributes and geometry we want to push
-        # Anything else at the top level dictionary is meta-data for the script
         geometry = dict(x=float(assignment[xField]),
                         y=float(assignment[yField]),
                         spatialReference=dict(
                             wkid=int(wkid)))
+        # Create the attributes
         attributes = dict(assignmentType=int(assignment[assignmentTypeField]),
                           location=assignment[locationField],
                           status=0,
                           assignmentRead=None)
+        # Add optional attributes
         if args.dispatcherIdField: attributes["dispatcherId"] = int(assignment[dispatcherIdField])
         if args.descriptionField: attributes["description"] = assignment[descriptionField]
         if args.priorityField: attributes["priority"] = int(assignment[priorityField])
@@ -208,7 +208,7 @@ def main(args):
     for i in range(len(response["addResults"])):
         assignments[i]["assignment"].attributes["OBJECTID"] = response["addResults"][i]["objectId"]
 
-    # Add the attachements
+    # Add the attachments
     logger.info("Adding Any Attachments...")
     if len(assignments) > 0 and "attachmentFile" in assignments[0]:
         for assignment in assignments:

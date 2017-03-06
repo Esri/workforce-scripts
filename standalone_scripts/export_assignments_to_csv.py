@@ -136,7 +136,7 @@ if __name__ == "__main__":
                         required=True)
     parser.add_argument('-where', dest='where', help="The where clause to use", default="1=1")
     parser.add_argument('-outCSV', dest="outCSV", help="The file/path to save the output CSV file", required=True)
-    parser.add_argument('-logFile', dest="logFile", help="The file to log to",required=True)
+    parser.add_argument('-logFile', dest="logFile", help="The file to log to", required=True)
     parser.add_argument('-outSR', dest="outSR", help="The output spatial reference to use", default=None)
     parser.add_argument('-dateFormat', dest='dateFormat', help="The date format to use", default="%d/%m/%Y %H:%M:%S")
     args = parser.parse_args()
