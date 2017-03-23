@@ -111,9 +111,11 @@ def get_assignments_from_csv(csv_file, xField, yField, assignmentTypeField, loca
         if args.descriptionField: attributes["description"] = assignment[descriptionField]
         if args.priorityField: attributes["priority"] = int(assignment[priorityField])
         if args.workOrderIdField: attributes["workOrderId"] = assignment[workOrderIdField]
-        if args.dueDateField: attributes["dueDate"] = arrow.Arrow.strptime(
-            assignment[dueDateField],
-            dateFormat).replace(tzinfo=dateutil.tz.gettz(timezone)).to('utc').strftime("%m/%d/%Y %H:%M:%S")
+        if args.dueDateField:
+            d = arrow.Arrow.strptime(assignment[dueDateField], dateFormat).replace(tzinfo=dateutil.tz.gettz(timezone))
+            if d.datetime.second == 0 and d.datetime.hour == 0 and d.datetime.minute == 0:
+                d = d.replace(hour=23, minute=59, second=59)
+            attributes["dueDate"] = d.to('utc').strftime("%m/%d/%Y %H:%M:%S")
         new_assignment = arcgis.features.Feature(geometry=geometry, attributes=attributes)
         # Need this extra dictionary so we can store the attachment file with the feature
         assignment_dict = (dict(assignment=new_assignment))

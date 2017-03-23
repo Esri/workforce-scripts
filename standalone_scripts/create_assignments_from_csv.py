@@ -82,9 +82,11 @@ def get_assignments_from_csv(csvFile, xField, yField, assignmentTypeField, locat
         if descriptionField: new_assignment["data"]["attributes"]["description"] = assignment[descriptionField]
         if priorityField: new_assignment["data"]["attributes"]["priority"] = int(assignment[priorityField])
         if workOrderIdField: new_assignment["data"]["attributes"]["workOrderId"] = assignment[workOrderIdField]
-        if dueDateField: new_assignment["data"]["attributes"]["dueDate"] = arrow.Arrow.strptime(
-            assignment[dueDateField],
-            dateFormat).replace(tzinfo=dateutil.tz.gettz(timezone)).to('utc').strftime("%m/%d/%Y %H:%M:%S")
+        if dueDateField:
+            d = arrow.Arrow.strptime(assignment[dueDateField], dateFormat).replace(tzinfo=dateutil.tz.gettz(timezone))
+            if d.datetime.second == 0 and d.datetime.hour == 0 and d.datetime.minute == 0:
+                d = d.replace(hour=23,minute=59, second=59)
+            new_assignment["data"]["attributes"]["dueDate"] = d.to('utc').strftime("%m/%d/%Y %H:%M:%S")
         if attachmentFileField: new_assignment["attachmentFile"] = \
             assignment[attachmentFileField].strip().rstrip()
         if workerField: new_assignment["workerUsername"] = assignment[workerField]
