@@ -3,7 +3,7 @@ A set of python scripts (using multiple libraries) to help administer Workforce 
 
 Supports Python 2.7+ and Python 3.4+ (required for ArcGIS API for Python)
 
-Three sets of scripts that do the same things are provided. [One](arcrest_scripts) relies on the [ArcREST](https://github.com/Esri/ArcREST) library. A [second](arcgis_api_for_python_scripts) set relies on [ArcGIS API for Python](https://developers.arcgis.com/python/). The [stand-a-lone](standalone_scripts) set of scripts are standalone and uses [Requests](http://docs.python-requests.org/) to make GET and POST requests easily and to support Python 2 and 3.
+Three sets of scripts that do the same things are provided. [One](arcrest_scripts) relies on the [ArcREST](https://github.com/Esri/ArcREST) library. A [second](arcgis_api_for_python_scripts) set relies on [ArcGIS API for Python](https://developers.arcgis.com/python/). The [stand-a-lone](standalone_scripts) set of scripts are standalone and uses [Requests](http://docs.python-requests.org/) to make GET and POST requests easily and to support Python 2 and 3. All three sets of scripts use [arrow](https://arrow.readthedocs.io/en/latest/) to handle datetime conversions.
 
 ## Features
 
