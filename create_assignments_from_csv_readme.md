@@ -1,6 +1,6 @@
 ## Create Assignments From CSV
 
-This script reads a CSV file containing the required fields to add unassigned assignments to a workforce project. Attachments can also be uploaded if the path to the file is specified in the CSV file.
+This script reads a CSV file containing the required fields to add unassigned or assigned assignments to a workforce project. Attachments can also be uploaded if the path to the file is specified in the CSV file.
 
 Supports Python 2.7+, 3.4+
 
@@ -29,12 +29,14 @@ Due to the various naming conventions organizations may have, this script has ma
 - -workOrderIdField \<workOrderIdField\> - The name of the field in the CSV file that contains the workerOrderId (Optional)
 - -dueDateField \<dueDateField\> - The name of the field in the CSV file that contains the dueDate (Optional)
 - -attachmentFileField \<attachmentFileField\> - The name of the CSV file that contains the file (if any) to upload with the assignmnent (Optional)
-- -dateFormat \<dateFormat\> - The date format to use (Optional - defaults to "%m/%d/%Y")
+- -dateFormat \<dateFormat\> - The date format to use (Optional - defaults to "%m/%d/%Y %H:%M:%S")
 - -wkid \<wkid\> - The spatial reference wkid that the x and y fields are in (Optional - defaults to 4236 (GCS_WGS_1984))
+- -workerField \<workerField\> - The field in the CSV file that contains the worker username to assign the assignment to
+- -timezone \<timezone-string\> - The timezone the datetimes are in (ex. 'US/Eastern', 'US/Pacific')
 
 Example Usage:
 ```python
-python create_assignments_from_csv.py -csvFile "../sample_data/assignments.csv" -u username -p password -url "https://<org>.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -xField "xField" -yField "yField" -assignmentTypeField "Type" -locationField "Location" -descriptionField "Description" -priorityField "Priority" -workOrderIdField "Work Order Id" -dueDateField "Due Date" -attachmentFileField "Attachment" -wkid 102100 -logFile "../log.txt"
+python create_assignments_from_csv.py -csvFile "../sample_data/assignments.csv" -u username -p password -url "https://<org>.maps.arcgis.com" -pid "038a1926d2d741dc8acabefd5b2cc5d3" -xField "xField" -yField "yField" -assignmentTypeField "Type" -locationField "Location" -descriptionField "Description" -priorityField "Priority" -workOrderIdField "Work Order Id" -dueDateField "Due Date" -attachmentFileField "Attachment" -wkid 102100 -logFile "../log.txt" -workerField "Worker" -timezone "US/Eastern"
 ```
 
 ## What it does
@@ -42,6 +44,14 @@ python create_assignments_from_csv.py -csvFile "../sample_data/assignments.csv" 
  1. First the script uses the provided credentials to authenticate with AGOL to get the requried token
  2. Then the CSV file is parsed using a DictReader, which means that the order of the fields in the CSV field does not matter
  3. Next if there is not a dispatcher field supplied, the dispatcher ID associated with the authenticated user is found
- 4. The assignments parsed from the CSV are validated. Check for valid dispatcherId, status, priority, assignmentType.
+ 4. The worker for each assignment is analyzed and the worker ID is set for the assignment
+ 4. The assignments parsed from the CSV are validated. Check for valid dispatcherId, workerId, status, priority, assignmentType.
  5. Add the assignments to the workforce project (assignment feature layer)
  6. Add the specified attachments to the assignments
+ 
+## Notes
+
+ ArcGIS Online stores datetimes in UTC. You can specify the timezone your datetime values are in by using the `-timezone` option. If this is not specified, the script assumes dates are in UTC.
+
+
+

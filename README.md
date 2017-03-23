@@ -34,14 +34,15 @@ We provided three different options to use Python to help automate common workfl
 
 1. Install Conda and the ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
 2. Clone or download this repository
-3. You should now be able to run all scripts in the `arcgis_api_for_python` folder (provided you use the correct arguments)
+3. Install arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
+4. You should now be able to run all scripts in the `arcgis_api_for_python` folder (provided you use the correct arguments)
 
 #### ArcREST
 
 1. Install Python 2.7.x or 3.4+ if not already installed
 2. Clone or download this repository
 3. In terminal/cmd navigate to the `arcrest_scripts` folder
-4. Install ArcREST form PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
+4. Install ArcREST and arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
 5. You should now be able to run all script in the `arcrest_scripts` folder (provided you use the correct arguments)
 
 #### Standalone
@@ -49,7 +50,7 @@ We provided three different options to use Python to help automate common workfl
 1. Install Python 2.7.x or 3.4+ if not already installed
 2. Clone or download this repository
 3. In terminal/cmd navigate to the `standalone_scripts` folder
-4. Install requests form PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
+4. Install requests and arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
 5. You should now be able to run all script in the `standalone_scripts` folder (provided you use the correct arguments)
 
 ## Resources

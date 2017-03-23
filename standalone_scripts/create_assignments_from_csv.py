@@ -25,19 +25,20 @@
 
 import argparse
 import csv
-import datetime
 import json
 import logging
 import logging.handlers
 import mimetypes
 import os
 import traceback
+import arrow
+import dateutil
 import workforcehelpers
 
 
 def get_assignments_from_csv(csvFile, xField, yField, assignmentTypeField, locationField, dispatcherIdField=None,
                              descriptionField=None, priorityField=None, workOrderIdField=None, dueDateField=None,
-                             dateFormat=r"%m/%d/%Y", wkid=102100, attachmentFileField=None):
+                             dateFormat=r"%m/%d/%Y", wkid=102100, attachmentFileField=None, workerField=None, timezone="UTC"):
     """
     Creates a list of dictionary objects representing assignments
     :param csvFile: The CSV file to read
@@ -53,6 +54,8 @@ def get_assignments_from_csv(csvFile, xField, yField, assignmentTypeField, locat
     :param dateFormat: The format that the dueDate is in (defaults to %m/%d/%Y)
     :param wkid: The wkid that the x,y values use (defaults to 102100 which matches assignments FS)
     :param attachmentFileField: The attachment file field to use
+    :param workerField: The name of the field containing the worker username
+    :param timezone: The timezone the assignments are in
     :return: A list of dictionary objects representing assignments
     """
     logger = logging.getLogger()
@@ -79,11 +82,12 @@ def get_assignments_from_csv(csvFile, xField, yField, assignmentTypeField, locat
         if descriptionField: new_assignment["data"]["attributes"]["description"] = assignment[descriptionField]
         if priorityField: new_assignment["data"]["attributes"]["priority"] = int(assignment[priorityField])
         if workOrderIdField: new_assignment["data"]["attributes"]["workOrderId"] = assignment[workOrderIdField]
-        if dueDateField: new_assignment["data"]["attributes"]["dueDate"] = datetime.datetime.strptime(
+        if dueDateField: new_assignment["data"]["attributes"]["dueDate"] = arrow.Arrow.strptime(
             assignment[dueDateField],
-            dateFormat).strftime("%m/%d/%Y")
+            dateFormat).replace(tzinfo=dateutil.tz.gettz(timezone)).to('utc').strftime("%m/%d/%Y %H:%M:%S")
         if attachmentFileField: new_assignment["attachmentFile"] = \
             assignment[attachmentFileField].strip().rstrip()
+        if workerField: new_assignment["workerUsername"] = assignment[workerField]
         assignments_out.append(new_assignment)
     return assignments_out
 
@@ -102,15 +106,22 @@ def validate_assignments(org_url, token, project_id, assignments):
     assignment_fl = workforcehelpers.get_assignments_feature_layer_url(org_url, token, project_id)
     dispatcher_fl = workforcehelpers.get_dispatchers_feature_layer_url(org_url, token, project_id)
     dispatchers = workforcehelpers.query_feature_layer(dispatcher_fl, token)
+    worker_fl = workforcehelpers.get_workers_feature_layer_url(org_url, token, project_id)
+    workers = workforcehelpers.query_feature_layer(worker_fl, token)
 
     statuses = []
     priorities = []
     assignmentTypes = []
     dispatcherIds = []
+    workerIds = []
 
     # Get the dispatcherIds
     for dispatcher in dispatchers["features"]:
         dispatcherIds.append(dispatcher["attributes"]["OBJECTID"])
+
+    # Get the workerIds
+    for worker in workers["features"]:
+        workerIds.append(worker["attributes"]["OBJECTID"])
 
     # Get the codes of the domains
     for field in workforcehelpers.get_feature_layer(assignment_fl, token)["fields"]:
@@ -137,6 +148,9 @@ def validate_assignments(org_url, token, project_id, assignments):
         if assignment["data"]["attributes"]["dispatcherId"] not in dispatcherIds:
             logging.getLogger().critical("Invalid Dispatcher Id for: {}".format(assignment))
             return False
+        if "workerUsername" in assignment and assignment["workerUsername"] and assignment["data"]["attributes"]["workerId"] not in workerIds:
+            logging.getLogger().critical("Invalid Worker Id for: {}".format(assignment))
+            return False
         if "attachmentFile" in assignment and assignment["attachmentFile"]:
             if not os.path.isfile(os.path.abspath(assignment["attachmentFile"])):
                 logging.getLogger().critical("Attachment file not found: {}".format(assignment["attachmentFile"]))
@@ -161,6 +175,26 @@ def get_dispatcher_id(org_url, token, username, project_id):
         return dispatchers["features"][0]["attributes"]["OBJECTID"]
     else:
         logger.critical("{} is not a dispatcher".format(username))
+        return None
+
+
+def get_worker_id(org_url, token, worker_username, project_id):
+    """
+    Get the id (integer) of the worker
+    :param org_url: (string) The organizational url to use
+    :param token: (string) The token to authenticate with
+    :param project_id: (string) The projectId to use
+    :param worker_username: (string) The username of the worker
+    :return: (int) The id of the worker
+    """
+    logger = logging.getLogger()
+    logger.debug("Getting worker id for: {}...".format(worker_username))
+    worker_fl = workforcehelpers.get_workers_feature_layer_url(org_url, token, project_id)
+    workers = workforcehelpers.query_feature_layer(worker_fl, token, where="userId='{}'".format(worker_username))
+    if workers["features"]:
+        return workers["features"][0]["attributes"]["OBJECTID"]
+    else:
+        logger.critical("{} is not a worker".format(worker_username))
         return None
 
 
@@ -230,7 +264,7 @@ def main(args):
     assignments = get_assignments_from_csv(args.csvFile, args.xField, args.yField, args.assignmentTypeField,
                                            args.locationField, args.dispatcherIdField, args.descriptionField,
                                            args.priorityField, args.workOrderIdField, args.dueDateField,
-                                           args.dateFormat, args.wkid, args.attachmentFileField)
+                                           args.dateFormat, args.wkid, args.attachmentFileField, args.workerField, args.timezone)
     # If the dispatcherId Field is not present in the CSV file, then we want to use the id associated with the
     # authenticated user
     if not args.dispatcherIdField:
@@ -244,7 +278,23 @@ def main(args):
         for assignment in assignments:
             if "dispatcherId" not in assignment["data"]["attributes"]:
                 assignment["data"]["attributes"]["dispatcherId"] = id
-    # Validate each assignment
+
+    # Set worker ids so they will be assigned automatically
+    logger.info("Setting worker ids...")
+    for assignment in assignments:
+        if "workerUsername" in assignment and assignment["workerUsername"]:
+            id =get_worker_id(args.org_url, token, assignment["workerUsername"], args.projectId)
+            if id:
+                assignment["data"]["attributes"]["workerId"] =id
+                assignment["data"]["attributes"]["status"] = 1 # assigned
+                assignment["data"]["attributes"]["assignedDate"] = arrow.now().to('utc').strftime(
+                    "%m/%d/%Y %H:%M:%S")
+            else:
+                logger.critical("No worker id found")
+                return
+
+
+                # Validate each assignment
     logger.info("Validating assignments...")
     if validate_assignments(args.org_url, token, args.projectId, assignments):
         logger.info("Adding Assignments...")
@@ -277,8 +327,10 @@ if __name__ == "__main__":
     parser.add_argument('-dueDateField', dest='dueDateField', help="The field that contains the dispatcherId")
     parser.add_argument('-attachmentFileField', dest='attachmentFileField',
                         help="The field that contains the file path to the attachment to upload")
-    parser.add_argument('-dateFormat', dest='dateFormat', default=r"%m/%d/%Y",
-                        help="The format to use for the date (eg. '%m/%d/%Y'")
+    parser.add_argument('-workerField', dest='workerField', help="The field that contains the workers username")
+    parser.add_argument('-dateFormat', dest='dateFormat', default=r"%m/%d/%Y %H:%M:%S",
+                        help="The format to use for the date (eg. '%m/%d/%Y %H:%M:%S'")
+    parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone for the assignments")
     parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read")
     parser.add_argument('-wkid', dest='wkid', help='The wkid that the x,y values are use', type=int, default=4326)
     parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)

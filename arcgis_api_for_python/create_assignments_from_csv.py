@@ -28,12 +28,12 @@ import csv
 import datetime
 import logging
 import logging.handlers
-import mimetypes
 import os
 import traceback
 import sys
 import arcgis
-import requests
+import arrow
+import dateutil
 
 
 def initialize_logging(log_file):
@@ -65,7 +65,7 @@ def initialize_logging(log_file):
 
 def get_assignments_from_csv(csv_file, xField, yField, assignmentTypeField, locationField, dispatcherIdField=None,
                              descriptionField=None, priorityField=None, workOrderIdField=None, dueDateField=None,
-                             dateFormat=r"%m/%d/%Y", wkid=102100, attachmentFileField=None):
+                             dateFormat="%m/%d/%Y %H:%M:%S", wkid=102100, attachmentFileField=None, workerField=None, timezone="UTC"):
     """
     Read the assignments from csv
     :param csv_file: (string) The csv file to read
@@ -81,6 +81,8 @@ def get_assignments_from_csv(csv_file, xField, yField, assignmentTypeField, loca
     :param dateFormat: The format that the dueDate is in (defaults to %m/%d/%Y)
     :param wkid: The wkid that the x,y values use (defaults to 102100 which matches assignments FS)
     :param attachmentFileField: The attachment file field to use
+    :param workerField: The name of the field containing the worker username
+    :param timezone: The timezone the assignments are in
     :return: List<dict> A list of dictionaries, which contain a Feature
     """
     # Parse CSV
@@ -109,23 +111,26 @@ def get_assignments_from_csv(csv_file, xField, yField, assignmentTypeField, loca
         if args.descriptionField: attributes["description"] = assignment[descriptionField]
         if args.priorityField: attributes["priority"] = int(assignment[priorityField])
         if args.workOrderIdField: attributes["workOrderId"] = assignment[workOrderIdField]
-        if args.dueDateField: attributes["dueDate"] = datetime.datetime.strptime(
+        if args.dueDateField: attributes["dueDate"] = arrow.Arrow.strptime(
             assignment[dueDateField],
-            dateFormat).strftime("%m/%d/%Y")
+            dateFormat).replace(tzinfo=dateutil.tz.gettz(timezone)).to('utc').strftime("%m/%d/%Y %H:%M:%S")
         new_assignment = arcgis.features.Feature(geometry=geometry, attributes=attributes)
         # Need this extra dictionary so we can store the attachment file with the feature
         assignment_dict = (dict(assignment=new_assignment))
+        if workerField:
+            assignment_dict["workerUsername"] = assignment[workerField]
         if args.attachmentFileField:
             assignment_dict["attachmentFile"] = assignment[attachmentFileField]
         assignments_to_add.append(assignment_dict)
     return assignments_to_add
 
 
-def validate_assignments(assignment_fl, dispatcher_fl, assignments_to_add):
+def validate_assignments(assignment_fl, dispatcher_fl, worker_fl, assignments_to_add):
     """
     Checks the assignments against the dispatcher ids and against domains
     :param assignment_fl: (FeatureLayer) The feature layer containing the assignments
     :param dispatcher_fl: (FeatureLayer) The feature layer containing the dispatchers
+    :param worker_fl: (FeatureLayer) The feature layer containing the dispatchers
     :param assignments_to_add: List(dict)
     :return:
     """
@@ -135,10 +140,15 @@ def validate_assignments(assignment_fl, dispatcher_fl, assignments_to_add):
     priorities = []
     assignmentTypes = []
     dispatcherIds = []
+    workerIds = []
 
     # Get the dispatcherIds
     for dispatcher in dispatcher_fl.query().features:
         dispatcherIds.append(dispatcher.attributes["OBJECTID"])
+
+    # Get the workerIds
+    for worker in worker_fl.query().features:
+        workerIds.append(worker.attributes["OBJECTID"])
 
     # Get the codes of the domains
     for field in assignment_fl.properties.fields:
@@ -151,20 +161,27 @@ def validate_assignments(assignment_fl, dispatcher_fl, assignments_to_add):
 
     logging.getLogger().info("Validating assignments...")
     # check the values against the fields that have domains
-    for assignment in [x["assignment"] for x in assignments_to_add]:
-        if assignment.attributes["status"] not in statuses:
-            logging.getLogger().critical("Invalid Status for: {}".format(assignment))
+    for assignment in assignments_to_add:
+        if assignment["assignment"].attributes["status"] not in statuses:
+            logging.getLogger().critical("Invalid Status for: {}".format(assignment["assignment"]))
             return False
-        if "priority" in assignment.attributes and assignment.attributes[
+        if "priority" in assignment["assignment"].attributes and assignment["assignment"].attributes[
             "priority"] not in priorities:
-            logging.getLogger().critical("Invalid Priority for: {}".format(assignment))
+            logging.getLogger().critical("Invalid Priority for: {}".format(assignment["assignment"]))
             return False
-        if assignment.attributes["assignmentType"] not in assignmentTypes:
-            logging.getLogger().critical("Invalid Assignment Type for: {}".format(assignment))
+        if assignment["assignment"].attributes["assignmentType"] not in assignmentTypes:
+            logging.getLogger().critical("Invalid Assignment Type for: {}".format(assignment["assignment"]))
             return False
-        if assignment.attributes["dispatcherId"] not in dispatcherIds:
-            logging.getLogger().critical("Invalid Dispatcher Id for: {}".format(assignment))
+        if assignment["assignment"].attributes["dispatcherId"] not in dispatcherIds:
+            logging.getLogger().critical("Invalid Dispatcher Id for: {}".format(assignment["assignment"]))
             return False
+        if "workerUsername" in assignment and assignment["workerUsername"] and assignment["assignment"].attributes["workerId"] not in workerIds:
+            logging.getLogger().critical("Invalid Worker Id for: {}".format(assignment))
+            return False
+        if "attachmentFile" in assignment and assignment["attachmentFile"]:
+            if not os.path.isfile(os.path.abspath(assignment["attachmentFile"])):
+                logging.getLogger().critical("Attachment file not found: {}".format(assignment["attachmentFile"]))
+                return False
     return True
 
 
@@ -175,15 +192,18 @@ def main(args):
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
     gis = arcgis.gis.GIS(args.org_url, username=args.username, password=args.password)
+    # Create a content manager object
+    content_manager = arcgis.gis.ContentManager(gis)
     # Get the project and data
-    workforce_project = arcgis.gis.Item(gis, args.projectId)
+    workforce_project = content_manager.get(args.projectId)
     workforce_project_data = workforce_project.get_data()
     assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
     dispatcher_fl = arcgis.features.FeatureLayer(workforce_project_data["dispatchers"]["url"], gis)
+    worker_fl = arcgis.features.FeatureLayer(workforce_project_data["workers"]["url"], gis)
     assignments = get_assignments_from_csv(args.csvFile, args.xField, args.yField, args.assignmentTypeField,
                                            args.locationField, args.dispatcherIdField, args.descriptionField,
                                            args.priorityField, args.workOrderIdField, args.dueDateField,
-                                           args.dateFormat, args.wkid, args.attachmentFileField)
+                                           args.dateFormat, args.wkid, args.attachmentFileField, args.workerField, args.timezone)
 
     # Set the dispatcher id
     id = None
@@ -199,6 +219,22 @@ def main(args):
         if "dispatcherId" not in assignment.attributes:
             assignment.attributes["dispatcherId"] = id
 
+    # set worker ids
+    for assignment in assignments:
+        if "workerUsername" in assignment and assignment["workerUsername"]:
+            workers = worker_fl.query(where="userId='{}'".format(assignment["workerUsername"]))
+            if workers.features:
+                assignment["assignment"].attributes["workerId"] = workers.features[0].attributes["OBJECTID"]
+                assignment["assignment"].attributes["status"] = 1 # assigned
+                assignment["assignment"].attributes["assignedDate"] = arrow.now().to('utc').strftime(
+                    "%m/%d/%Y %H:%M:%S")
+            else:
+                logger.critical("{} is not a worker".format(assignment["workerUsername"]))
+                return
+
+    logger.info("Validating Assignments...")
+    validate_assignments(assignment_fl, dispatcher_fl, worker_fl, assignments)
+
     # Add the assignments
     logger.info("Adding Assignments...")
     response = assignment_fl.edit_features(
@@ -211,21 +247,11 @@ def main(args):
     # Add the attachments
     logger.info("Adding Any Attachments...")
     if len(assignments) > 0 and "attachmentFile" in assignments[0]:
+        attachment_manager = arcgis.features.managers.AttachmentManager(assignment_fl)
         for assignment in assignments:
             if assignment["attachmentFile"] and assignment["attachmentFile"] != "":
-                # Need to build this part manually as the api does not support this yet
-                # url to hit to add attachments (<feature-service-layer>/<object-id>/addAttachment)
-                add_url = "{}/{}/addAttachment".format(workforce_project_data["assignments"]["url"],
-                                                       assignment["assignment"].attributes["OBJECTID"])
-                # Create the file dictionary that requests expects, guess the mimetype based on the file
-                files = {"attachment": (os.path.basename(assignment["attachmentFile"]),
-                                        open(os.path.abspath(assignment["attachmentFile"]), "rb"),
-                                        mimetypes.guess_type(os.path.abspath(assignment["attachmentFile"])))}
-                data = {
-                    'f': 'json',
-                    'token': gis._con._token
-                }
-                requests.post(add_url, data=data, files=files)
+                response = attachment_manager.add(assignment["assignment"].attributes["OBJECTID"],
+                                       os.path.abspath(assignment["attachmentFile"]))
                 logger.info(response)
     logger.info("Completed")
 
@@ -250,10 +276,12 @@ if __name__ == "__main__":
     parser.add_argument('-priorityField', dest='priorityField', help="The field that contains the priority")
     parser.add_argument('-workOrderIdField', dest='workOrderIdField', help="The field that contains the workOrderId")
     parser.add_argument('-dueDateField', dest='dueDateField', help="The field that contains the dispatcherId")
+    parser.add_argument('-workerField', dest='workerField', help="The field that contains the workers username")
     parser.add_argument('-attachmentFileField', dest='attachmentFileField',
                         help="The field that contains the file path to the attachment to upload")
-    parser.add_argument('-dateFormat', dest='dateFormat', default=r"%m/%d/%Y",
-                        help="The format to use for the date (eg. '%m/%d/%Y'")
+    parser.add_argument('-dateFormat', dest='dateFormat', default="%m/%d/%Y %H:%M:%S",
+                        help="The format to use for the date (eg. '%m/%d/%Y %H:%M:%S')")
+    parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone for the assignments")
     parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read")
     parser.add_argument('-wkid', dest='wkid', help='The wkid that the x,y values are use', type=int, default=4326)
     parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)

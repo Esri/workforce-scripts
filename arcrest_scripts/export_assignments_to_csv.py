@@ -24,19 +24,20 @@
 """
 import argparse
 import csv
-import datetime
 import logging
 import logging.handlers
 import traceback
+import arrow
 import workforcehelpers
 
 
-def write_assignments_to_csv(csv_file, assignments, date_format="%d/%m/%Y %H:%M:%S" ):
+def write_assignments_to_csv(csv_file, assignments, date_format="%d/%m/%Y %H:%M:%S", timezone="UTC"):
     """
     Writes the list of assignments to a CSV file
     :param csv_file: The file to write to
     :param assignments: The list of assignments to write
     :param date_format: The format to use for the dates
+    :param timezone: The timezone to use
     :return:
     """
 
@@ -78,29 +79,29 @@ def write_assignments_to_csv(csv_file, assignments, date_format="%d/%m/%Y %H:%M:
         # format date if there is a value
         # Divide by 1000 because REST API returns milliseconds
         if assignment["attributes"]["dueDate"] and assignment["attributes"]["dueDate"] != "":
-            assignment["attributes"]["dueDate"] = datetime.datetime.utcfromtimestamp(
-                int(assignment["attributes"]["dueDate"] / 1000)).strftime(date_format)
+            assignment["attributes"]["dueDate"] = arrow.get(
+                int(assignment["attributes"]["dueDate"] / 1000)).to(timezone).strftime(date_format)
         if assignment["attributes"]["assignedDate"] and assignment["attributes"]["assignedDate"] != "":
-            assignment["attributes"]["assignedDate"] = datetime.datetime.utcfromtimestamp(
-                int(assignment["attributes"]["assignedDate"] / 1000)).strftime(date_format)
+            assignment["attributes"]["assignedDate"] = arrow.get(
+                int(assignment["attributes"]["assignedDate"] / 1000)).to(timezone).strftime(date_format)
         if assignment["attributes"]["inProgressDate"] and assignment["attributes"]["inProgressDate"] != "":
-            assignment["attributes"]["inProgressDate"] = datetime.datetime.utcfromtimestamp(
-                int(assignment["attributes"]["inProgressDate"] / 1000)).strftime(date_format)
+            assignment["attributes"]["inProgressDate"] = arrow.get(
+                int(assignment["attributes"]["inProgressDate"] / 1000)).to(timezone).strftime(date_format)
         if assignment["attributes"]["completedDate"] and assignment["attributes"]["completedDate"] != "":
-            assignment["attributes"]["completedDate"] = datetime.datetime.utcfromtimestamp(
-                int(assignment["attributes"]["completedDate"] / 1000)).strftime(date_format)
+            assignment["attributes"]["completedDate"] = arrow.get(
+                int(assignment["attributes"]["completedDate"] / 1000)).to(timezone).strftime(date_format)
         if assignment["attributes"]["declinedDate"] and assignment["attributes"]["declinedDate"] != "":
-            assignment["attributes"]["declinedDate"] = datetime.datetime.utcfromtimestamp(
-                int(assignment["attributes"]["declinedDate"] / 1000)).strftime(date_format)
+            assignment["attributes"]["declinedDate"] = arrow.get(
+                int(assignment["attributes"]["declinedDate"] / 1000)).to(timezone).strftime(date_format)
         if assignment["attributes"]["pausedDate"] and assignment["attributes"]["pausedDate"] != "":
-            assignment["attributes"]["pausedDate"] = datetime.datetime.utcfromtimestamp(
-                int(assignment["attributes"]["pausedDate"] / 1000)).strftime(date_format)
+            assignment["attributes"]["pausedDate"] = arrow.get(
+                int(assignment["attributes"]["pausedDate"] / 1000)).to(timezone).strftime(date_format)
         if assignment["attributes"]["CreationDate"] and assignment["attributes"]["CreationDate"] != "":
-            assignment["attributes"]["CreationDate"] = datetime.datetime.utcfromtimestamp(
-                int(assignment["attributes"]["CreationDate"] / 1000)).strftime(date_format)
+            assignment["attributes"]["CreationDate"] = arrow.get(
+                int(assignment["attributes"]["CreationDate"] / 1000)).to(timezone).strftime(date_format)
         if assignment["attributes"]["EditDate"] and assignment["attributes"]["EditDate"] != "":
-            assignment["attributes"]["EditDate"] = datetime.datetime.utcfromtimestamp(
-                int(assignment["attributes"]["EditDate"] / 1000)).strftime(date_format)
+            assignment["attributes"]["EditDate"] = arrow.get(
+                int(assignment["attributes"]["EditDate"] / 1000)).to(timezone).strftime(date_format)
     # Make a list of the assignments (list of dictionaries) where each dictionary is the attributes of the feature
     assignment_attributes = [a['attributes'] for a in assignments]
     logging.getLogger().debug("Writing assignments to CSV file: {}".format(csv_file))
@@ -123,7 +124,7 @@ def main(args):
     assignments = assignment_fl.query(where=args.where, out_fields="*", outSR=args.outSR).features
     # Write the assignments to the csv file
     logging.getLogger().info("Writing to CSV...")
-    write_assignments_to_csv(args.outCSV, assignments, args.dateFormat)
+    write_assignments_to_csv(args.outCSV, assignments, args.dateFormat, args.timezone)
     logging.getLogger().info("Completed")
 
 
@@ -151,6 +152,7 @@ if __name__ == "__main__":
     parser.add_argument('-logFile', dest="logFile", help="The file to log to",required=True)
     parser.add_argument('-outSR', dest="outSR", help="The output spatial reference to use", default=None)
     parser.add_argument('-dateFormat', dest='dateFormat', help="The date format to use", default="%d/%m/%Y %H:%M:%S")
+    parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone to export to")
     args = parser.parse_args()
     workforcehelpers.initialize_logging(args.logFile)
     try:
