@@ -53,5 +53,5 @@ python create_assignments_from_csv.py -csvFile "../sample_data/assignments.csv" 
 
  ArcGIS Online stores datetimes in UTC. You can specify the timezone your datetime values are in by using the `-timezone` option. If this is not specified, the script assumes dates are in UTC.
 
-
+Additionally, if the specified datetime does not have any time associated with it, the script will append 23 hours, 59 minutes, and 59 seconds to the date, so that the entire day is valid as a due date. In the user interfaces for Workforce, any datetime with 23:59:59 is displayed as the date with no time.
 
