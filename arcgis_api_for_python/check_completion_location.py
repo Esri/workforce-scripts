@@ -162,6 +162,8 @@ def get_invalid_assignments(assignments, tracks_fl, time_tolerance, distance_tol
         locations_to_check = tracks_fl.query(where=loc_query_string).features
         # Bool to see if this assignment is valid or not
         is_valid = False
+        accuracyTL = []
+        min_max_distances = []
         for location in locations_to_check:
             # Make a list of coordinate pairs to get the distance of
             coords = []
@@ -181,9 +183,23 @@ def get_invalid_assignments(assignments, tracks_fl, time_tolerance, distance_tol
             if any(distance < distance_tolerance for distance in distances):
                 is_valid = True
                 break
-        # if it's not valid add the OBJECTID to the list of invalid assignment OBJECTIDS
+            accuracyTL.append(location.attributes["Accuracy"])
+            min_max_distances.extend(distances)  
+      # if it's not valid add the OBJECTID to the list of invalid assignment OBJECTIDS
         if not is_valid:
             logging.debug("Location Query: {}".format(loc_query_string))
+            average_accuracy_msg = ''
+            if min_max_distances and accuracyTL:
+                minmaxdistance = (str(round(min(min_max_distances)/1000, 1)),str(round(max(min_max_distances) / 1000, 1)))
+                average_accuracy_msg = "||Work order completed at a distance between {} Km and {} Km away from the actual\
+                 job location with a minimum reported GPS Accuracy of {} m from the tracking layer." \
+                .format(*minmaxdistance, min(accuracyTL))
+            else:
+                average_accuracy_msg = "||There aren't any locations in the tracking layer for this work order."
+            if assignment.attributes["notes"]:
+                assignment.attributes["notes"] += average_accuracy_msg
+            else:
+                assignment.attributes["notes"] = average_accuracy_msg
             invalid_assignments.append(assignment)
     return invalid_assignments
 
