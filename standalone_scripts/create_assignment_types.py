@@ -141,13 +141,13 @@ def main(args):
     # First step is to get authenticate and get a valid token
     token = workforcehelpers.get_token(args.org_url, args.username, args.password)
     logger.info("Reading CSV...")
-    # Next we want to parse the CSV file and create a list of assignments
+    # Next we want to parse the CSV file and create a list of assignment types
     assignment_types = get_assignment_types_from_csv(args.csvFile)
     # Validate each assignment
-    logger.info("Validating assignments...")
+    logger.info("Validating assignment types...")
     assignment_types = filter_assignment_types(args.org_url, token, args.projectId, assignment_types)
     if assignment_types:
-        logger.info("Adding Assignments...")
+        logger.info("Adding assignment types...")
         response = add_assignment_types(args.org_url, token, args.projectId, assignment_types)
         logger.info(response)
         logger.info("Completed")
