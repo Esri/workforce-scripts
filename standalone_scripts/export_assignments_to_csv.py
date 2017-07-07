@@ -139,7 +139,7 @@ if __name__ == "__main__":
     parser.add_argument('-outCSV', dest="outCSV", help="The file/path to save the output CSV file", required=True)
     parser.add_argument('-logFile', dest="logFile", help="The file to log to", required=True)
     parser.add_argument('-outSR', dest="outSR", help="The output spatial reference to use", default=None)
-    parser.add_argument('-dateFormat', dest='dateFormat', help="The date format to use", default="%d/%m/%Y %H:%M:%S")
+    parser.add_argument('-dateFormat', dest='dateFormat', help="The date format to use", default="%m/%d/%Y %H:%M:%S")
     parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone to export to")
     args = parser.parse_args()
     workforcehelpers.initialize_logging(args.logFile)

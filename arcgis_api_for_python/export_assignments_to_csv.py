@@ -28,12 +28,18 @@ import logging.handlers
 import traceback
 import sys
 import arcgis
+import arrow
 
 
-def main(args):
+def initialize_logging(log_file):
+    """
+    Setup logging
+    :param log_file: (string) The file to log to
+    :return: (Logger) a logging instance
+    """
     # initialize logging
     formatter = logging.Formatter("[%(asctime)s] [%(filename)30s:%(lineno)4s - %(funcName)30s()]\
-                 [%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
+             [%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
     # Grab the root logger
     logger = logging.getLogger()
     # Set the root logger logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -43,12 +49,22 @@ def main(args):
     sh.setFormatter(formatter)
     sh.setLevel(logging.INFO)
     # Create a handler to log to the specified file
-    rh = logging.handlers.RotatingFileHandler(args.logFile, mode='a', maxBytes=10485760)
+    rh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=10485760)
     rh.setFormatter(formatter)
     rh.setLevel(logging.DEBUG)
     # Add the handlers to the root logger
     logger.addHandler(sh)
     logger.addHandler(rh)
+    return logger
+
+
+def main(args):
+    # initialize logging
+    logger = initialize_logging(args.logFile)
+
+    # Set date params
+    timezone = args.timezone
+    date_format = args.dateFormat
 
     # Create the GIS
     logger.info("Authenticating...")
@@ -60,14 +76,84 @@ def main(args):
     workforce_project_data = workforce_project.get_data()
     assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
 
-    # Query features to delete
+    # Query features
     logger.info("Querying features...")
     assignments = assignment_fl.query(args.where, out_sr=args.outSR)
+    # Convert all dates to readable format
+    for assignment in assignments.features:
+        # format date if there is a value
+        # Divide by 1000 because REST API returns milliseconds
+        if assignment.attributes["dueDate"] and assignment.attributes["dueDate"] != "":
+            assignment.attributes["dueDate"] = arrow.get(
+                int(assignment.attributes["dueDate"] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes["assignedDate"] and assignment.attributes["assignedDate"] != "":
+            assignment.attributes["assignedDate"] = arrow.get(
+                int(assignment.attributes["assignedDate"] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes["inProgressDate"] and assignment.attributes["inProgressDate"] != "":
+            assignment.attributes["inProgressDate"] = arrow.get(
+                int(assignment.attributes["inProgressDate"] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes["completedDate"] and assignment.attributes["completedDate"] != "":
+            assignment.attributes["completedDate"] = arrow.get(
+                int(assignment.attributes["completedDate"] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes["declinedDate"] and assignment.attributes["declinedDate"] != "":
+            assignment.attributes["declinedDate"] = arrow.get(
+                int(assignment.attributes["declinedDate"] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes["pausedDate"] and assignment.attributes["pausedDate"] != "":
+            assignment.attributes["pausedDate"] = arrow.get(
+                int(assignment.attributes["pausedDate"] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes["CreationDate"] and assignment.attributes["CreationDate"] != "":
+            assignment.attributes["CreationDate"] = arrow.get(
+                int(assignment.attributes["CreationDate"] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes["EditDate"] and assignment.attributes["EditDate"] != "":
+            assignment.attributes["EditDate"] = arrow.get(
+                int(assignment.attributes["EditDate"] / 1000)).to(timezone).strftime(date_format)
 
+    # workaround for saving empty feature set (there are no fields when the query returned nothing)
+    if isinstance(assignments.fields, dict):
+        assignments.fields = []
+        assignments = inject_field_names(assignments)
     # Write the assignments to the csv file
     logging.getLogger().info("Writing to CSV...")
     assignments.save("", "exported.csv")
     logging.getLogger().info("Completed")
+
+
+def inject_field_names(assignments):
+    """
+    Add the field names manually since the query did not return any features, there are no fields available
+    :param assignments: (FeatureSet) The empty feature set
+    :return: (FeatureSet) assignments
+    """
+    fields = [
+        "OBJECTID",
+        "x",
+        "y",
+        "description",
+        "status",
+        "notes",
+        "priority",
+        "assignmentType",
+        "workOrderId",
+        "dueDate",
+        "workerId",
+        "GlobalID",
+        "location",
+        "declinedComment",
+        "assignedDate",
+        "assignmentRead",
+        "inProgressDate",
+        "completedDate",
+        "declinedDate",
+        "pausedDate",
+        "dispatcherId",
+        "CreationDate",
+        "Creator",
+        "EditDate",
+        "Editor"
+    ]
+    for name in fields:
+        assignments.fields.append({'name': name})
+    return assignments
 
 
 if __name__ == "__main__":
@@ -83,6 +169,8 @@ if __name__ == "__main__":
     parser.add_argument('-outCSV', dest="outCSV", help="The file/path to save the output CSV file", required=True)
     parser.add_argument('-logFile', dest="logFile", help="The file to log to", required=True)
     parser.add_argument('-outSR', dest="outSR", help="The output spatial reference to use", default=None)
+    parser.add_argument('-dateFormat', dest='dateFormat', help="The date format to use", default="%m/%d/%Y %H:%M:%S")
+    parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone to export to")
     args = parser.parse_args()
     try:
         main(args)
