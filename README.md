@@ -3,22 +3,23 @@ A set of python scripts (using multiple libraries) to help administer Workforce 
 
 Supports Python 2.7+ and Python 3.4+ (required for ArcGIS API for Python)
 
-A set of Python scripts using the [ArcGIS API for Python](https://developers.arcgis.com/python/). Additional (deprecated) scripts using vanilla Python and ArcREST are also available.
+A set of Python scripts using the [ArcGIS API for Python](https://developers.arcgis.com/python/). These scripts support Workforce in both AGOL and Enterprise 10.5.1.
+Additional (deprecated) scripts using vanilla Python and ArcREST are also available.
 
 
 ## Features
 
-| Functionality                                                        | Link                                                                            
+| Functionality                                                        | Script                                                                            
 |----------------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [ArcGIS API For Python](arcgis_api_for_python/create_assignments_from_csv.py)          |
-| [Copy Assignments To Feature Service](copy_assignments_fs_readme.md) | [ArcGIS API For Python](arcgis_api_for_python/copy_assignments_fs.py)                  |
-| [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [ArcGIS API For Python](arcgis_api_for_python/export_assignments_from_csv.py)          |
-| [Delete Assignments By Query](delete_assignments_by_query_readme.md) | [ArcGIS API For Python](arcgis_api_for_python/delete_assignments_by_query.py)          |
-| [Check Assignment Completion ](check_completion_location.md)         | [ArcGIS API For Python](arcgis_api_for_python/check_completion_location.py)            |
-| [Import Workers](import_workers.md)                                  | [ArcGIS API For Python](arcgis_api_for_python/import_workers.py)                       |
-| [Create Assignment Types ](create_assignment_types.md)               | [ArcGIS API For Python](arcgis_api_for_python/create_assignment_types.py)              |
-| [Delete Assignment Types ](delete_assignment_types.md)               | [ArcGIS API For Python](arcgis_api_for_python/delete_assignment_types.py)              |
-| [Assignment Monitor ](assignment_monitor.md)                         | [ArcGIS API For Python](arcgis_api_for_python/assignment_monitor/assignment_monitor.py)|
+| [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [create_assignments_from_csv.py](arcgis_api_for_python/create_assignments_from_csv.py)          |
+| [Copy Assignments To Feature Service](copy_assignments_fs_readme.md) | [copy_assignments_fs.py](arcgis_api_for_python/copy_assignments_fs.py)                  |
+| [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [export_assignments_from_csv.py](arcgis_api_for_python/export_assignments_from_csv.py)          |
+| [Delete Assignments By Query](delete_assignments_by_query_readme.md) | [delete_assignments_by_query.py](arcgis_api_for_python/delete_assignments_by_query.py)          |
+| [Check Assignment Completion ](check_completion_location.md)         | [check_completion_location.py](arcgis_api_for_python/check_completion_location.py)            |
+| [Import Workers](import_workers.md)                                  | [import_workers.py](arcgis_api_for_python/import_workers.py)                       |
+| [Create Assignment Types ](create_assignment_types.md)               | [create_assignment_types.py](arcgis_api_for_python/create_assignment_types.py)              |
+| [Delete Assignment Types ](delete_assignment_types.md)               | [create_assignment_types.py](arcgis_api_for_python/create_assignment_types.py)              |
+| [Assignment Monitor ](assignment_monitor.md)                         | [assignment_monitor.py](arcgis_api_for_python/assignment_monitor/assignment_monitor.py)|
 
 
 ## Instructions

@@ -36,11 +36,42 @@ import arcgis
 import requests
 
 
-def post_to_slack(slack_webhook, assignment, project_id):
+def get_field_name(field_name, fl):
+    """
+    Attempts to get the field name (could vary based on portal/AGOL implementation)
+    :param field_name: (string) The field name to get
+    :param fl: (FeatureLayer) The feature layer the field should be in
+    :return: (string) The field name
+    """
+    for field in fl.properties["fields"]:
+        if field_name == field["name"]:
+            return field_name
+        if field_name.lower() == field["name"]:
+            return field_name.lower()
+        # These field names are not only lower case but also different for Portal vs AGOL
+        # CreationDate
+        if field_name == "CreationDate":
+            return fl.properties["editFieldsInfo"]["creationDateField"]
+        # EditDate
+        if field_name == "EditDate":
+            return fl.properties["editFieldsInfo"]["editDateField"]
+        # Creator
+        if field_name == "Creator":
+            return fl.properties["editFieldsInfo"]["creatorField"]
+        # Editor
+        if field_name == "Editor":
+            return fl.properties["editFieldsInfo"]["editorField"]
+    else:
+        logging.getLogger().critical("Field: {} does not exist".format(field_name))
+        raise Exception("Field: {} does not exist".format(field_name))
+    
+
+def post_to_slack(slack_webhook, assignment, project_id, assignment_fl):
     """
     Posts a message to slack
     :param slack_webhook: (string) The url of the slack webhook
     :param assignment: (Feature) The feature to use
+    :param assignment_fl: (FeatureLayer) The assignment feature layer (needed for field lookup)
     :return:
     """
     # create the message to send
@@ -51,13 +82,13 @@ def post_to_slack(slack_webhook, assignment, project_id):
               "Worker: {}\n"\
               "Time: {}\n" \
               "Link: {}".format(
-        assignment.attributes["location"],
-        assignment.attributes["description"],
-        assignment.attributes["notes"],
-        assignment.attributes["Editor"],
-        datetime.datetime.fromtimestamp(int(assignment.attributes["completedDate"])/1000).strftime("%Y-%m-%d %H:%M"),
+        assignment.attributes[get_field_name("location", assignment_fl)],
+        assignment.attributes[get_field_name("description", assignment_fl)],
+        assignment.attributes[get_field_name("notes", assignment_fl)],
+        assignment.attributes[get_field_name("Editor", assignment_fl)],
+        datetime.datetime.fromtimestamp(int(assignment.attributes[get_field_name("completedDate", assignment_fl)])/1000).strftime("%Y-%m-%d %H:%M"),
         "http://workforce.arcgis.com/projects/{}/dispatch/assignments/{}".format(project_id,
-                                                                                  assignment.attributes["OBJECTID"])
+                                                                                  assignment.attributes[get_field_name("OBJECTID", assignment_fl)])
     )
     logging.getLogger().info("Posting: {} to slack".format(message))
     response = requests.post(slack_webhook, json={"text": message})
@@ -128,39 +159,40 @@ def initialize_db(db):
     conn.close()
 
 
-def add_assignment_to_db(db, assignment):
+def add_assignment_to_db(db, assignment, assignment_fl):
     """
     Adds an assignment to the database
     :param db: (string) The database to connect to
     :param assignment: (Feature) The assignment to add
+    :param assignment_fl: (FeatureLayer) The assignment feature layer (needed for field lookup)
     :return:
     """
     conn = sqlite3.connect(db)
     c = conn.cursor()
     params = (
-        assignment.attributes["OBJECTID"],
-        assignment.attributes["description"],
-        assignment.attributes["status"],
-        assignment.attributes["notes"],
-        assignment.attributes["priority"],
-        assignment.attributes["assignmentType"],
-        assignment.attributes["workOrderId"],
-        assignment.attributes["dueDate"],
-        assignment.attributes["workerId"],
-        assignment.attributes["GlobalID"],
-        assignment.attributes["location"],
-        assignment.attributes["declinedComment"],
-        assignment.attributes["assignedDate"],
-        assignment.attributes["assignmentRead"],
-        assignment.attributes["inProgressDate"],
-        assignment.attributes["completedDate"],
-        assignment.attributes["declinedDate"],
-        assignment.attributes["pausedDate"],
-        assignment.attributes["dispatcherId"],
-        assignment.attributes["CreationDate"],
-        assignment.attributes["Creator"],
-        assignment.attributes["EditDate"],
-        assignment.attributes["Editor"]
+        assignment.attributes[get_field_name("OBJECTID", assignment_fl)],
+        assignment.attributes[get_field_name("description", assignment_fl)],
+        assignment.attributes[get_field_name("status", assignment_fl)],
+        assignment.attributes[get_field_name("notes", assignment_fl)],
+        assignment.attributes[get_field_name("priority", assignment_fl)],
+        assignment.attributes[get_field_name("assignmentType", assignment_fl)],
+        assignment.attributes[get_field_name("workOrderId", assignment_fl)],
+        assignment.attributes[get_field_name("dueDate", assignment_fl)],
+        assignment.attributes[get_field_name("workerId", assignment_fl)],
+        assignment.attributes[get_field_name("GlobalID", assignment_fl)],
+        assignment.attributes[get_field_name("location", assignment_fl)],
+        assignment.attributes[get_field_name("declinedComment", assignment_fl)],
+        assignment.attributes[get_field_name("assignedDate", assignment_fl)],
+        assignment.attributes[get_field_name("assignmentRead", assignment_fl)],
+        assignment.attributes[get_field_name("inProgressDate", assignment_fl)],
+        assignment.attributes[get_field_name("completedDate", assignment_fl)],
+        assignment.attributes[get_field_name("declinedDate", assignment_fl)],
+        assignment.attributes[get_field_name("pausedDate", assignment_fl)],
+        assignment.attributes[get_field_name("dispatcherId", assignment_fl)],
+        assignment.attributes[get_field_name("CreationDate", assignment_fl)],
+        assignment.attributes[get_field_name("Creator", assignment_fl)],
+        assignment.attributes[get_field_name("EditDate", assignment_fl)],
+        assignment.attributes[get_field_name("Editor", assignment_fl)]
     )
     c.execute("INSERT INTO assignments VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
     conn.commit()
@@ -183,14 +215,14 @@ def get_global_ids(db):
 if __name__ == "__main__":
     # parse the config file
     config = configparser.ConfigParser()
-    config.read("config.ini")
+    config.read("my_portal_config.ini")
 
     logger = initialize_logging(config["LOG"]["LOGFILE"])
     initialize_db(config["DB"]["DATABASE"])
 
     # Authenticate and get data
     logger.info("Authenticating with ArcGIS Online...")
-    gis = arcgis.gis.GIS(config["AGOL"]["ORG"], username=config["AGOL"]["USERNAME"], password=config["AGOL"]["PASSWORD"])
+    gis = arcgis.gis.GIS(config["AGOL"]["ORG"], username=config["AGOL"]["USERNAME"], password=config["AGOL"]["PASSWORD"], verify_cert=False)
     logger.info("Getting project info...")
     project_data = arcgis.gis.Item(gis, config["WORKFORCE"]["PROJECT"]).get_data()
     assignment_feature_layer = arcgis.features.FeatureLayer(project_data["assignments"]["url"], gis)
@@ -205,15 +237,15 @@ if __name__ == "__main__":
         assignments = assignment_feature_layer.query(where="Status=3").features
         logger.info("Processing assignments...")
         for assignment in assignments:
-            if not assignment.attributes["GlobalID"] in processed_global_ids:
+            if not assignment.attributes[get_field_name("GlobalID", assignment_feature_layer)] in processed_global_ids:
                 logger.info("Adding new assignment to sqlite database...")
-                processed_global_ids.append(assignment.attributes["GlobalID"])
+                processed_global_ids.append(assignment.attributes[get_field_name("GlobalID", assignment_feature_layer)])
                 # append the global id to the csv file (in-case we need to restart script)
-                add_assignment_to_db(config["DB"]["DATABASE"], assignment)
+                add_assignment_to_db(config["DB"]["DATABASE"], assignment, assignment_feature_layer)
                 # post message to slack, if configured
                 if config.has_section("SLACK") and config.has_option("SLACK","WEBHOOK"):
                     logger.info("Posting assignment to slack...")
-                    post_to_slack(config["SLACK"]["WEBHOOK"], assignment, config["WORKFORCE"]["PROJECT"])
+                    post_to_slack(config["SLACK"]["WEBHOOK"], assignment, config["WORKFORCE"]["PROJECT"], assignment_feature_layer)
         # sleep for 5 seconds before polling again
         logger.info("Sleeping for 5 seconds...")
         time.sleep(5)
