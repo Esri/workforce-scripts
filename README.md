@@ -1,36 +1,28 @@
 # Workforce Scripts
-A set of python scripts (using multiple libraries) to help administer Workforce projects and services
+A set of python scripts (using multiple libraries) to help administer Workforce projects and services.
 
 Supports Python 2.7+ and Python 3.4+ (required for ArcGIS API for Python)
 
-Three sets of scripts that do the same things are provided. [One](arcrest_scripts) relies on the [ArcREST](https://github.com/Esri/ArcREST) library. A [second](arcgis_api_for_python_scripts) set relies on [ArcGIS API for Python](https://developers.arcgis.com/python/). The [stand-a-lone](standalone_scripts) set of scripts are standalone and uses [Requests](http://docs.python-requests.org/) to make GET and POST requests easily and to support Python 2 and 3. All three sets of scripts use [arrow](https://arrow.readthedocs.io/en/latest/) to handle datetime conversions.
+A set of Python scripts using the [ArcGIS API for Python](https://developers.arcgis.com/python/). Additional (deprecated) scripts using vanilla Python and ArcREST are also available.
+
 
 ## Features
 
-| Functionality                                                        | Link                                                                                                                       | Script Name                    |
-|----------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|--------------------------------|
-| [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [ArcGIS API For Python](arcgis_api_for_python/create_assignments_from_csv.py) <br> [ArcREST](arcrest_scripts/create_assignments_from_csv.py) <br>  [Standalone](standalone_scripts/create_assignments_from_csv.py) | create_assignments_from_csv.py |
-| [Copy Assignments To Feature Service](copy_assignments_fs_readme.md) | [ArcGIS API For Python](arcgis_api_for_python/copy_assignments_fs.py) <br> [ArcREST](arcrest_scripts/copy_assignments_fs.py) <br> [Standalone](standalone_scripts/copy_assignments_fs.py)                 | copy_assignments_fs.py         |
-| [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [ArcGIS API For Python](arcgis_api_for_python/export_assignments_from_csv.py) <br> [ArcREST](arcrest_scripts/export_assignments_to_csv.py) <br> [Standalone](standalone_scripts/export_assignments_to_csv.py)     | export_assignments_to_csv.py   |
-| [Delete Assignments By Query](delete_assignments_by_query_readme.md) | [ArcGIS API For Python](arcgis_api_for_python/delete_assignments_by_query.py) <br> [ArcREST](arcrest_scripts/delete_assignments_by_query.py) <br> [Standalone](standalone_scripts/delete_assignments_by_query.py) | delete_assignments_by_query.py |
-| [Check Assignment Completion ](check_completion_location.md)         | [ArcGIS API For Python](arcgis_api_for_python/check_completion_location.py) <br> [ArcREST](arcrest_scripts/check_completion_location.py) <br> [Standalone](standalone_scripts/check_completion_location.py)      | check_completion_location.py   |
-| [Import Workers](import_workers.md)                                  | [ArcGIS API For Python](arcgis_api_for_python/import_workers.py) <br> [Standalone](standalone_scripts/import_workers.py)                                                                         | import_workers.py              |
-| [Create Assignment Types ](create_assignment_types.md)               | [ArcGIS API For Python](arcgis_api_for_python/create_assignment_types.py) <br> [Standalone](standalone_scripts/create_assignment_types.py)                                                                | create_assignment_types.py     |
-| [Delete Assignment Types ](delete_assignment_types.md)               | [ArcGIS API For Python](arcgis_api_for_python/delete_assignment_types.py) <br> [Standalone](standalone_scripts/delete_assignment_types.py)                                                                | delete_assignment_types.py     |
-| [Assignment Monitor ](assignment_monitor.md)                         | [ArcGIS API For Python](arcgis_api_for_python/assignment_monitor/assignment_monitor.py)                                    | assignment_monitor.py          |
+| Functionality                                                        | Link                                                                            
+|----------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [ArcGIS API For Python](arcgis_api_for_python/create_assignments_from_csv.py)          |
+| [Copy Assignments To Feature Service](copy_assignments_fs_readme.md) | [ArcGIS API For Python](arcgis_api_for_python/copy_assignments_fs.py)                  |
+| [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [ArcGIS API For Python](arcgis_api_for_python/export_assignments_from_csv.py)          |
+| [Delete Assignments By Query](delete_assignments_by_query_readme.md) | [ArcGIS API For Python](arcgis_api_for_python/delete_assignments_by_query.py)          |
+| [Check Assignment Completion ](check_completion_location.md)         | [ArcGIS API For Python](arcgis_api_for_python/check_completion_location.py)            |
+| [Import Workers](import_workers.md)                                  | [ArcGIS API For Python](arcgis_api_for_python/import_workers.py)                       |
+| [Create Assignment Types ](create_assignment_types.md)               | [ArcGIS API For Python](arcgis_api_for_python/create_assignment_types.py)              |
+| [Delete Assignment Types ](delete_assignment_types.md)               | [ArcGIS API For Python](arcgis_api_for_python/delete_assignment_types.py)              |
+| [Assignment Monitor ](assignment_monitor.md)                         | [ArcGIS API For Python](arcgis_api_for_python/assignment_monitor/assignment_monitor.py)|
 
-
-## Why are there so many choices?
-
-We provided three different options to use Python to help automate common workflows within Workforce For ArcGIS. 
-
-- If you plan to integrate Workforce with many other systems or significantly modify these scripts, it's probably best if you use the stand-a-lone scripts.
-- If you have existing workflows that use ArcREST for other ArcGIS related scripts, it's probably best if you use the ArcREST scripts.
-- If you are relatively new to Python, have interest in using other geoprocessing analytics, or would like to use [Jupyter](https://jupyter.org/) notebooks, it's probably best if you use the ArcGIS API for Python scripts.
 
 ## Instructions
 
-#### ArcGIS API for Python
 
 1. Install Conda and the ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
 2. Clone or download this repository
@@ -38,21 +30,6 @@ We provided three different options to use Python to help automate common workfl
 4. Install arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
 5. You should now be able to run all scripts in the `arcgis_api_for_python` folder (provided you use the correct arguments)
 
-#### ArcREST
-
-1. Install Python 2.7.x or 3.4+ if not already installed
-2. Clone or download this repository
-3. In terminal/cmd navigate to the `arcrest_scripts` folder
-4. Install ArcREST and arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
-5. You should now be able to run all script in the `arcrest_scripts` folder (provided you use the correct arguments)
-
-#### Standalone
-
-1. Install Python 2.7.x or 3.4+ if not already installed
-2. Clone or download this repository
-3. In terminal/cmd navigate to the `standalone_scripts` folder
-4. Install requests and arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
-5. You should now be able to run all script in the `standalone_scripts` folder (provided you use the correct arguments)
 
 ## Resources
 
