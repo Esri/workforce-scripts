@@ -30,7 +30,7 @@ import sys
 import arcgis
 
 
-def main(args):
+def main(arguments):
     # initialize logging
     formatter = logging.Formatter("[%(asctime)s] [%(filename)30s:%(lineno)4s - %(funcName)30s()]\
              [%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
@@ -43,7 +43,7 @@ def main(args):
     sh.setFormatter(formatter)
     sh.setLevel(logging.INFO)
     # Create a handler to log to the specified file
-    rh = logging.handlers.RotatingFileHandler(args.logFile, mode='a', maxBytes=10485760)
+    rh = logging.handlers.RotatingFileHandler(arguments.logFile, mode='a', maxBytes=10485760)
     rh.setFormatter(formatter)
     rh.setLevel(logging.DEBUG)
     # Add the handlers to the root logger
@@ -53,16 +53,16 @@ def main(args):
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(args.org_url, username=args.username, password=args.password)
+    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert=False)
 
     # Get the project and data
-    workforce_project = arcgis.gis.Item(gis, args.projectId)
+    workforce_project = arcgis.gis.Item(gis, arguments.projectId)
     workforce_project_data = workforce_project.get_data()
     assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
 
     # Query features to delete
     logger.info("Querying features...")
-    oids_to_delete = assignment_fl.query(args.where, return_ids_only=True, object_ids=",".join(args.objectIDs))[
+    oids_to_delete = assignment_fl.query(arguments.where, return_ids_only=True, object_ids=",".join(arguments.objectIDs))[
         "objectIds"]
 
     # Delete features

@@ -77,32 +77,6 @@ def get_assignment_types_from_csv(csv_file):
     return assignment_types
 
 
-def filter_assignment_types(assignment_fl, assignment_types):
-    """
-    Filters the assignment type, so that we don't have duplicates
-    :param assignment_fl: (FeatureLayer) The assignment feature layer
-    :param assignment_types: (string) The list of assignment types to add
-    :return: List<dict> The list of assignment types to add
-    """
-    assignment_types_to_add =[]
-    logger = logging.getLogger()
-    for field in assignment_fl.properties["fields"]:
-        if field["name"] == "assignmentType":
-            for assignment_type in assignment_types:
-                if assignment_types.count(assignment_type) > 1:
-                    logger.critical("Duplicate types detected in csv...")
-                    return []
-                duplicate = False
-                for current_type in field["domain"]["codedValues"]:
-                    if current_type["name"] == assignment_type:
-                        logger.warning("Duplicate type detected and will not be added: {}".format(assignment_type))
-                        duplicate = True
-                if not duplicate:
-                    assignment_types_to_add.append(assignment_type)
-            break
-    return assignment_types_to_add
-
-
 def add_assignment_types(assignment_fl, assignment_types):
     """
     Adds the assignments to project
@@ -111,45 +85,51 @@ def add_assignment_types(assignment_fl, assignment_types):
     :return: The json response of the addFeatures REST API Call
     """
     for field in assignment_fl.properties["fields"]:
-        if field["name"] == "assignmentType":
-            length = len(field["domain"]["codedValues"])
-            # Add new types here, auto-increment the coded values
+        if field["name"].lower() == "assignmenttype":
             for assignment_type in assignment_types:
+                # Next coded value
+                codes = [x["code"] for x in field["domain"]["codedValues"]]
+                if codes:
+                    next_code = max(codes) + 1
+                else:
+                    next_code = 1
+                # check for duplicates in list
+                if assignment_types.count(assignment_type) > 1:
+                    raise RuntimeError("Duplicate type: '{}' detected in list".format(assignment_type))
+                # check for potential duplicate online
+                for current_type in field["domain"]["codedValues"]:
+                    if current_type["name"] == assignment_type:
+                        raise RuntimeError("Type: '{}' already exists".format(current_type["name"]))
                 field["domain"]["codedValues"].append(
                     {
                         "name": assignment_type,
-                        "code": length+1
-                     }
+                        "code": next_code
+                    }
                 )
-                length += 1
             break
-    response = assignment_fl.manager.update_definition(
-        {
-            'fields': assignment_fl.properties['fields']
-        }
-    )
-    return response
+    return assignment_fl.manager.update_definition({
+        'fields': assignment_fl.properties['fields']
+    })
 
 
-def main(args):
+def main(arguments):
     # initialize logging
-    logger = initialize_logging(args.logFile)
+    logger = initialize_logging(arguments.logFile)
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(args.org_url, username=args.username, password=args.password)
+    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert=False)
     # Create a content manager object
     content_manager = arcgis.gis.ContentManager(gis)
     # Get the project and data
-    workforce_project = content_manager.get(args.projectId)
+    workforce_project = content_manager.get(arguments.projectId)
     workforce_project_data = workforce_project.get_data()
     assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
     logger.info("Reading CSV...")
     # Next we want to parse the CSV file and create a list of assignment types
-    assignment_types = get_assignment_types_from_csv(args.csvFile)
+    assignment_types = get_assignment_types_from_csv(arguments.csvFile)
     # Validate each assignment
     logger.info("Validating assignment types...")
-    assignment_types = filter_assignment_types(assignment_fl, assignment_types)
     if assignment_types:
         logger.info("Adding assignment types...")
         response = add_assignment_types(assignment_fl, assignment_types)

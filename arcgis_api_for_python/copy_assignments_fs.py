@@ -31,6 +31,36 @@ import sys
 import arcgis
 
 
+def get_field_name(field_name, fl):
+    """
+    Attempts to get the field name (could vary based on portal/AGOL implementation)
+    :param field_name: (string) The field name to get
+    :param fl: (FeatureLayer) The feature layer the field should be in
+    :return: (string) The field name
+    """
+    for field in fl.properties["fields"]:
+        if field_name == field["name"]:
+            return field_name
+        if field_name.lower() == field["name"]:
+            return field_name.lower()
+        # These field names are not only lower case but also different for Portal vs AGOL
+        # CreationDate
+        if field_name == "CreationDate":
+            return fl.properties["editFieldsInfo"]["creationDateField"]
+        # EditDate
+        if field_name == "EditDate":
+            return fl.properties["editFieldsInfo"]["editDateField"]
+        # Creator
+        if field_name == "Creator":
+            return fl.properties["editFieldsInfo"]["creatorField"]
+        # Editor
+        if field_name == "Editor":
+            return fl.properties["editFieldsInfo"]["editorField"]
+    else:
+        logging.getLogger().critical("Field: {} does not exist".format(field_name))
+        raise Exception("Field: {} does not exist".format(field_name))
+
+
 def initialize_logging(log_file):
     """
     Setup logging
@@ -106,24 +136,24 @@ def validate_config(target_fl, field_mappings):
     return True
 
 
-def main(args):
+def main(arguments):
     # initialize logging
-    logger = initialize_logging(args.logFile)
+    logger = initialize_logging(arguments.logFile)
 
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(args.org_url, username=args.username, password=args.password)
+    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert=False)
 
     # Get the project and data
-    workforce_project = arcgis.gis.Item(gis, args.projectId)
+    workforce_project = arcgis.gis.Item(gis, arguments.projectId)
     workforce_project_data = workforce_project.get_data()
     assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
-    target_fl = arcgis.features.FeatureLayer(args.targetFL, gis)
+    target_fl = arcgis.features.FeatureLayer(arguments.targetFL, gis)
 
     # Open the field mappings config file
     logging.getLogger().info("Reading field mappings...")
-    with open(args.configFile, 'r') as f:
+    with open(arguments.configFile, 'r') as f:
         field_mappings = json.load(f)
     logging.getLogger().info("Validating field mappings...")
     if not validate_config(target_fl, field_mappings):
@@ -133,7 +163,8 @@ def main(args):
         # Copy the assignments
         # Query the source to get the features specified by the query string
         logger.info("Querying source features...")
-        current_assignments = assignment_fl.query(where=args.where, out_sr=target_fl.properties.extent.spatialReference)
+        current_assignments = assignment_fl.query(where=arguments.where,
+                                                  out_sr=target_fl.properties.extent.spatialReference)
 
         # Query the archived assignments to get all of the currently archived ones
         logger.info("Querying target features")
@@ -144,18 +175,19 @@ def main(args):
         # that is storing the archived ones
         assignments_to_copy = []
         for assignment in current_assignments.features:
-            if assignment.attributes["GlobalID"] not in global_ids:
+            if assignment.attributes[get_field_name("GlobalID", assignment_fl)] not in global_ids:
                 assignments_to_copy.append(assignment)
-            # Create a new list to store the updated feature-dictionaries
+                # Create a new list to store the updated feature-dictionaries
         assignments_to_submit = []
         # Loop over all assignments that we want to add,
         for assignment in assignments_to_copy:
             # map the field names appropriately
             assignment_attributes = {}
             for key, value in field_mappings.items():
-                assignment_attributes[value] = assignment.attributes[key]
+                assignment_attributes[value] = assignment.attributes[get_field_name(key, assignment_fl)]
             # create the new feature object to send to server
-            assignments_to_submit.append(arcgis.features.Feature(geometry=assignment.geometry, attributes=assignment_attributes))
+            assignments_to_submit.append(
+                arcgis.features.Feature(geometry=assignment.geometry, attributes=assignment_attributes))
         logger.info("Copying assignments...")
         response = target_fl.edit_features(adds=arcgis.features.FeatureSet(assignments_to_submit))
         logger.info(response)
