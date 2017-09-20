@@ -58,55 +58,85 @@ def initialize_logging(log_file):
     return logger
 
 
-def main(args):
+def get_field_name(field_name, fl):
+    """
+    Attempts to get the field name (could vary based on portal/AGOL implementation)
+    :param field_name: (string) The field name to get
+    :param fl: (FeatureLayer) The feature layer the field should be in
+    :return: (string) The field name
+    """
+    for field in fl.properties["fields"]:
+        if field_name == field["name"]:
+            return field_name
+        if field_name.lower() == field["name"]:
+            return field_name.lower()
+        # These field names are not only lower case but also different for Portal vs AGOL
+        # CreationDate
+        if field_name == "CreationDate":
+            return fl.properties["editFieldsInfo"]["creationDateField"]
+        # EditDate
+        if field_name == "EditDate":
+            return fl.properties["editFieldsInfo"]["editDateField"]
+        # Creator
+        if field_name == "Creator":
+            return fl.properties["editFieldsInfo"]["creatorField"]
+        # Editor
+        if field_name == "Editor":
+            return fl.properties["editFieldsInfo"]["editorField"]
+    else:
+        logging.getLogger().critical("Field: {} does not exist".format(field_name))
+        raise Exception("Field: {} does not exist".format(field_name))
+
+
+def main(arguments):
     # initialize logging
-    logger = initialize_logging(args.logFile)
+    logger = initialize_logging(arguments.logFile)
 
     # Set date params
-    timezone = args.timezone
-    date_format = args.dateFormat
+    timezone = arguments.timezone
+    date_format = arguments.dateFormat
 
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(args.org_url, username=args.username, password=args.password)
+    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert=False)
 
     # Get the project and data
-    workforce_project = arcgis.gis.Item(gis, args.projectId)
+    workforce_project = arcgis.gis.Item(gis, arguments.projectId)
     workforce_project_data = workforce_project.get_data()
     assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
 
     # Query features
     logger.info("Querying features...")
-    assignments = assignment_fl.query(args.where, out_sr=args.outSR)
+    assignments = assignment_fl.query(arguments.where, out_sr=arguments.outSR)
     # Convert all dates to readable format
     for assignment in assignments.features:
         # format date if there is a value
         # Divide by 1000 because REST API returns milliseconds
-        if assignment.attributes["dueDate"] and assignment.attributes["dueDate"] != "":
-            assignment.attributes["dueDate"] = arrow.get(
-                int(assignment.attributes["dueDate"] / 1000)).to(timezone).strftime(date_format)
-        if assignment.attributes["assignedDate"] and assignment.attributes["assignedDate"] != "":
-            assignment.attributes["assignedDate"] = arrow.get(
-                int(assignment.attributes["assignedDate"] / 1000)).to(timezone).strftime(date_format)
-        if assignment.attributes["inProgressDate"] and assignment.attributes["inProgressDate"] != "":
-            assignment.attributes["inProgressDate"] = arrow.get(
-                int(assignment.attributes["inProgressDate"] / 1000)).to(timezone).strftime(date_format)
-        if assignment.attributes["completedDate"] and assignment.attributes["completedDate"] != "":
-            assignment.attributes["completedDate"] = arrow.get(
-                int(assignment.attributes["completedDate"] / 1000)).to(timezone).strftime(date_format)
-        if assignment.attributes["declinedDate"] and assignment.attributes["declinedDate"] != "":
-            assignment.attributes["declinedDate"] = arrow.get(
-                int(assignment.attributes["declinedDate"] / 1000)).to(timezone).strftime(date_format)
-        if assignment.attributes["pausedDate"] and assignment.attributes["pausedDate"] != "":
-            assignment.attributes["pausedDate"] = arrow.get(
-                int(assignment.attributes["pausedDate"] / 1000)).to(timezone).strftime(date_format)
-        if assignment.attributes["CreationDate"] and assignment.attributes["CreationDate"] != "":
-            assignment.attributes["CreationDate"] = arrow.get(
-                int(assignment.attributes["CreationDate"] / 1000)).to(timezone).strftime(date_format)
-        if assignment.attributes["EditDate"] and assignment.attributes["EditDate"] != "":
-            assignment.attributes["EditDate"] = arrow.get(
-                int(assignment.attributes["EditDate"] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes[get_field_name("dueDate", assignment_fl)] and assignment.attributes[get_field_name("dueDate", assignment_fl)] != "":
+            assignment.attributes[get_field_name("dueDate", assignment_fl)] = arrow.get(
+                int(assignment.attributes[get_field_name("dueDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes[get_field_name("assignedDate", assignment_fl)] and assignment.attributes[get_field_name("assignedDate", assignment_fl)] != "":
+            assignment.attributes[get_field_name("assignedDate", assignment_fl)] = arrow.get(
+                int(assignment.attributes[get_field_name("assignedDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes[get_field_name("inProgressDate", assignment_fl)] and assignment.attributes[get_field_name("inProgressDate", assignment_fl)] != "":
+            assignment.attributes[get_field_name("inProgressDate", assignment_fl)] = arrow.get(
+                int(assignment.attributes[get_field_name("inProgressDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format, assignment_fl)
+        if assignment.attributes[get_field_name("completedDate", assignment_fl)] and assignment.attributes[get_field_name("completedDate", assignment_fl)] != "":
+            assignment.attributes[get_field_name("completedDate", assignment_fl)] = arrow.get(
+                int(assignment.attributes[get_field_name("completedDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes[get_field_name("declinedDate", assignment_fl)] and assignment.attributes[get_field_name("declinedDate", assignment_fl)] != "":
+            assignment.attributes[get_field_name("declinedDate", assignment_fl)] = arrow.get(
+                int(assignment.attributes[get_field_name("declinedDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes[get_field_name("pausedDate", assignment_fl)] and assignment.attributes[get_field_name("pausedDate", assignment_fl)] != "":
+            assignment.attributes[get_field_name("pausedDate", assignment_fl)] = arrow.get(
+                int(assignment.attributes[get_field_name("pausedDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes[get_field_name("CreationDate", assignment_fl)] and assignment.attributes[get_field_name("CreationDate", assignment_fl)] != "":
+            assignment.attributes[get_field_name("CreationDate", assignment_fl)] = arrow.get(
+                int(assignment.attributes[get_field_name("CreationDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format)
+        if assignment.attributes[get_field_name("EditDate", assignment_fl)] and assignment.attributes[get_field_name("EditDate", assignment_fl)] != "":
+            assignment.attributes[get_field_name("EditDate", assignment_fl)] = arrow.get(
+                int(assignment.attributes[get_field_name("EditDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format)
 
     # workaround for saving empty feature set (there are no fields when the query returned nothing)
     if isinstance(assignments.fields, dict):

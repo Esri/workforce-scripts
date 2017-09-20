@@ -20,7 +20,8 @@
 
    limitations under the License.​
 
-    This sample copies assignments from one project to another feature service if the assignments were not completed properly
+    This sample copies assignments from one project to another feature service if the assignments
+    were not completed properly
 """
 import argparse
 import datetime
@@ -31,6 +32,36 @@ import math
 import traceback
 import sys
 import arcgis
+
+
+def get_field_name(field_name, fl):
+    """
+    Attempts to get the field name (could vary based on portal/AGOL implementation)
+    :param field_name: (string) The field name to get
+    :param fl: (FeatureLayer) The feature layer the field should be in
+    :return: (string) The field name
+    """
+    for field in fl.properties["fields"]:
+        if field_name == field["name"]:
+            return field_name
+        if field_name.lower() == field["name"]:
+            return field_name.lower()
+        # These field names are not only lower case but also different for Portal vs AGOL
+        # CreationDate
+        if field_name == "CreationDate":
+            return fl.properties["editFieldsInfo"]["creationDateField"]
+        # EditDate
+        if field_name == "EditDate":
+            return fl.properties["editFieldsInfo"]["editDateField"]
+        # Creator
+        if field_name == "Creator":
+            return fl.properties["editFieldsInfo"]["creatorField"]
+        # Editor
+        if field_name == "Editor":
+            return fl.properties["editFieldsInfo"]["editorField"]
+    else:
+        logging.getLogger().critical("Field: {} does not exist".format(field_name))
+        raise Exception("Field: {} does not exist".format(field_name))
 
 
 def initialize_logging(log_file):
@@ -118,21 +149,25 @@ def get_completed_assignments(assignment_fl, worker_fl, workers):
     """
     # Get the workers ids
     if not workers:
-        workers = [feature.attributes["userId"] for feature in worker_fl.query().features]
+        workers = [feature.attributes[get_field_name("userId", worker_fl)] for feature in worker_fl.query().features]
 
     # Query worker id
-    worker_query = "userId in ({})".format(",".join(["'{}'".format(w) for w in workers]))
-    worker_ids = [w.attributes["OBJECTID"] for w in worker_fl.query(where=worker_query).features]
+    worker_query = "{} in ({})".format(get_field_name("userId", worker_fl),
+                                       ",".join(["'{}'".format(w) for w in workers]))
+    worker_ids = [w.attributes[get_field_name("OBJECTID", worker_fl)] for w in
+                  worker_fl.query(where=worker_query).features]
     if not worker_ids:
         logging.getLogger().info("No assignments completed by specified workers")
         return
     logging.getLogger().info("Querying source features...")
-    assignment_query = "workerId in ({}) AND completedDate is not NULL".format(",".join(["'{}'".format(w) for w in worker_ids]))
+    assignment_query = "{} in ({}) AND {} is not NULL".format(get_field_name("workerId", assignment_fl),
+                                                              ",".join(["'{}'".format(w) for w in worker_ids]),
+                                                              get_field_name("completedDate", assignment_fl))
     completed_assignments = assignment_fl.query(assignment_query).features
     return completed_assignments
 
 
-def get_invalid_assignments(assignments, tracks_fl, time_tolerance, distance_tolerance, min_accuracy):
+def get_invalid_assignments(assignments, tracks_fl, time_tolerance, distance_tolerance, min_accuracy, assignment_fl):
     """
     Filters the assignment based on time and distance
     :param assignments: (List<Feature>) The assignments to check
@@ -140,6 +175,7 @@ def get_invalid_assignments(assignments, tracks_fl, time_tolerance, distance_tol
     :param time_tolerance: (int) The tolerance (in minutes) to use when verifying locations
     :param distance_tolerance: (float) The distance (in meters) to use when verifiying locations
     :param min_accuracy: (float) The minimum distance required
+    :param assignment_fl: (FeatureLayer) The assignment feature layer
     :return: (List<Feature>) The list of assigments that are invalid
     """
     # Find invalid assignments
@@ -149,14 +185,16 @@ def get_invalid_assignments(assignments, tracks_fl, time_tolerance, distance_tol
         start_coords = (assignment.geometry["x"], assignment.geometry["y"])
         # When the assignment was completed
         completion_date = datetime.datetime.utcfromtimestamp(
-            int(assignment.attributes["completedDate"]) / 1000)
+            int(assignment.attributes[get_field_name("completedDate", assignment_fl)]) / 1000)
         # Add/Subtract some minutes to give a little leeway
         start_date = completion_date - datetime.timedelta(minutes=time_tolerance)
         end_date = completion_date + datetime.timedelta(minutes=time_tolerance)
         # Make a query string to select location by the worker during the time period
-        loc_query_string = "Editor = '{}' AND CreationDate >= '{}' AND CreationDate <= '{}' AND Accuracy <= {}" \
-            .format(assignment.attributes["Editor"], start_date.strftime('%Y-%m-%d %H:%M:%S'),
-                    end_date.strftime('%Y-%m-%d %H:%M:%S'),
+        loc_query_string = "{} = '{}' AND {} >= '{}' AND {} <= '{}' AND {} <= {}" \
+            .format(get_field_name("Editor", tracks_fl), assignment.attributes[get_field_name("Editor", tracks_fl)],
+                    get_field_name("CreationDate", tracks_fl),
+                    start_date.strftime('%Y-%m-%d %H:%M:%S'), get_field_name("CreationDate", tracks_fl),
+                    end_date.strftime('%Y-%m-%d %H:%M:%S'), get_field_name("Accuracy", tracks_fl),
                     min_accuracy)
         # Query the feature layer
         locations_to_check = tracks_fl.query(where=loc_query_string).features
@@ -164,10 +202,9 @@ def get_invalid_assignments(assignments, tracks_fl, time_tolerance, distance_tol
         is_valid = False
         for location in locations_to_check:
             # Make a list of coordinate pairs to get the distance of
-            coords = []
-            coords.append((location.geometry["x"], location.geometry["y"]))
+            coords = [(location.geometry["x"], location.geometry["y"])]
             # If we include the accuracy, we need to make four variations (+- the accuracy)
-            accuracy = float(location.attributes["Accuracy"])
+            accuracy = float(location.attributes[get_field_name("Accuracy", tracks_fl)])
             coords.append((location.geometry["x"] + accuracy,
                            location.geometry["y"] + accuracy))
             coords.append((location.geometry["x"] + accuracy,
@@ -188,12 +225,13 @@ def get_invalid_assignments(assignments, tracks_fl, time_tolerance, distance_tol
     return invalid_assignments
 
 
-def copy_assignments(assignments, target_fl, field_mappings):
+def copy_assignments(assignments, target_fl, field_mappings, assignment_fl):
     """
     Copies the assignments to the target feature service layer
     :param assignments: (List<Feature>) The list of assignments to add
     :param target_fl: (string) The target feature layer to add the assignments to
     :param field_mappings: (dict) The field mappings that convert the original fields to the target fields
+    :param assignment_fl: (FeatureLayer) The assignment feature layer
     :return:
     """
     # Query the archived assignments to get all of the currently archived/invalid ones
@@ -205,7 +243,7 @@ def copy_assignments(assignments, target_fl, field_mappings):
     # that is storing the archived ones
     assignments_to_copy = []
     for assignment in assignments:
-        if assignment.attributes["GlobalID"] not in global_ids:
+        if assignment.attributes[get_field_name("GlobalID", assignment_fl)] not in global_ids:
             assignments_to_copy.append(assignment)
     # Create a new list to store the updated feature-dictionaries
     assignments_to_submit = []
@@ -214,9 +252,10 @@ def copy_assignments(assignments, target_fl, field_mappings):
         # map the field names appropriately
         assignment_attributes = {}
         for key, value in field_mappings.items():
-            assignment_attributes[value] = assignment.attributes[key]
+            assignment_attributes[value] = assignment.attributes[get_field_name(key, assignment_fl)]
         # create the new feature object to send to server
-        assignments_to_submit.append(arcgis.features.Feature(geometry=assignment.geometry, attributes=assignment_attributes))
+        assignments_to_submit.append(
+            arcgis.features.Feature(geometry=assignment.geometry, attributes=assignment_attributes))
     if assignments_to_submit:
         logging.getLogger().info("Adding invalid assignments to target Feature Service...")
         response = target_fl.edit_features(adds=arcgis.features.FeatureSet(assignments_to_submit))
@@ -233,37 +272,39 @@ def get_simple_distance(coords1, coords2):
     :param coords2: (Tuple) of x and y coordinates
     :return: (float) The distance between the two points
     """
-    return math.sqrt((coords1[0]-coords2[0])**2 + (coords1[1]-coords2[1])**2)
+    return math.sqrt((coords1[0] - coords2[0]) ** 2 + (coords1[1] - coords2[1]) ** 2)
 
 
-def main(args):
+def main(arguments):
     # initialize logger
-    logger = initialize_logging(args.logFile)
+    logger = initialize_logging(arguments.logFile)
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(args.org_url, username=args.username, password=args.password)
+    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert=False)
 
     # Get the project and data
-    workforce_project = arcgis.gis.Item(gis, args.projectId)
+    workforce_project = arcgis.gis.Item(gis, arguments.projectId)
     workforce_project_data = workforce_project.get_data()
     assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
     tracks_fl = arcgis.features.FeatureLayer(workforce_project_data["tracks"]["url"], gis)
     worker_fl = arcgis.features.FeatureLayer(workforce_project_data["workers"]["url"], gis)
-    target_fl = arcgis.features.FeatureLayer(args.targetFL, gis)
+    target_fl = arcgis.features.FeatureLayer(arguments.targetFL, gis)
 
     # Open the field mappings config file
     logging.getLogger().info("Reading field mappings...")
-    with open(args.configFile, 'r') as f:
+    with open(arguments.configFile, 'r') as f:
         field_mappings = json.load(f)
 
     if not validate_config(target_fl, field_mappings):
         logger.critical("Invalid field mappings detected")
         return
     else:
-        completed_assignments = get_completed_assignments(assignment_fl, worker_fl, args.workers)
-        invalid_assignments = get_invalid_assignments(completed_assignments, tracks_fl, args.timeTol, args.distTol, args.minAccuracy)
-        copy_assignments(invalid_assignments, target_fl, field_mappings)
+        completed_assignments = get_completed_assignments(assignment_fl, worker_fl, arguments.workers)
+        invalid_assignments = get_invalid_assignments(completed_assignments, tracks_fl, arguments.timeTol,
+                                                      arguments.distTol,
+                                                      arguments.minAccuracy, assignment_fl)
+        copy_assignments(invalid_assignments, target_fl, field_mappings, assignment_fl)
 
 
 if __name__ == "__main__":

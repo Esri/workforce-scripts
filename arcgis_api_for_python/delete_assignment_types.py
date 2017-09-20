@@ -65,7 +65,7 @@ def delete_assignment_types(assignment_fl):
     :return: The json response of the REST API Call
     """
     for field in assignment_fl.properties["fields"]:
-        if field["name"] == "assignmentType":
+        if field["name"].lower() == "assignmenttype":
             field["domain"]["codedValues"] = []
             break
     response = assignment_fl.manager.update_definition(
@@ -76,17 +76,17 @@ def delete_assignment_types(assignment_fl):
     return response
 
 
-def main(args):
+def main(arguments):
     # initialize logging
-    logger = initialize_logging(args.logFile)
+    logger = initialize_logging(arguments.logFile)
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(args.org_url, username=args.username, password=args.password)
+    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert=False)
     # Create a content manager object
     content_manager = arcgis.gis.ContentManager(gis)
     # Get the project and data
-    workforce_project = content_manager.get(args.projectId)
+    workforce_project = content_manager.get(arguments.projectId)
     workforce_project_data = workforce_project.get_data()
     logger.info("Deleting assignment types...")
     assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
