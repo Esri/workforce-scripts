@@ -116,6 +116,9 @@ def main(args):
         return
 
     # Get the codes of the domains
+    statuses = []
+    priorities = []
+    assignmentTypes = []
     for field in assignment_fl.properties.fields:
         if field.name == "status":
             statuses = [cv.code for cv in field.domain.codedValues]
@@ -173,17 +176,17 @@ def main(args):
             assignment_wrapper["assignment"].attributes[get_field_name("dispatcherId", assignment_fl)] = dispatcher_id
 
         # set worker ids
-        if "workerUsername" in assignment and assignment_wrapper["workerUsername"]:
+        if "workerUsername" in assignment_wrapper and assignment_wrapper["workerUsername"]:
             workers = worker_fl.query(
                 where="{}='{}'".format(get_field_name("userId", worker_fl), assignment_wrapper["workerUsername"]))
             if workers.features:
-                assignment_wrapper["assignment"].attributes[get_field_name("workerId", worker_fl)] = \
+                assignment_wrapper["assignment"].attributes[get_field_name("workerId", assignment_fl)] = \
                 workers.features[0].attributes[get_field_name("OBJECTID", worker_fl)]
                 assignment_wrapper["assignment"].attributes[get_field_name("status", assignment_fl)] = 1  # assigned
                 assignment_wrapper["assignment"].attributes[
                     get_field_name("assignedDate", assignment_fl)] = arrow.now().to('utc').timestamp * 1000
             else:
-                logger.critical("{} is not a worker".format(assignment["workerUsername"]))
+                logger.critical("{} is not a worker".format(assignment_wrapper["workerUsername"]))
                 return
 
         # Do some validation
