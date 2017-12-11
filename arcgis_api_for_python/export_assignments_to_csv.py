@@ -31,6 +31,11 @@ import arcgis
 import arrow
 
 
+def log_critical_and_raise_exception(message):
+    logging.getLogger().critical(message)
+    raise Exception(message)
+
+
 def initialize_logging(log_file):
     """
     Setup logging
@@ -84,8 +89,7 @@ def get_field_name(field_name, fl):
         if field_name == "Editor":
             return fl.properties["editFieldsInfo"]["editorField"]
     else:
-        logging.getLogger().critical("Field: {} does not exist".format(field_name))
-        raise Exception("Field: {} does not exist".format(field_name))
+        log_critical_and_raise_exception("Field: {} does not exist".format(field_name))
 
 
 def main(arguments):

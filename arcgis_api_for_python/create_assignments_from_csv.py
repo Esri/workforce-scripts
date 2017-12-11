@@ -35,6 +35,11 @@ import arrow
 import dateutil
 
 
+def log_critical_and_raise_exception(message):
+    logging.getLogger().critical(message)
+    raise Exception(message)
+
+
 def initialize_logging(log_file):
     """
     Setup logging
@@ -88,8 +93,7 @@ def get_field_name(field_name, fl):
         if field_name == "Editor":
             return fl.properties["editFieldsInfo"]["editorField"]
     else:
-        logging.getLogger().critical("Field: {} does not exist".format(field_name))
-        raise Exception("Field: {} does not exist".format(field_name))
+        log_critical_and_raise_exception("Field: {} does not exist".format(field_name))
 
 
 def main(args):
@@ -112,8 +116,7 @@ def main(args):
     if dispatchers.features:
         dispatcher_id = dispatchers.features[0].attributes[get_field_name("OBJECTID", dispatcher_fl)]
     else:
-        logger.critical("{} is not a dispatcher".format(args.username))
-        return
+        log_critical_and_raise_exception("{} is not a dispatcher".format(args.username))
 
     # Get the codes of the domains
     statuses = []
@@ -151,6 +154,8 @@ def main(args):
         # Add optional attributes
         if args.dispatcherIdField: attributes[get_field_name("dispatcherId", assignment_fl)] = int(
             assignment[args.dispatcherIdField])
+        elif get_field_name("dispatcherId", assignment_fl) not in attributes:
+                attributes[get_field_name("dispatcherId", assignment_fl)] = dispatcher_id
         if args.descriptionField: attributes[get_field_name("description", assignment_fl)] = assignment[
             args.descriptionField]
         if args.priorityField: attributes[get_field_name("priority", assignment_fl)] = int(
@@ -172,8 +177,7 @@ def main(args):
             assignment_wrapper["attachmentFile"] = assignment[args.attachmentFileField]
 
         # Set the dispatcherId in the assignment json
-        if get_field_name("dispatcherId", assignment_fl) not in assignment_wrapper["assignment"].attributes:
-            assignment_wrapper["assignment"].attributes[get_field_name("dispatcherId", assignment_fl)] = dispatcher_id
+
 
         # set worker ids
         if "workerUsername" in assignment_wrapper and assignment_wrapper["workerUsername"]:
@@ -186,27 +190,24 @@ def main(args):
                 assignment_wrapper["assignment"].attributes[
                     get_field_name("assignedDate", assignment_fl)] = arrow.now().to('utc').timestamp * 1000
             else:
-                logger.critical("{} is not a worker".format(assignment_wrapper["workerUsername"]))
-                return
+                log_critical_and_raise_exception("{} is not a worker".format(assignment_wrapper["workerUsername"]))
 
         # Do some validation
+        dispatcher_ids = [x.attributes[get_field_name('OBJECTID', dispatcher_fl)] for x in dispatcher_fl.query().features]
+        if assignment_wrapper["assignment"].attributes[get_field_name("dispatcherId", assignment_fl)] not in dispatcher_ids:
+            log_critical_and_raise_exception("Invalid Dispatcher ID for: {}".format(assignment_wrapper["assignment"]))
         if assignment_wrapper["assignment"].attributes[get_field_name("status", assignment_fl)] not in statuses:
-            logging.getLogger().critical("Invalid Status for: {}".format(assignment_wrapper["assignment"]))
-            return
+            log_critical_and_raise_exception("Invalid Status for: {}".format(assignment_wrapper["assignment"]))
         if get_field_name("priority", assignment_fl) in assignment_wrapper["assignment"].attributes and \
                         assignment_wrapper["assignment"].attributes[
                             "priority"] not in priorities:
-            logging.getLogger().critical("Invalid Priority for: {}".format(assignment_wrapper["assignment"]))
-            return
+            log_critical_and_raise_exception("Invalid Priority for: {}".format(assignment_wrapper["assignment"]))
         if assignment_wrapper["assignment"].attributes[
             get_field_name("assignmentType", assignment_fl)] not in assignmentTypes:
-            logging.getLogger().critical("Invalid Assignment Type for: {}".format(assignment_wrapper["assignment"]))
-            return
+            log_critical_and_raise_exception("Invalid Assignment Type for: {}".format(assignment_wrapper["assignment"]))
         if "attachmentFile" in assignment_wrapper and assignment_wrapper["attachmentFile"]:
             if not os.path.isfile(os.path.abspath(assignment_wrapper["attachmentFile"])):
-                logging.getLogger().critical(
-                    "Attachment file not found: {}".format(assignment_wrapper["attachmentFile"]))
-                return
+                log_critical_and_raise_exception("Attachment file not found: {}".format(assignment_wrapper["attachmentFile"]))
         assignments_to_add.append(assignment_wrapper)
 
     # Add the assignments

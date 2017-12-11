@@ -31,6 +31,11 @@ import sys
 import arcgis
 
 
+def log_critical_and_raise_exception(message):
+    logging.getLogger().critical(message)
+    raise Exception(message)
+
+
 def get_field_name(field_name, fl):
     """
     Attempts to get the field name (could vary based on portal/AGOL implementation)
@@ -57,8 +62,7 @@ def get_field_name(field_name, fl):
         if field_name == "Editor":
             return fl.properties["editFieldsInfo"]["editorField"]
     else:
-        logging.getLogger().critical("Field: {} does not exist".format(field_name))
-        raise Exception("Field: {} does not exist".format(field_name))
+        log_critical_and_raise_exception("Field: {} does not exist".format(field_name))
 
 
 def initialize_logging(log_file):
@@ -93,7 +97,7 @@ def validate_config(target_fl, field_mappings):
     Validates the field mappings to make sure the fields exist
     :param target_fl: (string) The feature service to copy to
     :param field_mappings: (dict) The field mappings
-    :return: True if valid, False if not
+    :return:
     """
     logging.getLogger().info("Validating field mappings...")
     # Validate configuration file
@@ -126,14 +130,11 @@ def validate_config(target_fl, field_mappings):
     # Check that the configuration file is not missing any fields
     for field in fields:
         if field not in field_mappings:
-            logging.getLogger().critical("Config file is missing: '{}' field mapping".format(field))
-            return False
+            log_critical_and_raise_exception("Config file is missing: '{}' field mapping".format(field))
     # Check that the provided fields exist in the target feature layer
     for field in field_mappings.values():
         if field not in field_names:
-            logging.getLogger().critical("Field '{}' is not present in the provided target feature layer".format(field))
-            return False
-    return True
+            log_critical_and_raise_exception("Field '{}' is not present in the provided target feature layer".format(field))
 
 
 def main(arguments):
@@ -156,42 +157,40 @@ def main(arguments):
     with open(arguments.configFile, 'r') as f:
         field_mappings = json.load(f)
     logging.getLogger().info("Validating field mappings...")
-    if not validate_config(target_fl, field_mappings):
-        logger.critical("Invalid field mappings detected")
-        return
-    else:
-        # Copy the assignments
-        # Query the source to get the features specified by the query string
-        logger.info("Querying source features...")
-        current_assignments = assignment_fl.query(where=arguments.where,
-                                                  out_sr=target_fl.properties.extent.spatialReference)
+    # validate the config
+    validate_config(target_fl, field_mappings)
+    # Copy the assignments
+    # Query the source to get the features specified by the query string
+    logger.info("Querying source features...")
+    current_assignments = assignment_fl.query(where=arguments.where,
+                                              out_sr=target_fl.properties.extent.spatialReference)
 
-        # Query the archived assignments to get all of the currently archived ones
-        logger.info("Querying target features")
-        archived_assignments = target_fl.query(out_fields=field_mappings["GlobalID"])
-        # Create a list of GlobalIDs - These should be unique
-        global_ids = [feature.attributes[field_mappings["GlobalID"]] for feature in archived_assignments.features]
-        # Iterate through the the assignments returned and only add those that don't exist in the Feature Layer
-        # that is storing the archived ones
-        assignments_to_copy = []
-        for assignment in current_assignments.features:
-            if assignment.attributes[get_field_name("GlobalID", assignment_fl)] not in global_ids:
-                assignments_to_copy.append(assignment)
-                # Create a new list to store the updated feature-dictionaries
-        assignments_to_submit = []
-        # Loop over all assignments that we want to add,
-        for assignment in assignments_to_copy:
-            # map the field names appropriately
-            assignment_attributes = {}
-            for key, value in field_mappings.items():
-                assignment_attributes[value] = assignment.attributes[get_field_name(key, assignment_fl)]
-            # create the new feature object to send to server
-            assignments_to_submit.append(
-                arcgis.features.Feature(geometry=assignment.geometry, attributes=assignment_attributes))
-        logger.info("Copying assignments...")
-        response = target_fl.edit_features(adds=arcgis.features.FeatureSet(assignments_to_submit))
-        logger.info(response)
-        logger.info("Completed")
+    # Query the archived assignments to get all of the currently archived ones
+    logger.info("Querying target features")
+    archived_assignments = target_fl.query(out_fields=field_mappings["GlobalID"])
+    # Create a list of GlobalIDs - These should be unique
+    global_ids = [feature.attributes[field_mappings["GlobalID"]] for feature in archived_assignments.features]
+    # Iterate through the the assignments returned and only add those that don't exist in the Feature Layer
+    # that is storing the archived ones
+    assignments_to_copy = []
+    for assignment in current_assignments.features:
+        if assignment.attributes[get_field_name("GlobalID", assignment_fl)] not in global_ids:
+            assignments_to_copy.append(assignment)
+            # Create a new list to store the updated feature-dictionaries
+    assignments_to_submit = []
+    # Loop over all assignments that we want to add,
+    for assignment in assignments_to_copy:
+        # map the field names appropriately
+        assignment_attributes = {}
+        for key, value in field_mappings.items():
+            assignment_attributes[value] = assignment.attributes[get_field_name(key, assignment_fl)]
+        # create the new feature object to send to server
+        assignments_to_submit.append(
+            arcgis.features.Feature(geometry=assignment.geometry, attributes=assignment_attributes))
+    logger.info("Copying assignments...")
+    response = target_fl.edit_features(adds=arcgis.features.FeatureSet(assignments_to_submit))
+    logger.info(response)
+    logger.info("Completed")
 
 
 if __name__ == "__main__":

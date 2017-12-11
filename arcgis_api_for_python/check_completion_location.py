@@ -34,6 +34,11 @@ import sys
 import arcgis
 
 
+def log_critical_and_raise_exception(message):
+    logging.getLogger().critical(message)
+    raise Exception(message)
+
+
 def get_field_name(field_name, fl):
     """
     Attempts to get the field name (could vary based on portal/AGOL implementation)
@@ -60,8 +65,7 @@ def get_field_name(field_name, fl):
         if field_name == "Editor":
             return fl.properties["editFieldsInfo"]["editorField"]
     else:
-        logging.getLogger().critical("Field: {} does not exist".format(field_name))
-        raise Exception("Field: {} does not exist".format(field_name))
+        log_critical_and_raise_exception("Field: {} does not exist".format(field_name))
 
 
 def initialize_logging(log_file):
@@ -96,7 +100,7 @@ def validate_config(target_fl, field_mappings):
     Validates the field mappings to make sure the fields exist
     :param target_fl: (string) The feature service to copy to
     :param field_mappings: (dict) The field mappings
-    :return: True if valid, False if not
+    :return:
     """
     logging.getLogger().info("Validating field mappings...")
     # Validate configuration file
@@ -129,14 +133,11 @@ def validate_config(target_fl, field_mappings):
     # Check that the configuration file is not missing any fields
     for field in fields:
         if field not in field_mappings:
-            logging.getLogger().critical("Config file is missing: '{}' field mapping".format(field))
-            return False
+            log_critical_and_raise_exception("Config file is missing: '{}' field mapping".format(field))
     # Check that the provided fields exist in the target feature layer
     for field in field_mappings.values():
         if field not in field_names:
-            logging.getLogger().critical("Field '{}' is not present in the provided target feature layer".format(field))
-            return False
-    return True
+            log_critical_and_raise_exception("Field '{}' is not present in the provided target feature layer".format(field))
 
 
 def get_completed_assignments(assignment_fl, worker_fl, workers):
@@ -295,11 +296,7 @@ def main(arguments):
     logging.getLogger().info("Reading field mappings...")
     with open(arguments.configFile, 'r') as f:
         field_mappings = json.load(f)
-
-    if not validate_config(target_fl, field_mappings):
-        logger.critical("Invalid field mappings detected")
-        return
-    else:
+        validate_config(target_fl, field_mappings)
         completed_assignments = get_completed_assignments(assignment_fl, worker_fl, arguments.workers)
         invalid_assignments = get_invalid_assignments(completed_assignments, tracks_fl, arguments.timeTol,
                                                       arguments.distTol,
