@@ -144,7 +144,7 @@ def main(arguments):
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert=False)
+    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert= not arguments.skipSSLVerification)
 
     # Get the project and data
     workforce_project = arcgis.gis.Item(gis, arguments.projectId)
@@ -207,6 +207,7 @@ if __name__ == "__main__":
                         required=True)
     parser.add_argument('-configFile', dest="configFile", help="The json configuration file to use", required=True)
     parser.add_argument('-logFile', dest='logFile', help="The log file to write to", required=True)
+    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true', help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)

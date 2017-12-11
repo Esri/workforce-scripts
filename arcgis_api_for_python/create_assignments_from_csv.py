@@ -102,7 +102,7 @@ def main(args):
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(args.org_url, username=args.username, password=args.password, verify_cert=False)
+    gis = arcgis.gis.GIS(args.org_url, username=args.username, password=args.password, verify_cert= not args.skipSSLVerification)
     # Create a content manager object
     content_manager = arcgis.gis.ContentManager(gis)
     # Get the project and data
@@ -262,6 +262,7 @@ if __name__ == "__main__":
     parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read")
     parser.add_argument('-wkid', dest='wkid', help='The wkid that the x,y values are use', type=int, default=4326)
     parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)
+    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true', help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)

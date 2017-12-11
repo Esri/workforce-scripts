@@ -103,7 +103,7 @@ def main(arguments):
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert=False)
+    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert= not arguments.skipSSLVerification)
 
     # Get the project and data
     workforce_project = arcgis.gis.Item(gis, arguments.projectId)
@@ -205,6 +205,7 @@ if __name__ == "__main__":
     parser.add_argument('-outSR', dest="outSR", help="The output spatial reference to use", default=None)
     parser.add_argument('-dateFormat', dest='dateFormat', help="The date format to use", default="%m/%d/%Y %H:%M:%S")
     parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone to export to")
+    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true', help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)
