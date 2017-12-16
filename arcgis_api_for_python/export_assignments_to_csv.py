@@ -148,7 +148,7 @@ def main(arguments):
         assignments = inject_field_names(assignments)
     # Write the assignments to the csv file
     logging.getLogger().info("Writing to CSV...")
-    assignments.save("", "exported.csv")
+    assignments.save("", arguments.outCSV)
     logging.getLogger().info("Completed")
 
 
