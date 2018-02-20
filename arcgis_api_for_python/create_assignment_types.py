@@ -147,7 +147,7 @@ if __name__ == "__main__":
     parser.add_argument('-url', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
     parser.add_argument('-pid', dest='projectId', help="The id of the project to add assignments to", required=True)
-    parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read")
+    parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read", required=True)
     parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)
     args = parser.parse_args()
     try:
