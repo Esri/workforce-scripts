@@ -152,17 +152,17 @@ def main(args):
             get_field_name("assignmentRead", assignment_fl): None
         }
         # Add optional attributes
-        if args.dispatcherIdField: attributes[get_field_name("dispatcherId", assignment_fl)] = int(
-            assignment[args.dispatcherIdField])
+        if args.dispatcherIdField and assignment[args.dispatcherIdField]:
+            attributes[get_field_name("dispatcherId", assignment_fl)] = int(assignment[args.dispatcherIdField])
         elif get_field_name("dispatcherId", assignment_fl) not in attributes:
-                attributes[get_field_name("dispatcherId", assignment_fl)] = dispatcher_id
-        if args.descriptionField: attributes[get_field_name("description", assignment_fl)] = assignment[
-            args.descriptionField]
-        if args.priorityField: attributes[get_field_name("priority", assignment_fl)] = int(
-            assignment[args.priorityField])
-        if args.workOrderIdField: attributes[get_field_name("workOrderId", assignment_fl)] = assignment[
-            args.workOrderIdField]
-        if args.dueDateField:
+            attributes[get_field_name("dispatcherId", assignment_fl)] = dispatcher_id
+        if args.descriptionField and assignment[args.descriptionField]:
+            attributes[get_field_name("description", assignment_fl)] = assignment[args.descriptionField]
+        if args.priorityField and assignment[args.priorityField]:
+            attributes[get_field_name("priority", assignment_fl)] = int(assignment[args.priorityField])
+        if args.workOrderIdField and assignment[args.workOrderIdField]:
+            attributes[get_field_name("workOrderId", assignment_fl)] = assignment[args.workOrderIdField]
+        if args.dueDateField and assignment[args.dueDateField]:
             d = arrow.Arrow.strptime(assignment[args.dueDateField], args.dateFormat).replace(
                 tzinfo=dateutil.tz.gettz(args.timezone))
             if d.datetime.second == 0 and d.datetime.hour == 0 and d.datetime.minute == 0:
@@ -171,9 +171,9 @@ def main(args):
         new_assignment = arcgis.features.Feature(geometry=geometry, attributes=attributes)
         # Need this extra dictionary so we can store the attachment file with the feature
         assignment_wrapper = (dict(assignment=new_assignment))
-        if args.workerField:
+        if args.workerField and assignment[args.workerField]:
             assignment_wrapper["workerUsername"] = assignment[args.workerField]
-        if args.attachmentFileField:
+        if args.attachmentFileField and assignment[args.attachmentFileField]:
             assignment_wrapper["attachmentFile"] = assignment[args.attachmentFileField]
 
         # Set the dispatcherId in the assignment json
@@ -222,10 +222,10 @@ def main(args):
 
     # Add the attachments
     logger.info("Adding Any Attachments...")
-    if len(assignments_to_add) > 0 and "attachmentFile" in assignments_to_add[0]:
+    if len(assignments_to_add) > 0:
         attachment_manager = arcgis.features.managers.AttachmentManager(assignment_fl)
         for assignment in assignments_to_add:
-            if assignment["attachmentFile"] and assignment["attachmentFile"] != "":
+            if "attachmentFile" in assignment and assignment["attachmentFile"]:
                 response = attachment_manager.add(
                     assignment["assignment"].attributes[get_field_name("OBJECTID", assignment_fl)],
                     os.path.abspath(assignment["attachmentFile"]))
