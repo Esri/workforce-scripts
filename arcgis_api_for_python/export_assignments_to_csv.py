@@ -31,6 +31,11 @@ import arcgis
 import arrow
 
 
+def log_critical_and_raise_exception(message):
+    logging.getLogger().critical(message)
+    raise Exception(message)
+
+
 def initialize_logging(log_file):
     """
     Setup logging
@@ -84,8 +89,7 @@ def get_field_name(field_name, fl):
         if field_name == "Editor":
             return fl.properties["editFieldsInfo"]["editorField"]
     else:
-        logging.getLogger().critical("Field: {} does not exist".format(field_name))
-        raise Exception("Field: {} does not exist".format(field_name))
+        log_critical_and_raise_exception("Field: {} does not exist".format(field_name))
 
 
 def main(arguments):
@@ -99,7 +103,7 @@ def main(arguments):
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert=False)
+    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert= not arguments.skipSSLVerification)
 
     # Get the project and data
     workforce_project = arcgis.gis.Item(gis, arguments.projectId)
@@ -144,7 +148,7 @@ def main(arguments):
         assignments = inject_field_names(assignments)
     # Write the assignments to the csv file
     logging.getLogger().info("Writing to CSV...")
-    assignments.save("", "exported.csv")
+    assignments.save("", arguments.outCSV)
     logging.getLogger().info("Completed")
 
 
@@ -201,6 +205,7 @@ if __name__ == "__main__":
     parser.add_argument('-outSR', dest="outSR", help="The output spatial reference to use", default=None)
     parser.add_argument('-dateFormat', dest='dateFormat', help="The date format to use", default="%m/%d/%Y %H:%M:%S")
     parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone to export to")
+    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true', help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)

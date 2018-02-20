@@ -33,6 +33,11 @@ import traceback
 import arcgis
 
 
+def log_critical_and_raise_exception(message):
+    logging.getLogger().critical(message)
+    raise Exception(message)
+
+
 def user_exists(gis, username):
     """
     Searchs the organization/portal to see if a user exists
@@ -71,8 +76,7 @@ def get_field_name(field_name, fl):
         if field_name == "Editor":
             return fl.properties["editFieldsInfo"]["editorField"]
     else:
-        logging.getLogger().critical("Field: {} does not exist".format(field_name))
-        raise Exception("Field: {} does not exist".format(field_name))
+        log_critical_and_raise_exception("Field: {} does not exist".format(field_name))
 
 
 def initialize_logger(logFile):
@@ -104,7 +108,7 @@ def main(arguments):
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert=False)
+    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert= not arguments.skipSSLVerification)
     # Get the project and data
     workforce_project = arcgis.gis.Item(gis, arguments.project_id)
     workforce_project_data = workforce_project.get_data()
@@ -129,12 +133,12 @@ def main(arguments):
             new_worker = arcgis.features.Feature(attributes=new_worker_attributes)
             # check if the user exists in the org
             if not user_exists(gis, new_worker.attributes[get_field_name("userId", workers_fl)]):
-                logger.warning("User '{}' does not exist in your org and will not be added".format(
+                log_critical_and_raise_exception("User '{}' does not exist in your org".format(
                     new_worker.attributes[get_field_name("userId", workers_fl)]))
             # check if user already is part of the project
             elif new_worker.attributes[get_field_name("userId", workers_fl)] in [
                 w.attributes[get_field_name("userId", workers_fl)] for w in current_workers]:
-                logger.warning("User '{}' is already part of this project and will not be added".format(
+                log_critical_and_raise_exception("User '{}' is already part of this project".format(
                     new_worker.attributes[get_field_name("userId", workers_fl)]))
             else:
                 workers.append(new_worker)
@@ -174,6 +178,7 @@ if __name__ == "__main__":
                         help="The name of the column representing the contact number of the worker", default=None)
     parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read")
     parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)
+    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true', help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)
