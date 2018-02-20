@@ -1,10 +1,10 @@
 # Workforce Scripts
 A set of python scripts (using multiple libraries) to help administer Workforce projects and services.
 
-Supports Python 2.7+ and Python 3.4+ (required for ArcGIS API for Python)
+Supports Python 3.5+ (required for ArcGIS API for Python)
 
-A set of Python scripts using the [ArcGIS API for Python](https://developers.arcgis.com/python/). These scripts support Workforce in both AGOL and Enterprise 10.5.1.
-Additional (deprecated) scripts using vanilla Python and ArcREST are also available.
+A set of Python scripts using the [ArcGIS API for Python](https://developers.arcgis.com/python/). These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
+Additional, deprecated, scripts using vanilla Python and ArcREST are also available. These deprecated scripts only support Workforce in ArcGIS Online.
 
 
 ## Features
@@ -25,7 +25,7 @@ Additional (deprecated) scripts using vanilla Python and ArcREST are also availa
 ## Instructions
 
 
-1. Install Conda and the ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
+1. Install ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
 2. Clone or download this repository
 3. In terminal/cmd navigate to the `arcgis_api_for_python` folder
 4. Install arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
