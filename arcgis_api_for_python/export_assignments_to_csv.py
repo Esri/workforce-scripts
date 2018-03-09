@@ -106,7 +106,7 @@ def main(arguments):
     gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert= not arguments.skipSSLVerification)
 
     # Get the project and data
-    workforce_project = arcgis.gis.Item(gis, arguments.projectId)
+    workforce_project = gis.content.get(arguments.projectId)
     workforce_project_data = workforce_project.get_data()
     assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
 

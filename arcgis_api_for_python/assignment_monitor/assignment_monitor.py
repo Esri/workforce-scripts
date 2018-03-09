@@ -215,7 +215,7 @@ def get_global_ids(db):
 if __name__ == "__main__":
     # parse the config file
     config = configparser.ConfigParser()
-    config.read("config.ini")
+    config.read("my_config.ini")
 
     logger = initialize_logging(config["LOG"]["LOGFILE"])
     initialize_db(config["DB"]["DATABASE"])
