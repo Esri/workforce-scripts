@@ -120,7 +120,7 @@ def main(arguments):
     # First step is to get authenticate and get a valid token
     gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert= not arguments.skipSSLVerification)
     # Create a content manager object
-    content_manager = arcgis.gis.ContentManager(gis)
+    content_manager = gis.content
     # Get the project and data
     workforce_project = content_manager.get(arguments.projectId)
     workforce_project_data = workforce_project.get_data()

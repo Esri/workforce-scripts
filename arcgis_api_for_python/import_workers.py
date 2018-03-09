@@ -45,8 +45,7 @@ def user_exists(gis, username):
     :param username: (string) The username to search for
     :return: True if user exists, False if not
     """
-    user_manager = arcgis.gis.UserManager(gis)
-    users = user_manager.search(query=username)
+    users = gis.users.search(query=username)
     return username in [x["username"] for x in users]
 
 
@@ -110,7 +109,7 @@ def main(arguments):
     # First step is to get authenticate and get a valid token
     gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert= not arguments.skipSSLVerification)
     # Get the project and data
-    workforce_project = arcgis.gis.Item(gis, arguments.project_id)
+    workforce_project = gis.content.get(args.project_id)
     workforce_project_data = workforce_project.get_data()
     workers_fl = arcgis.features.FeatureLayer(workforce_project_data["workers"]["url"], gis)
     current_workers = workers_fl.query().features
@@ -149,7 +148,7 @@ def main(arguments):
         logger.info(response)
         # Need to make sure the user is part of the workforce group
         worker_ids = [x.attributes[get_field_name("userId", workers_fl)] for x in workers]
-        group = arcgis.gis.Group(gis, workforce_project_data["groupId"])
+        group = gis.groups.get(workforce_project_data["groupId"])
         logger.info("Adding workers to project group...")
         response = group.add_users(worker_ids)
         logger.info(response)

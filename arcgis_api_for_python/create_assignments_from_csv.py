@@ -104,7 +104,7 @@ def main(args):
     # First step is to get authenticate and get a valid token
     gis = arcgis.gis.GIS(args.org_url, username=args.username, password=args.password, verify_cert= not args.skipSSLVerification)
     # Create a content manager object
-    content_manager = arcgis.gis.ContentManager(gis)
+    content_manager = gis.content
     # Get the project and data
     workforce_project = content_manager.get(args.projectId)
     workforce_project_data = workforce_project.get_data()
@@ -175,9 +175,6 @@ def main(args):
             assignment_wrapper["workerUsername"] = assignment[args.workerField]
         if args.attachmentFileField and assignment[args.attachmentFileField]:
             assignment_wrapper["attachmentFile"] = assignment[args.attachmentFileField]
-
-        # Set the dispatcherId in the assignment json
-
 
         # set worker ids
         if "workerUsername" in assignment_wrapper and assignment_wrapper["workerUsername"]:
