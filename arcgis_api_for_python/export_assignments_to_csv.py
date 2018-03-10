@@ -125,7 +125,7 @@ def main(arguments):
                 int(assignment.attributes[get_field_name("assignedDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format)
         if assignment.attributes[get_field_name("inProgressDate", assignment_fl)] and assignment.attributes[get_field_name("inProgressDate", assignment_fl)] != "":
             assignment.attributes[get_field_name("inProgressDate", assignment_fl)] = arrow.get(
-                int(assignment.attributes[get_field_name("inProgressDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format, assignment_fl)
+                int(assignment.attributes[get_field_name("inProgressDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format)
         if assignment.attributes[get_field_name("completedDate", assignment_fl)] and assignment.attributes[get_field_name("completedDate", assignment_fl)] != "":
             assignment.attributes[get_field_name("completedDate", assignment_fl)] = arrow.get(
                 int(assignment.attributes[get_field_name("completedDate", assignment_fl)] / 1000)).to(timezone).strftime(date_format)
