@@ -29,42 +29,15 @@ import logging.handlers
 import traceback
 import sys
 import arcgis
+from arcgis.apps import workforce
+from arcgis.gis import GIS
 
 
 def log_critical_and_raise_exception(message):
     logging.getLogger().critical(message)
     raise Exception(message)
 
-
-def get_field_name(field_name, fl):
-    """
-    Attempts to get the field name (could vary based on portal/AGOL implementation)
-    :param field_name: (string) The field name to get
-    :param fl: (FeatureLayer) The feature layer the field should be in
-    :return: (string) The field name
-    """
-    for field in fl.properties["fields"]:
-        if field_name == field["name"]:
-            return field_name
-        if field_name.lower() == field["name"]:
-            return field_name.lower()
-        # These field names are not only lower case but also different for Portal vs AGOL
-        # CreationDate
-        if field_name == "CreationDate":
-            return fl.properties["editFieldsInfo"]["creationDateField"]
-        # EditDate
-        if field_name == "EditDate":
-            return fl.properties["editFieldsInfo"]["editDateField"]
-        # Creator
-        if field_name == "Creator":
-            return fl.properties["editFieldsInfo"]["creatorField"]
-        # Editor
-        if field_name == "Editor":
-            return fl.properties["editFieldsInfo"]["editorField"]
-    else:
-        log_critical_and_raise_exception("Field: {} does not exist".format(field_name))
-
-
+# Removed get_field_name function as part of module integration
 def initialize_logging(log_file):
     """
     Setup logging
@@ -144,37 +117,46 @@ def main(arguments):
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert= not arguments.skipSSLVerification)
+    # updated the gis argument since we import arcgis and GIS
+    gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
+              verify_cert= not arguments.skipSSLVerification)
 
     # Get the project and data
-    workforce_project = arcgis.gis.Item(gis, arguments.projectId)
-    workforce_project_data = workforce_project.get_data()
-    assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
     target_fl = arcgis.features.FeatureLayer(arguments.targetFL, gis)
+    # Get the project info
+    item = gis.content.get(arguments.projectId)
+    project = workforce.Project(item)
 
     # Open the field mappings config file
     logging.getLogger().info("Reading field mappings...")
     with open(arguments.configFile, 'r') as f:
         field_mappings = json.load(f)
     logging.getLogger().info("Validating field mappings...")
+
     # validate the config
     validate_config(target_fl, field_mappings)
+
     # Copy the assignments
     # Query the source to get the features specified by the query string
     logger.info("Querying source features...")
-    current_assignments = assignment_fl.query(where=arguments.where,
-                                              out_sr=target_fl.properties.extent.spatialReference)
+
+    # removed the assignment_fl.query call and replaced with assignments.search
+    current_assignments = project.assignments.search(where=arguments.where)
 
     # Query the archived assignments to get all of the currently archived ones
     logger.info("Querying target features")
-    archived_assignments = target_fl.query(out_fields=field_mappings["GlobalID"])
+
+    # Removed out_fields from target_fl query
+    archived_assignments = target_fl.query()
+
     # Create a list of GlobalIDs - These should be unique
     global_ids = [feature.attributes[field_mappings["GlobalID"]] for feature in archived_assignments.features]
     # Iterate through the the assignments returned and only add those that don't exist in the Feature Layer
-    # that is storing the archived ones
     assignments_to_copy = []
-    for assignment in current_assignments.features:
-        if assignment.attributes[get_field_name("GlobalID", assignment_fl)] not in global_ids:
+    # Updated loop to get the global_id and only copy if it doesn't already exist in global_ids
+    for assignment in current_assignments:
+        # calling the .global_id to replace the attributes and "get field name"
+        if assignment.global_id not in global_ids:
             assignments_to_copy.append(assignment)
             # Create a new list to store the updated feature-dictionaries
     assignments_to_submit = []
@@ -183,7 +165,8 @@ def main(arguments):
         # map the field names appropriately
         assignment_attributes = {}
         for key, value in field_mappings.items():
-            assignment_attributes[value] = assignment.attributes[get_field_name(key, assignment_fl)]
+            # Updated the feature.attributes to call the correct field mapping items
+            assignment_attributes[value] = assignment.feature.attributes[key]
         # create the new feature object to send to server
         assignments_to_submit.append(
             arcgis.features.Feature(geometry=assignment.geometry, attributes=assignment_attributes))
@@ -207,7 +190,8 @@ if __name__ == "__main__":
                         required=True)
     parser.add_argument('-configFile', dest="configFile", help="The json configuration file to use", required=True)
     parser.add_argument('-logFile', dest='logFile', help="The log file to write to", required=True)
-    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true', help="Verify the SSL Certificate of the server")
+    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true',
+                        help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)

@@ -27,7 +27,8 @@ import logging
 import logging.handlers
 import traceback
 import sys
-import arcgis
+from arcgis.apps import workforce
+from arcgis.gis import GIS
 
 
 def main(arguments):
@@ -53,25 +54,16 @@ def main(arguments):
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert= not arguments.skipSSLVerification)
+    gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
+              verify_cert= not arguments.skipSSLVerification)
 
     # Get the project and data
-    workforce_project = arcgis.gis.Item(gis, arguments.projectId)
-    workforce_project_data = workforce_project.get_data()
-    assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
+    item = gis.content.get(arguments.projectId)
+    project = workforce.Project(item)
 
-    # Query features to delete
-    logger.info("Querying features...")
-    oids_to_delete = assignment_fl.query(arguments.where, return_ids_only=True, object_ids=",".join(arguments.objectIDs))[
-        "objectIds"]
+    # Need to add in a call to the assignment_fl in order to avoid bogging down the server with large assignment calls
+    project.assignments_layer.delete_features(where=arguments.where)
 
-    # Delete features
-    logger.info("Deleting features...")
-    if oids_to_delete:
-        ret = assignment_fl.edit_features(deletes=",".join(str(x) for x in oids_to_delete))
-        logger.info(ret)
-    else:
-        logger.info("No features to delete")
     logger.info("Complete")
 
 
@@ -88,7 +80,8 @@ if __name__ == "__main__":
     group.add_argument('-where', dest='where', help="The where clause to use", default="1=1")
     group.add_argument('-objectIDs', dest='objectIDs', help="The objectIds to delete", nargs="+", default=[])
     parser.add_argument('-logFile', dest="logFile", help="The file to log to", required=True)
-    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true', help="Verify the SSL Certificate of the server")
+    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true',
+                        help="Verify the SSL Certificate of the server")
 
     args = parser.parse_args()
     try:

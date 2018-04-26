@@ -20,15 +20,18 @@
 
    limitations under the License.​
 
-   This sample deletes all assignment types (Will mess up your assignments if you have any)
+   This sample creates assignment types from CSV files
 """
 
 import argparse
+import csv
 import logging
 import logging.handlers
+import os
 import sys
 import traceback
-import arcgis
+from arcgis.gis import GIS
+from arcgis.apps import workforce
 
 
 def initialize_logging(log_file):
@@ -58,22 +61,21 @@ def initialize_logging(log_file):
     return logger
 
 
-def delete_assignment_types(assignment_fl):
+def get_assignment_types_from_csv(csv_file):
     """
-    Adds the assignments to project
-    :param assignment_fl: (FeatureLayer) The assignment feature layer
-    :return: The json response of the REST API Call
+    Creates a list of assignment types
+    :param csv_file: The CSV file to read
+    :return: A list assignment types
     """
-    for field in assignment_fl.properties["fields"]:
-        if field["name"].lower() == "assignmenttype":
-            field["domain"]["codedValues"] = []
-            break
-    response = assignment_fl.manager.update_definition(
-        {
-            'fields': assignment_fl.properties['fields']
-        }
-    )
-    return response
+    logger = logging.getLogger()
+    csvFile = os.path.abspath(csv_file)
+    logger.debug("Reading CSV file: {}...".format(csvFile))
+    assignment_types = []
+    with open(csvFile, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            assignment_types.extend(x.strip() for x in row)
+    return assignment_types
 
 
 def main(arguments):
@@ -81,17 +83,19 @@ def main(arguments):
     logger = initialize_logging(arguments.logFile)
     # Create the GIS
     logger.info("Authenticating...")
-    # First step is to get authenticate and get a valid token
-    gis = arcgis.gis.GIS(arguments.org_url, username=arguments.username, password=arguments.password, verify_cert= not arguments.skipSSLVerification)
-    # Create a content manager object
-    content_manager = arcgis.gis.ContentManager(gis)
+
     # Get the project and data
-    workforce_project = content_manager.get(arguments.projectId)
-    workforce_project_data = workforce_project.get_data()
-    logger.info("Deleting assignment types...")
-    assignment_fl = arcgis.features.FeatureLayer(workforce_project_data["assignments"]["url"], gis)
-    delete_assignment_types(assignment_fl)
-    logger.info("Completed")
+    gis = GIS(arguments.org_url, arguments.username, arguments.password, verify_cert=(not arguments.skipSSLVerification))
+
+    item = gis.content.get(arguments.projectId)
+    project = workforce.Project(item)
+
+    logger.info("Reading CSV...")
+    # Next we want to parse the CSV file and create a list of assignment types
+    assignment_types = get_assignment_types_from_csv(arguments.csvFile)
+    for at in assignment_types:
+        project.assignment_types.add(name=at)
+    logger.info("complete")
 
 
 if __name__ == "__main__":
@@ -102,8 +106,10 @@ if __name__ == "__main__":
     parser.add_argument('-url', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
     parser.add_argument('-pid', dest='projectId', help="The id of the project to add assignments to", required=True)
+    parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read", required=True)
     parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)
-    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true', help="Verify the SSL Certificate of the server")
+    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true',
+                        help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)

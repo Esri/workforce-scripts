@@ -1,2 +1,0 @@
-arcrest_package>=3.5.3
-arrow>=0.10.0
