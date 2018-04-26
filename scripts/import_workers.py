@@ -30,14 +30,8 @@ import logging.handlers
 import os
 import sys
 import traceback
-import arcgis
 from arcgis.apps import workforce
 from arcgis.gis import GIS
-
-
-def log_critical_and_raise_exception(message):
-    logging.getLogger().critical(message)
-    raise Exception(message)
 
 
 def initialize_logger(log_file):
@@ -64,37 +58,40 @@ def initialize_logger(log_file):
 
 
 def main(arguments):
-    # initialize logging
-    logger = initialize_logger(arguments.logFile)
+    # Initialize logging
+    logger = initialize_logger(arguments.log_file)
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,
               password=arguments.password,
-              verify_cert=not arguments.skipSSLVerification)
-    # Get the project and data
-    item = gis.content.get(arguments.projectId)
+              verify_cert=not arguments.skip_ssl_verification)
+    # Get the workforce project
+    item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
-    csvFile = os.path.abspath(arguments.csvFile)
-    # Identify the workers
-    workers = []
     # Read the CVS file and loop through the workers information contained within this file
-    with open(csvFile, 'r') as file:
+    logger.info("Parsing CSV...")
+    with open(os.path.abspath(arguments.csv_file), 'r') as file:
         reader = csv.DictReader(file)
+        # List of workers to add
+        workers = []
         for row in reader:
-            # Naming the required fields from the worker CSV file
-            worker = arcgis.apps.workforce.Worker(project,
-                                                  name=row[arguments.name_field],
-                                                  status=row[arguments.status_field],
-                                                  user_id=row[arguments.user_id_field])
-            # These fields are optional, and are called out separately
-            worker.contact_number = row[arguments.contact_number_field]
-            worker.title = row[arguments.title_field]
+            # Create a worker using the required fields
+            worker = workforce.Worker(project,
+                                      name=row[arguments.name_field],
+                                      status=row[arguments.status_field],
+                                      user_id=row[arguments.user_id_field])
+            # These fields are optional, and are added separately
+            if arguments.contact_number_field:
+                worker.contact_number = row.get(arguments.contact_number_field)
+            if arguments.title_field:
+                worker.title = row.get(arguments.title_field)
             workers.append(worker)
-        # Batch add workers to avoid too many calls
+        # Batch add workers
+        logger.info("Adding Workers...")
         project.workers.batch_add(workers)
-    logger.info("Complete")
+    logger.info("Completed")
 
 
 if __name__ == "__main__":
@@ -102,22 +99,22 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Add Workers to Workforce Project")
     parser.add_argument('-u', dest='username', help="The username to authenticate with", required=True)
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
-    parser.add_argument('-url', dest='org_url', help="The url of the org/portal to use", required=True)
+    parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
-    parser.add_argument('-pid', dest='projectId', help='The id of the project', required=True)
-    parser.add_argument('-nameField', dest='name_field',
+    parser.add_argument('-project-id', dest='project_id', help='The id of the project', required=True)
+    parser.add_argument('-name-field', dest='name_field',
                         help="The name of the column representing the name of the worker", required=True)
-    parser.add_argument('-statusField', dest='status_field',
+    parser.add_argument('-status-field', dest='status_field',
                         help="The name of the column representing the status of the worker", required=True)
-    parser.add_argument('-userIdField', dest='user_id_field',
+    parser.add_argument('-user-id-field', dest='user_id_field',
                         help="The name of the column representing the userId of the worker", required=True)
-    parser.add_argument('-titleField', dest='title_field',
+    parser.add_argument('-title-field', dest='title_field',
                         help="The name of the column representing the title of the worker", default=None)
-    parser.add_argument('-contactNumberField', dest='contact_number_field',
+    parser.add_argument('-contact-number-field', dest='contact_number_field',
                         help="The name of the column representing the contact number of the worker", default=None)
-    parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read")
-    parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)
-    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true',
+    parser.add_argument('-csv-file', dest='csv_file', help="The path/name of the csv file to read")
+    parser.add_argument('-log-file', dest='log_file', help='The log file to use', required=True)
+    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
