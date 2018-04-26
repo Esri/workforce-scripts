@@ -18,7 +18,7 @@ Additional, deprecated, scripts using vanilla Python and ArcREST are also availa
 | [Check Assignment Completion ](check_completion_location.md)         | [check_completion_location.py](arcgis_api_for_python/check_completion_location.py)            |
 | [Import Workers](import_workers.md)                                  | [import_workers.py](arcgis_api_for_python/import_workers.py)                       |
 | [Create Assignment Types ](create_assignment_types.md)               | [create_assignment_types.py](arcgis_api_for_python/create_assignment_types.py)              |
-| [Delete Assignment Types ](delete_assignment_types.md)               | [create_assignment_types.py](arcgis_api_for_python/create_assignment_types.py)              |
+| [Delete Assignment Types ](delete_assignment_types.md)               | [delete_assignment_types.py](arcgis_api_for_python/delete_assignment_types.py)              |
 | [Assignment Monitor ](assignment_monitor.md)                         | [assignment_monitor.py](arcgis_api_for_python/assignment_monitor/assignment_monitor.py)|
 
 
