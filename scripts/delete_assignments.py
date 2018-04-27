@@ -44,7 +44,7 @@ def main(arguments):
     sh.setFormatter(formatter)
     sh.setLevel(logging.INFO)
     # Create a handler to log to the specified file
-    rh = logging.handlers.RotatingFileHandler(arguments.logFile, mode='a', maxBytes=10485760)
+    rh = logging.handlers.RotatingFileHandler(arguments.log_file, mode='a', maxBytes=10485760)
     rh.setFormatter(formatter)
     rh.setLevel(logging.DEBUG)
     # Add the handlers to the root logger
@@ -55,16 +55,18 @@ def main(arguments):
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
-              verify_cert= not arguments.skipSSLVerification)
+              verify_cert=not arguments.skip_ssl_verification)
 
-    # Get the project and data
-    item = gis.content.get(arguments.projectId)
+    # Get the project
+    item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
 
-    # Need to add in a call to the assignment_fl in order to avoid bogging down the server with large assignment calls
+    # Call delete features on the layer
+    logger.info("Deleting assignments...")
     project.assignments_layer.delete_features(where=arguments.where)
-
-    logger.info("Complete")
+    # Note: could also use the following if validation of assignments is important:
+    # project.assignments.batch_delete(project.assignments.search(where=arguments.where))
+    logger.info("Completed")
 
 
 if __name__ == "__main__":
@@ -72,15 +74,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Delete Assignments to Workforce Project")
     parser.add_argument('-u', dest='username', help="The username to authenticate with", required=True)
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
-    parser.add_argument('-url', dest='org_url', help="The url of the org/portal to use", required=True)
+    parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
-    parser.add_argument('-pid', dest='projectId', help="The id of the project to delete assignments from",
+    parser.add_argument('-project-id', dest='project_id', help="The id of the project to delete assignments from",
                         required=True)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-where', dest='where', help="The where clause to use", default="1=1")
-    group.add_argument('-objectIDs', dest='objectIDs', help="The objectIds to delete", nargs="+", default=[])
-    parser.add_argument('-logFile', dest="logFile", help="The file to log to", required=True)
-    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true',
+    parser.add_argument('-log-file', dest="log_file", help="The file to log to", required=True)
+    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
 
     args = parser.parse_args()

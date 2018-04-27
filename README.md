@@ -14,7 +14,7 @@ Additional, deprecated, scripts using vanilla Python and ArcREST are also availa
 | [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [create_assignments_from_csv.py](scripts/create_assignments_from_csv.py)          |
 | [Copy Assignments To Feature Service](copy_assignments_fs_readme.md) | [copy_assignments_fs.py](scripts/copy_assignments_fs.py)                  |
 | [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [export_assignments_from_csv.py](scripts/export_assignments_from_csv.py)          |
-| [Delete Assignments By Query](delete_assignments_by_query_readme.md) | [delete_assignments_by_query.py](scripts/delete_assignments_by_query.py)          |
+| [Delete Assignments](delete_assignments_readme.md)                   | [delete_assignments.py](scripts/delete_assignments.py)          |
 | [Check Assignment Completion ](check_completion_location.md)         | [check_completion_location.py](scripts/check_completion_location.py)            |
 | [Import Workers](import_workers.md)                                  | [import_workers.py](scripts/import_workers.py)                       |
 | [Import Dispatchers](import_dispatchers.md)                          | [import_dispatchers.py](scripts/import_workers.py)                       |
