@@ -14,7 +14,7 @@ This script deletes assignments based a query or list of OBJECTIDs. The script u
 
 Example Usage:
 ```python
-python delete_assignments.py -u username -p password -url "https://<org>.maps.arcgis.com" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -logFile "../log.txt" -where "1=1"
+python delete_assignments.py -u username -p password -org "https://<org>.maps.arcgis.com" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -log-file "../log.txt" -where "1=1"
 ```
 
 ## What it does

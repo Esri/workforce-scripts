@@ -31,6 +31,7 @@ import traceback
 from arcgis.apps import workforce
 from arcgis.gis import GIS
 
+
 def initialize_logging(log_file):
     """
     Setup logging
@@ -57,17 +58,18 @@ def initialize_logging(log_file):
     logger.addHandler(rh)
     return logger
 
+
 def main(arguments):
     # initialize logging
-    logger = initialize_logging(arguments.logFile)
+    logger = initialize_logging(arguments.log_file)
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
-              verify_cert= not arguments.skipSSLVerification)
+              verify_cert=not arguments.skip_ssl_verification)
 
     # Get the project and data
-    item = gis.content.get(arguments.projectId)
+    item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
     # Find all assignment_types and assign
     assignment_types = project.assignment_types.search()
@@ -83,11 +85,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Add Assignments to Workforce Project")
     parser.add_argument('-u', dest='username', help="The username to authenticate with", required=True)
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
-    parser.add_argument('-url', dest='org_url', help="The url of the org/portal to use", required=True)
+    parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
-    parser.add_argument('-pid', dest='projectId', help="The id of the project to add assignments to", required=True)
-    parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)
-    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true',
+    parser.add_argument('-project-id', dest='project_id', help="The id of the project to add assignments to", required=True)
+    parser.add_argument('-log-file', dest='log_file', help='The log file to use', required=True)
+    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
