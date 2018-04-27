@@ -3,7 +3,7 @@ A set of python scripts (using multiple libraries) to help administer Workforce 
 
 Supports Python 3.5+ (required for ArcGIS API for Python)
 
-A set of Python scripts using the [ArcGIS API for Python](https://developers.arcgis.com/python/). These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
+A set of Python scripts using the [ArcGIS API for Python v1.4.1+](https://developers.arcgis.com/python/). These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 Additional, deprecated, scripts using vanilla Python and ArcREST are also available. These deprecated scripts only support Workforce in ArcGIS Online.
 
 
@@ -11,15 +11,16 @@ Additional, deprecated, scripts using vanilla Python and ArcREST are also availa
 
 | Functionality                                                        | Script                                                                            
 |----------------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [create_assignments_from_csv.py](arcgis_api_for_python/create_assignments_from_csv.py)          |
-| [Copy Assignments To Feature Service](copy_assignments_fs_readme.md) | [copy_assignments_fs.py](arcgis_api_for_python/copy_assignments_fs.py)                  |
-| [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [export_assignments_from_csv.py](arcgis_api_for_python/export_assignments_from_csv.py)          |
-| [Delete Assignments By Query](delete_assignments_by_query_readme.md) | [delete_assignments_by_query.py](arcgis_api_for_python/delete_assignments_by_query.py)          |
-| [Check Assignment Completion ](check_completion_location.md)         | [check_completion_location.py](arcgis_api_for_python/check_completion_location.py)            |
-| [Import Workers](import_workers.md)                                  | [import_workers.py](arcgis_api_for_python/import_workers.py)                       |
-| [Create Assignment Types ](create_assignment_types.md)               | [create_assignment_types.py](arcgis_api_for_python/create_assignment_types.py)              |
-| [Delete Assignment Types ](delete_assignment_types.md)               | [create_assignment_types.py](arcgis_api_for_python/create_assignment_types.py)              |
-| [Assignment Monitor ](assignment_monitor.md)                         | [assignment_monitor.py](arcgis_api_for_python/assignment_monitor/assignment_monitor.py)|
+| [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [create_assignments_from_csv.py](scripts/create_assignments_from_csv.py)          |
+| [Copy Assignments To Feature Service](copy_assignments_fs_readme.md) | [copy_assignments_fs.py](scripts/copy_assignments_fs.py)                  |
+| [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [export_assignments_from_csv.py](scripts/export_assignments_from_csv.py)          |
+| [Delete Assignments By Query](delete_assignments_by_query_readme.md) | [delete_assignments_by_query.py](scripts/delete_assignments_by_query.py)          |
+| [Check Assignment Completion ](check_completion_location.md)         | [check_completion_location.py](scripts/check_completion_location.py)            |
+| [Import Workers](import_workers.md)                                  | [import_workers.py](scripts/import_workers.py)                       |
+| [Import Dispatchers](import_dispatchers.md)                          | [import_dispatchers.py](scripts/import_workers.py)                       |
+| [Create Assignment Types ](create_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
+| [Delete Assignment Types ](delete_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
+
 
 
 ## Instructions
@@ -27,16 +28,15 @@ Additional, deprecated, scripts using vanilla Python and ArcREST are also availa
 
 1. Install ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
 2. Clone or download this repository
-3. In terminal/cmd navigate to the `arcgis_api_for_python` folder
+3. In terminal/cmd navigate to the `scripts` folder
 4. Install arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
-5. You should now be able to run all scripts in the `arcgis_api_for_python` folder (provided you use the correct arguments)
+5. You should now be able to run all scripts in the `scripts` folder (provided you use the correct arguments)
 
 
 ## Resources
 
  * [ArcGIS API for Python](https://developers.arcgis.com/python)
  * [Workforce for ArcGIS](http://www.esri.com/products/workforce-for-arcgis)
- * [ArcGIS REST API](http://resources.arcgis.com/en/help/arcgis-rest-api)
 
 ## Issues
 

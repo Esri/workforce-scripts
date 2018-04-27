@@ -22,14 +22,14 @@ Due to the various naming conventions organizations may have, this script has ma
 - -log-file \<logFile\> The log file to use for logging messages
 - -project-id \<projectId\> The workforce project ID (from AGOL)
 - -name-field \<nameField\> The name of the column that stores the workers name
-- -status-field \<statusField\> The name of the column that stores the workers status. Statuses should be 0.
+- -status-field \<statusField\> The name of the column that stores the workers status. Statuses should be "not_working", "working", or "on_break".
 - -user-id-field \<userIdField\> The name of the column that stores the workers named user username
 - -title-field \<titleField\> (optional) The name of the column that stores the workers title
 - -contact-number-field \<contactNumberField\> (optional) The name of the column that stores the workers contact number
 
 Example Usage:
 ```python
-python create_workers_from_csv.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -name-field name -status-field status -user-id-field userId -log-file log.txt -csv-file ../sample_data/workers.csv -project-id <project-id> -title-field title -contact-number-field contactNumber
+python import_workers.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -name-field name -status-field status -user-id-field userId -log-file log.txt -csv-file ../sample_data/workers.csv -project-id <project-id> -title-field title -contact-number-field contactNumber
 ```
 
 ## What it does
