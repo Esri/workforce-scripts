@@ -68,10 +68,10 @@ def get_assignment_types_from_csv(csv_file):
     :return: A list assignment types
     """
     logger = logging.getLogger()
-    csvFile = os.path.abspath(csv_file)
-    logger.debug("Reading CSV file: {}...".format(csvFile))
+    csv_file = os.path.abspath(csv_file)
+    logger.debug("Reading CSV file: {}...".format(csv_file))
     assignment_types = []
-    with open(csvFile, 'r') as file:
+    with open(csv_file, 'r') as file:
         reader = csv.reader(file)
         for row in reader:
             assignment_types.extend(x.strip() for x in row)
@@ -80,22 +80,24 @@ def get_assignment_types_from_csv(csv_file):
 
 def main(arguments):
     # initialize logging
-    logger = initialize_logging(arguments.logFile)
+    logger = initialize_logging(arguments.log_file)
     # Create the GIS
     logger.info("Authenticating...")
 
     # Get the project and data
-    gis = GIS(arguments.org_url, arguments.username, arguments.password, verify_cert=(not arguments.skipSSLVerification))
-
-    item = gis.content.get(arguments.projectId)
+    gis = GIS(arguments.org_url, arguments.username, arguments.password, verify_cert=not arguments.skip_ssl_verification)
+    item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
 
     logger.info("Reading CSV...")
     # Next we want to parse the CSV file and create a list of assignment types
-    assignment_types = get_assignment_types_from_csv(arguments.csvFile)
+    assignment_types = get_assignment_types_from_csv(arguments.csv_file)
+    assignment_types_to_add = []
     for at in assignment_types:
-        project.assignment_types.add(name=at)
-    logger.info("complete")
+        assignment_types_to_add.append(workforce.AssignmentType(project, name=at))
+    logger.info("Adding Assignment Types...")
+    project.assignment_types.batch_add(assignment_types_to_add)
+    logger.info("Completed")
 
 
 if __name__ == "__main__":
@@ -103,12 +105,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Add Assignments to Workforce Project")
     parser.add_argument('-u', dest='username', help="The username to authenticate with", required=True)
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
-    parser.add_argument('-url', dest='org_url', help="The url of the org/portal to use", required=True)
+    parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
-    parser.add_argument('-pid', dest='projectId', help="The id of the project to add assignments to", required=True)
-    parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read", required=True)
-    parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)
-    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true',
+    parser.add_argument('-project-id', dest='project_id', help="The id of the project to add assignments to", required=True)
+    parser.add_argument('-csv-file', dest='csv_file', help="The path/name of the csv file to read", required=True)
+    parser.add_argument('-log-file', dest='log_file', help='The log file to use', required=True)
+    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:

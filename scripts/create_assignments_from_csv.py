@@ -31,6 +31,7 @@ import traceback
 import sys
 import arrow
 import dateutil
+import types
 from arcgis.apps import workforce
 from arcgis.gis import GIS
 
@@ -69,85 +70,111 @@ def initialize_logging(log_file):
 
 def main(arguments):
     # initialize logging
-    logger = initialize_logging(arguments.logFile)
+    logger = initialize_logging(arguments.log_file)
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
-              verify_cert= not arguments.skipSSLVerification)
+              verify_cert= not arguments.skip_ssl_verification)
     # Get the project and data
-    item = gis.content.get(arguments.projectId)
+    item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
-    dispatcher = project.dispatchers.search(where="userId='{}'".format(args.username))
+    dispatcher = project.dispatchers.search(where="{}='{}'".format(project._dispatcher_schema.user_id, arguments.username))
     if not dispatcher:
         log_critical_and_raise_exception("{} is not a dispatcher".format(args.username))
     # Read the csv file
-    logger.info("Reading CSV file: {}...".format(arguments.csvFile))
+    logger.info("Reading CSV file: {}...".format(arguments.csv_file))
     assignments_in_csv = []
-    with open(arguments.csvFile, 'r') as file:
+    with open(arguments.csv_file, 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
             assignments_in_csv.append(row)
+
+    # Fetch assignment types
     assignment_types = project.assignment_types.search()
     assignment_type_dict = {}
     for assignment_type in assignment_types:
         assignment_type_dict[assignment_type.name] = assignment_type
+
+    # Fetch dispatchers
+    dispatchers = project.dispatchers.search()
+    dispatchers_dict = {}
+    for dispatcher in dispatchers:
+        dispatchers_dict[dispatcher.user_id] = dispatcher
+
+    # Fetch the workers
+    workers = project.workers.search()
+    workers_dict = {}
+    for worker in workers:
+        workers_dict[worker.user_id] = worker
+
     assignments_to_add = []
     for assignment in assignments_in_csv:
         assignment_to_add = workforce.Assignment(project)
         # Create the geometry
-        geometry = dict(x=float(assignment[args.xField]),
-                        y=float(assignment[args.yField]),
+        geometry = dict(x=float(assignment[args.x_field]),
+                        y=float(assignment[args.y_field]),
                         spatialReference=dict(
                             wkid=int(args.wkid)))
         assignment_to_add.geometry = geometry
 
         # Determine the assignment due date, and if no time is provided, make the due date all day
-        if args.dueDateField and assignment[args.dueDateField]:
-            d = arrow.Arrow.strptime(assignment[args.dueDateField], args.dateFormat).replace(
+        if args.due_date_field and assignment[args.due_date_field]:
+            d = arrow.Arrow.strptime(assignment[args.due_date_field], args.date_format).replace(
             tzinfo=dateutil.tz.gettz(args.timezone))
             if d.datetime.second == 0 and d.datetime.hour == 0 and d.datetime.minute == 0:
                 d = d.replace(hour=23, minute=59, second=59)
             # Convert date to UTC time
             assignment_to_add.due_date = d.to('utc').datetime
 
-        assignment_to_add.assignment_type = assignment_type_dict[assignment[args.assignmentTypeField]]
-        # Add location  of assignment from CSV
-        assignment_to_add.location = assignment[args.locationField]
-        # Add statement to determine if assignment is assigned or not
-        if args.workerField and assignment[args.workerField]:
-            assignment_to_add.status = "assigned"
-        else:
-            assignment_to_add.status = "unassigned"
-        # Add assignment date and convert the date to UTC from what the API returns
-        assignment_to_add.assigned_date = arrow.now().to('utc').datetime
+        # Set the assignment type
+        assignment_to_add.assignment_type = assignment_type_dict[assignment[args.assignment_type_field]]
 
-        # Determine who dispatched the assignment
-        dispatchers = project.dispatchers.search()
-        dispatchers_dict = {}
-        for dispatcher in dispatchers:
-            dispatchers_dict[dispatcher.user_id] = dispatcher
-        if args.dispatcherIdField and assignment[args.dispatcherIdField]:
-            assignment_to_add.dispatcher = dispatchers_dict[args.dispatcherIdField]
+        # Set the location
+        assignment_to_add.location = assignment[args.location_field]
+
+        # Set the dispatcher
+        if args.dispatcher_field and assignment[args.dispatcher_field]:
+            assignment_to_add.dispatcher = dispatchers_dict[args.dispatcher_field]
         else:
             assignment_to_add.dispatcher = dispatcher
 
-        # Define workers and determine which have assignments from the CSV
-        workers = project.workers.search()
-        workers_dict = {}
-        for worker in workers:
-            workers_dict[worker.user_id] = worker
-        if args.workerField and assignment[args.workerField]:
-            assignment_to_add.worker = workers_dict[assignment[args.workerField]]
+        # Fetch workers and assign the worker to the assignment
+        if args.worker_field and assignment[args.worker_field]:
+            assignment_to_add.worker = workers_dict[assignment[args.worker_field]]
+            assignment_to_add.assigned_date = arrow.now().to('utc').datetime
+            assignment_to_add.status = "assigned"
         else:
-            assignment_to_add.worker = worker
+            assignment_to_add.status = "unassigned"
+
+        # Set the priority
+        if args.priority_field and assignment[args.priority_field]:
+            assignment_to_add.priority = assignment[args.priority_field]
+
+        # Set the description
+        if args.description_field and assignment[args.description_field]:
+            assignment_to_add.description = assignment[args.description_field]
+
+        # Set the work order id
+        if args.work_order_id_field and assignment[args.work_order_id_field]:
+            assignment_to_add.work_order_id = assignment[args.work_order_id_field]
+
+        # Set attachment
+        if args.attachment_file_field and assignment[args.attachment_file_field]:
+            assignment_to_add.attachment_file = types.SimpleNamespace()
+            assignment_to_add.attachment_file = assignment[args.attachment_file_field]
 
         # Add all assignments to the list created
         assignments_to_add.append(assignment_to_add)
 
     # Batch add all assignments to the project
-    project.assignments.batch_add(assignments_to_add)
-    logger.info("Complete")
+    logger.info("Adding Assignments...")
+    assignments = project.assignments.batch_add(assignments_to_add)
+    logger.info("Adding Attachments...")
+    for assignment in assignments:
+        if hasattr(assignment, "attachment_file"):
+            assignment.attachments.add(assignment.attachment_file)
+    logger.info("Completed")
 
 
 if __name__ == "__main__":
@@ -155,31 +182,31 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Add Assignments to Workforce Project")
     parser.add_argument('-u', dest='username', help="The username to authenticate with", required=True)
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
-    parser.add_argument('-url', dest='org_url', help="The url of the org/portal to use", required=True)
+    parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
-    parser.add_argument('-pid', dest='projectId', help="The id of the project to add assignments to", required=True)
-    parser.add_argument('-xField', dest='xField', help="The field that contains the x SHAPE information", required=True)
-    parser.add_argument('-yField', dest='yField', help="The field that contains the y SHAPE information", required=True)
-    parser.add_argument('-assignmentTypeField', dest='assignmentTypeField',
+    parser.add_argument('-project-id', dest='project_id', help="The id of the project to add assignments to", required=True)
+    parser.add_argument('-x-field', dest='x_field', help="The field that contains the x SHAPE information", required=True)
+    parser.add_argument('-y-field', dest='y_field', help="The field that contains the y SHAPE information", required=True)
+    parser.add_argument('-assignment-type-field', dest='assignment_type_field',
                         help="The field that contains the assignmentType", required=True)
-    parser.add_argument('-locationField', dest='locationField',
+    parser.add_argument('-location-field', dest='location_field',
                         help="The field that contains the location", required=True)
-    parser.add_argument('-dispatcherIdField', dest='dispatcherIdField',
+    parser.add_argument('-dispatcher-field', dest='dispatcher_field',
                         help="The field that contains the dispatcherId")
-    parser.add_argument('-descriptionField', dest='descriptionField', help="The field that contains the description")
-    parser.add_argument('-priorityField', dest='priorityField', help="The field that contains the priority")
-    parser.add_argument('-workOrderIdField', dest='workOrderIdField', help="The field that contains the workOrderId")
-    parser.add_argument('-dueDateField', dest='dueDateField', help="The field that contains the dispatcherId")
-    parser.add_argument('-workerField', dest='workerField', help="The field that contains the workers username")
-    parser.add_argument('-attachmentFileField', dest='attachmentFileField',
+    parser.add_argument('-description-field', dest='description_field', help="The field that contains the description")
+    parser.add_argument('-priority-field', dest='priority_field', help="The field that contains the priority")
+    parser.add_argument('-work-order-id-field', dest='work_order_id_field', help="The field that contains the workOrderId")
+    parser.add_argument('-due-date-field', dest='due_date_field', help="The field that contains the dispatcherId")
+    parser.add_argument('-worker-field', dest='worker_field', help="The field that contains the workers username")
+    parser.add_argument('-attachment-file-field', dest='attachment_file_field',
                         help="The field that contains the file path to the attachment to upload")
-    parser.add_argument('-dateFormat', dest='dateFormat', default="%m/%d/%Y %H:%M:%S",
+    parser.add_argument('-date-format', dest='date_format', default="%m/%d/%Y %H:%M:%S",
                         help="The format to use for the date (eg. '%m/%d/%Y %H:%M:%S')")
     parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone for the assignments")
-    parser.add_argument('-csvFile', dest='csvFile', help="The path/name of the csv file to read")
+    parser.add_argument('-csv-file', dest='csv_file', help="The path/name of the csv file to read")
     parser.add_argument('-wkid', dest='wkid', help='The wkid that the x,y values are use', type=int, default=4326)
-    parser.add_argument('-logFile', dest='logFile', help='The log file to use', required=True)
-    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true',
+    parser.add_argument('-log-file', dest='log_file', help='The log file to use', required=True)
+    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
