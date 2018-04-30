@@ -4,7 +4,7 @@ This script reads a CSV file containing the assignment types to add to the workf
 
 **This script requires the logged in user to be an admin or to be the owner of the project**
 
-Supports Python 2.7+, 3.4+
+Supports Python 3.5+
 
 ----
 
@@ -15,13 +15,13 @@ Consider the following CSV example that is to be imported into Workforce:
 
 In addition to the authentication arguments, the script specific arguments are as follows:
 
-- -csvFile \<csvFile\> The csv file to read
-- -logFile \<logFile\> The log file to use for logging messages
-- -pid \<projectId\> - The workforce project ID (from AGOL)
+- -csv-file \<csvFile\> The csv file to read
+- -log-file \<logFile\> The log file to use for logging messages
+- -project-id \<projectId\> - The workforce project ID (from AGOL)
 
 Example Usage:
 ```python
-python create_assignment_types.py -u <username> -p <password> -url https://<org>.maps.arcgis.com -pid <project-id> -csvFile ../sample_data/assignment_types.csv -logFile log.txt
+python create_assignment_types.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -project-id <project-id> -csv-file ../sample_data/assignment_types.csv -log-file log.txt
 ```
 
 ## What it does

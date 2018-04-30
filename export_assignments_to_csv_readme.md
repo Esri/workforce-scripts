@@ -12,7 +12,7 @@ This script queries the assignment feature layer and exports the results to a CS
 - -project-id \<project-id\> - The workforce project ID (from AGOL)
 - -csv-file \<csv\> - The csv file to write the results to
 - -where \<where\> - The where clause to use when querying the assignments to export (Optional - Defaults to '1=1')
-- -dateFormat \<date-format\> - The date format to use in the exported CSV file (**Not available when using ArcGIS API for Python**)
+- -date-format \<date-format\> - The date format to use in the exported CSV file (**Not available when using ArcGIS API for Python**)
 - -timezone \<timezone\> - The timezone to convert the dates to (**Not available when using ArcGIS API for Python**)
 
 Example Usage:

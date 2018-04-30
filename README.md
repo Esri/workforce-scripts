@@ -1,25 +1,29 @@
 # Workforce Scripts
 A set of python scripts (using multiple libraries) to help administer Workforce projects and services.
 
-Supports Python 3.5+ (required for ArcGIS API for Python)
+Supports:
+- Python 3.5+
+- Python API for ArcGIS 1.4.1+
 
-A set of Python scripts using the [ArcGIS API for Python v1.4.1+](https://developers.arcgis.com/python/). These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
-Additional, deprecated, scripts using vanilla Python and ArcREST are also available. These deprecated scripts only support Workforce in ArcGIS Online.
+A set of Python scripts using the [ArcGIS API for Python v1.4.1+](https://developers.arcgis.com/python/).
+These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
+
 
 
 ## Features
 
 | Functionality                                                        | Script                                                                            
 |----------------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [create_assignments_from_csv.py](scripts/create_assignments_from_csv.py)          |
-| [Copy Assignments To Feature Service](copy_assignments_fs_readme.md) | [copy_assignments_fs.py](scripts/copy_assignments_fs.py)                  |
-| [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [export_assignments_from_csv.py](scripts/export_assignments_from_csv.py)          |
-| [Delete Assignments](delete_assignments_readme.md)                   | [delete_assignments.py](scripts/delete_assignments.py)          |
-| [Check Assignment Completion ](check_completion_location.md)         | [check_completion_location.py](scripts/check_completion_location.py)            |
-| [Import Workers](import_workers.md)                                  | [import_workers.py](scripts/import_workers.py)                       |
-| [Import Dispatchers](import_dispatchers.md)                          | [import_dispatchers.py](scripts/import_workers.py)                       |
 | [Create Assignment Types ](create_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
+| [Import Workers](import_workers.md)                                  | [import_workers.py](scripts/import_workers.py)                       |
+| [Import Dispatchers](import_dispatchers.md)                          | [import_dispatchers.py](scripts/import_workers.py)
+| [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [create_assignments_from_csv.py](scripts/create_assignments_from_csv.py)          |
+| [Copy Assignments To Feature Service](copy_assignments_to_fs_readme.md) | [copy_assignments_to_fs.py](scripts/copy_assignments_to_fs.py)                  |
+| [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [export_assignments_from_csv.py](scripts/export_assignments_from_csv.py)          |
+| [Check Assignment Completion Location](check_completion_location.md)         | [check_completion_location.py](scripts/check_completion_location.py)            |
+| [Delete Assignments](delete_assignments_readme.md)                   | [delete_assignments.py](scripts/delete_assignments.py)          |                   |
 | [Delete Assignment Types ](delete_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
+| [Assignment Monitor (Slack Integration)](assignment_monitor.md)                           | [assignment_monitor.py](scripts/assignment_monitor.py) |
 
 
 
