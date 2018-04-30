@@ -71,7 +71,9 @@ def main(arguments):
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate
-    gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
+    gis = GIS(arguments.org_url,
+              username=arguments.username,
+              password=arguments.password,
               verify_cert=not arguments.skip_ssl_verification)
 
     # Get the project and data
@@ -85,83 +87,83 @@ def main(arguments):
     # Take the assignment data, format it correctly if necessary, and assign it to the dict
     for assignment in assignments:
         assignment_to_export = {}
-        assignment_to_export[project._assignment_schema.assigned_date] = assignment.assigned_date
+        assignment_to_export["AssignedDate"] = assignment.assigned_date
         if assignment.assigned_date:
-            assignment_to_export[project._assignment_schema.assigned_date] = \
+            assignment_to_export["AssignedDate"] = \
                 arrow.get(assignment.assigned_date).to(timezone).strftime(
                 date_format)
         if assignment.due_date:
-            assignment_to_export[project._assignment_schema.due_date] = \
+            assignment_to_export["DueDate"] = \
                 arrow.get(assignment.due_date).to(timezone).strftime(date_format)
         if assignment.creation_date:
-            assignment_to_export[project._assignment_schema.creation_date] = \
+            assignment_to_export["CreationDate"] = \
                 arrow.get(assignment.creation_date).to(timezone).strftime(
                 date_format)
         if assignment.declined_date:
-            assignment_to_export[project._assignment_schema.declined_date] = \
+            assignment_to_export["DeclinedDate"] = \
                 arrow.get(assignment.declined_date).to(timezone).strftime(
                 date_format)
         if assignment.paused_date:
-            assignment_to_export[project._assignment_schema.paused_date] = \
+            assignment_to_export["PausedDate"] = \
                 arrow.get(assignment.paused_date).to(timezone).strftime(date_format)
         if assignment.completed_date:
-            assignment_to_export[project._assignment_schema.completed_date] = \
+            assignment_to_export["CompletedDate"] = \
                 arrow.get(assignment.completed_date).to(timezone).strftime(
                 date_format)
         if assignment.edit_date:
-            assignment_to_export[project._assignment_schema.edit_date] = \
+            assignment_to_export["EditDate"] = \
                 arrow.get(assignment.edit_date).to(timezone).strftime(date_format)
         if assignment.in_progress_date:
-            assignment_to_export[project._assignment_schema.in_progress_date] = \
+            assignment_to_export["InProgressDate"] = \
                 arrow.get(assignment.in_progress_date).to(timezone).strftime(
                 date_format)
-        assignment_to_export["x"] = assignment.geometry["x"]
-        assignment_to_export["y"] = assignment.geometry["y"]
-        assignment_to_export[project._assignment_schema.dispatcher_id] = assignment.dispatcher_id
-        assignment_to_export[project._assignment_schema.work_order_id] = assignment.work_order_id
-        assignment_to_export[project._assignment_schema.status] = assignment.status
-        assignment_to_export[project._assignment_schema.description] = assignment.description
-        assignment_to_export[project._assignment_schema.notes] = assignment.notes
-        assignment_to_export[project._assignment_schema.priority] = assignment.priority
-        assignment_to_export[project._assignment_schema.assignment_type] = assignment.assignment_type.name
-        assignment_to_export[project._assignment_schema.worker_id] = assignment.worker_id
-        assignment_to_export[project._assignment_schema.global_id] = assignment.global_id
-        assignment_to_export[project._assignment_schema.location] = assignment.location
-        assignment_to_export[project._assignment_schema.creator] = assignment.creator
-        assignment_to_export[project._assignment_schema.editor] = assignment.editor
-        assignment_to_export[project._assignment_schema.dispatcher_id] = assignment.dispatcher_id
-        assignment_to_export[project._assignment_schema.declined_date] = assignment.declined_comment
-        assignment_to_export[project._assignment_schema.object_id] = assignment.object_id
+        assignment_to_export["X"] = assignment.geometry["x"]
+        assignment_to_export["Y"] = assignment.geometry["y"]
+        assignment_to_export["DispatcherId"] = assignment.dispatcher_id
+        assignment_to_export["WorkOrderId"] = assignment.work_order_id
+        assignment_to_export["Status"] = assignment.status
+        assignment_to_export["Description"] = assignment.description
+        assignment_to_export["Notes"] = assignment.notes
+        assignment_to_export["Priority"] = assignment.priority
+        assignment_to_export["AssignmentType"] = assignment.assignment_type.name
+        assignment_to_export["WorkerId"] = assignment.worker_id
+        assignment_to_export["GlobalID"] = assignment.global_id
+        assignment_to_export["Location"] = assignment.location
+        assignment_to_export["Creator"] = assignment.creator
+        assignment_to_export["Editor"] = assignment.editor
+        assignment_to_export["DeclinedComment"] = assignment.declined_comment
+        assignment_to_export["OBJECTID"] = assignment.object_id
+        assignment_to_export["AssignmentRead"] = assignment.assignment_read
         # Append each field to the assignments to be exported
         assignments_to_export.append(assignment_to_export)
     logger.info("Writing to CSV...")
     # Create the CSV
     with open(arguments.csv_file, 'w', newline='') as csv_file:
-        fieldnames = [project._assignment_schema.object_id,
-                      "x",
-                      "y",
-                      project._assignment_schema.description,
-                      project._assignment_schema.status,
-                      project._assignment_schema.notes,
-                      project._assignment_schema.priority,
-                      project._assignment_schema.assignment_type,
-                      project._assignment_schema.work_order_id,
-                      project._assignment_schema.due_date,
-                      project._assignment_schema.worker_id,
-                      project._assignment_schema.global_id,
-                      project._assignment_schema.location,
-                      project._assignment_schema.declined_comment,
-                      project._assignment_schema.assigned_date,
-                      project._assignment_schema.assignment_read,
-                      project._assignment_schema.in_progress_date,
-                      project._assignment_schema.completed_date,
-                      project._assignment_schema.declined_date,
-                      project._assignment_schema.paused_date,
-                      project._assignment_schema.dispatcher_id,
-                      project._assignment_schema.creation_date,
-                      project._assignment_schema.creator,
-                      project._assignment_schema.edit_date,
-                      project._assignment_schema.editor]
+        fieldnames = ["OBJECTID",
+                      "X",
+                      "Y",
+                      "Description",
+                      "Status",
+                      "Notes",
+                      "Priority",
+                      "AssignmentType",
+                      "WorkOrderId",
+                      "DueDate",
+                      "WorkerId",
+                      "GlobalID",
+                      "Location",
+                      "DeclinedComment",
+                      "AssignedDate",
+                      "AssignmentRead",
+                      "InProgressDate",
+                      "CompletedDate",
+                      "DeclinedDate",
+                      "PausedDate",
+                      "DispatcherId",
+                      "CreationDate",
+                      "Creator",
+                      "EditDate",
+                      "Editor"]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(assignments_to_export)

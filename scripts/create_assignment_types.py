@@ -85,7 +85,10 @@ def main(arguments):
     logger.info("Authenticating...")
 
     # Get the project and data
-    gis = GIS(arguments.org_url, arguments.username, arguments.password, verify_cert=not arguments.skip_ssl_verification)
+    gis = GIS(arguments.org_url,
+              username=arguments.username,
+              password=arguments.password,
+              verify_cert=not arguments.skip_ssl_verification)
     item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
 

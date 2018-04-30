@@ -79,8 +79,8 @@ def main(arguments):
         for row in reader:
             # Create a dispatcher using the required fields
             dispatcher = workforce.Dispatcher(project,
-                                          name=row[arguments.name_field],
-                                          user_id=row[arguments.user_id_field])
+                                              name=row[arguments.name_field],
+                                              user_id=row[arguments.user_id_field])
             # These fields are optional, and are added separately
             if arguments.contact_number_field:
                 dispatcher.contact_number = row.get(arguments.contact_number_field)

@@ -74,8 +74,10 @@ def main(arguments):
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
-    gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
-              verify_cert= not arguments.skip_ssl_verification)
+    gis = GIS(arguments.org_url,
+              username=arguments.username,
+              password=arguments.password,
+              verify_cert=not arguments.skip_ssl_verification)
     # Get the project and data
     item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)

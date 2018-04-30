@@ -68,8 +68,10 @@ def main(arguments):
     logger.info("Authenticating...")
 
     # First step is to authenticate
-    gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
-              verify_cert= not arguments.skip_ssl_verification)
+    gis = GIS(arguments.org_url,
+              username=arguments.username,
+              password=arguments.password,
+              verify_cert=not arguments.skip_ssl_verification)
 
     # Get the target feature layer
     target_fl = arcgis.features.FeatureLayer(arguments.target_fl, gis)
