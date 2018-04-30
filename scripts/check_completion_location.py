@@ -36,12 +36,6 @@ from arcgis.apps import workforce
 from arcgis.gis import GIS
 
 
-
-def log_critical_and_raise_exception(message):
-    logging.getLogger().critical(message)
-    raise Exception(message)
-
-
 def initialize_logging(log_file):
     """
     Setup logging
@@ -69,7 +63,6 @@ def initialize_logging(log_file):
     return logger
 
 
-
 def get_simple_distance(coords1, coords2):
     """
     Calculates the simple distance between two x,y points
@@ -78,7 +71,15 @@ def get_simple_distance(coords1, coords2):
     :return: (float) The distance between the two points
     """
     return math.sqrt((coords1[0] - coords2[0]) ** 2 + (coords1[1] - coords2[1]) ** 2)
+
+
 def get_completed_assignments(project, workers):
+    """
+    Get's the completed assignments
+    :param project: (Project) The project to use
+    :param workers: (List<String>) The list of worker usernames to get completed assignments for
+    :return: List<Assignment> The list of completed assignments
+    """
     if not workers:
         workers = project.workers.search()
 
@@ -88,7 +89,7 @@ def get_completed_assignments(project, workers):
                   project.workers.search(where=worker_query)]
     if not worker_ids:
         logging.getLogger().info("No assignments completed by specified workers")
-        return
+        return []
     logging.getLogger().info("Querying source features...")
     assignment_query = "{} in ({}) AND {} is not NULL".format(project._assignment_schema.worker_id,
                                                               ",".join(["'{}'".format(w) for w in worker_ids]),
@@ -96,16 +97,25 @@ def get_completed_assignments(project, workers):
     completed_assignments = project.assignments.search(assignment_query)
     return completed_assignments
 
-def copy_assignments(project, invalid_assignments, target_fl, field_mappings):
+
+def copy_assignments(project, assignments, target_fl, field_mappings):
+    """
+    Copies assignments from the project to another feature layer
+    :param project: (Project) The project to copy assignments from
+    :param assignments: (List<Assignment>) The list of assignments to copy
+    :param target_fl: (Featurelayer) The feature layer to copy the assignments to
+    :param field_mappings: (Dict) The dictionary containing the field mappings between the project and target layer
+    :return:
+    """
     # Query the archived assignments to get all of the currently archived/invalid ones
     logging.getLogger().info("Querying target features")
-    archived_assignments = target_fl.query(out_fields=field_mappings["GlobalID"])
+    archived_assignments = target_fl.query(out_fields=field_mappings[project._assignment_schema.global_id])
     # Create a list of GlobalIDs - These should be unique
-    global_ids = [feature.attributes[field_mappings["GlobalID"]] for feature in archived_assignments.features]
+    global_ids = [feature.attributes[field_mappings[project._assignment_schema.global_id]] for feature in archived_assignments.features]
     # Iterate through the the assignments returned and only add those that don't exist in the Feature Layer
     # that is storing the archived ones
     assignments_to_copy = []
-    for assignment in invalid_assignments:
+    for assignment in assignments:
         if assignment.global_id not in global_ids:
             assignments_to_copy.append(assignment)
     # Create a new list to store the updated feature-dictionaries
@@ -129,6 +139,15 @@ def copy_assignments(project, invalid_assignments, target_fl, field_mappings):
 
 
 def get_invalid_assignments(project, time_tolerance, dist_tolerance, min_accuracy, workers):
+    """
+    Finds all invalid assignments completed by the specified workers
+    :param project: (Project) The workforce project containing the assignments
+    :param time_tolerance: (int) The time tolerance to use when evaluating assignments
+    :param dist_tolerance: (int) The distance tolerance to use when evaluating assignments
+    :param min_accuracy: (int) The minimum accuracy to consider
+    :param workers: (List<String>) The list of worker username to consider
+    :return:
+    """
     completed_assignments = get_completed_assignments(project, workers)
     # Find invalid assignments
     invalid_assignments = []
@@ -145,7 +164,7 @@ def get_invalid_assignments(project, time_tolerance, dist_tolerance, min_accurac
             .format(project._track_schema.editor, assignment.editor,
                     project._track_schema.creation_date,
                     start_date.strftime('%Y-%m-%d %H:%M:%S'), project._track_schema.creation_date,
-                    end_date.strftime('%Y-%m-%d %H:%M:%S'), project._track_schema.accuracy,
+                    end_date.strftime('%Y-%m-%d %H:%M:%S'), "Accuracy",
                     min_accuracy)
         # Query the feature layer
         locations_to_check = project.tracks.search(where=loc_query_string)
@@ -155,7 +174,9 @@ def get_invalid_assignments(project, time_tolerance, dist_tolerance, min_accurac
             # Make a list of coordinate pairs to get the distance of
             coords = [(location.geometry["x"], location.geometry["y"])]
             # If we include the accuracy, we need to make four variations (+- the accuracy)
-            accuracy = float(location.attributes[project._track_schema.accuracy])
+            # Bug in the Workforce module at 1.4.1 causes accuracy to not be an available property
+            # Will be fixed in the next release
+            accuracy = float(location.feature.attributes["Accuracy"])
             coords.append((location.geometry["x"] + accuracy,
                            location.geometry["y"] + accuracy))
             coords.append((location.geometry["x"] + accuracy,
@@ -169,7 +190,6 @@ def get_invalid_assignments(project, time_tolerance, dist_tolerance, min_accurac
             if any(distance < dist_tolerance for distance in distances):
                 is_valid = True
                 break
-        # if it's not valid add the OBJECTID to the list of invalid assignment OBJECTIDS
         if not is_valid:
             logging.debug("Location Query: {}".format(loc_query_string))
             invalid_assignments.append(assignment)
@@ -178,22 +198,25 @@ def get_invalid_assignments(project, time_tolerance, dist_tolerance, min_accurac
 
 def main(arguments):
     # initialize logger
-    logger = initialize_logging(arguments.logFile)
+    logger = initialize_logging(arguments.log_file)
     # Create the GIS
     logger.info("Authenticating...")
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
-              verify_cert=not arguments.skipSSLVerification)
+              verify_cert=not arguments.skip_ssl_verification)
 
-    # Get the project and data
-
-    item = gis.content.get(arguments.projectId)
+    # Get the project
+    item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
-    invalid_assignments = get_invalid_assignments(project, arguments.timeTol, arguments.distTol, arguments.minAccuracy, arguments.workers)
+    invalid_assignments = get_invalid_assignments(project,
+                                                  arguments.time_tolerance,
+                                                  arguments.distance_tolerance,
+                                                  arguments.min_accuracy,
+                                                  arguments.workers)
 
-    with open(arguments.configFile, 'r') as f:
+    with open(arguments.config_file, 'r') as f:
         field_mappings = json.load(f)
-    target_fl = arcgis.features.FeatureLayer(arguments.targetFL, gis)
+    target_fl = arcgis.features.FeatureLayer(arguments.target_fl, gis)
     copy_assignments(project, invalid_assignments, target_fl, field_mappings)
 
 
@@ -202,23 +225,23 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Export assignments from Workforce Project")
     parser.add_argument('-u', dest='username', help="The username to authenticate with", required=True)
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
-    parser.add_argument('-url', dest='org_url', help="The url of the org/portal to use", required=True)
+    parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
-    parser.add_argument('-pid', dest='projectId', help="The id of the project to delete assignments from",
+    parser.add_argument('-project-id', dest='project_id', help="The id of the project to delete assignments from",
                         required=True)
     parser.add_argument('-where', dest='where', help="The where clause to use", default="1=1")
-    parser.add_argument('-targetFL', dest='targetFL', help="The feature layer to copy the assignments to",
+    parser.add_argument('-target-fl', dest='target_fl', help="The feature layer to copy the assignments to",
                         required=True)
-    parser.add_argument('-configFile', dest="configFile", help="The json configuration file to use", required=True)
-    parser.add_argument('-logFile', dest='logFile', help="The log file to write to", required=True)
+    parser.add_argument('-config-file', dest="config_file", help="The json configuration file to use", required=True)
+    parser.add_argument('-log-file', dest='log_file', help="The log file to write to", required=True)
     parser.add_argument('-workers', dest='workers', nargs="+", help="The id of the worker to check")
-    parser.add_argument('-timeTol', dest='timeTol',
+    parser.add_argument('-time-tolerance', dest='time_tolerance',
                         help="The tolerance (in minutes) to check completion date vs location", type=int, default=5)
-    parser.add_argument('-distTol', dest='distTol', type=int, default=100,
+    parser.add_argument('-distance-tolerance', dest='distance_tolerance', type=int, default=100,
                         help='The distance tolerance to use (meters- based on SR of Assignments FL)')
-    parser.add_argument('-minAccuracy', dest='minAccuracy', default=50,
+    parser.add_argument('-min-accuracy', dest='min_accuracy', default=50,
                         help="The minimum accuracy to use (meters - based on SR of Assignments FL)")
-    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true', help="Verify the SSL Certificate of the server")
+    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true', help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)

@@ -33,11 +33,6 @@ from arcgis.apps import workforce
 from arcgis.gis import GIS
 
 
-def log_critical_and_raise_exception(message):
-    logging.getLogger().critical(message)
-    raise Exception(message)
-
-# Removed get_field_name function as part of module integration
 def initialize_logging(log_file):
     """
     Setup logging
@@ -65,100 +60,49 @@ def initialize_logging(log_file):
     return logger
 
 
-def validate_config(target_fl, field_mappings):
-    """
-    Validates the field mappings to make sure the fields exist
-    :param target_fl: (string) The feature service to copy to
-    :param field_mappings: (dict) The field mappings
-    :return:
-    """
-    logging.getLogger().info("Validating field mappings...")
-    # Validate configuration file
-    fields = ["OBJECTID",
-              "description",
-              "status",
-              "notes",
-              "priority",
-              "assignmentType",
-              "workOrderId",
-              "dueDate",
-              "workerId",
-              "GlobalID",
-              "location",
-              "declinedComment",
-              "assignedDate",
-              "assignmentRead",
-              "inProgressDate",
-              "completedDate",
-              "declinedDate",
-              "pausedDate",
-              "dispatcherId",
-              "CreationDate",
-              "Creator",
-              "EditDate",
-              "Editor"]
-    # Get the names of the fields in the target layer
-    target_fields = target_fl.properties.fields
-    field_names = [field["name"] for field in target_fields]
-    # Check that the configuration file is not missing any fields
-    for field in fields:
-        if field not in field_mappings:
-            log_critical_and_raise_exception("Config file is missing: '{}' field mapping".format(field))
-    # Check that the provided fields exist in the target feature layer
-    for field in field_mappings.values():
-        if field not in field_names:
-            log_critical_and_raise_exception("Field '{}' is not present in the provided target feature layer".format(field))
-
-
 def main(arguments):
     # initialize logging
-    logger = initialize_logging(arguments.logFile)
+    logger = initialize_logging(arguments.log_file)
 
     # Create the GIS
     logger.info("Authenticating...")
-    # First step is to get authenticate and get a valid token
-    # updated the gis argument since we import arcgis and GIS
-    gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
-              verify_cert= not arguments.skipSSLVerification)
 
-    # Get the project and data
-    target_fl = arcgis.features.FeatureLayer(arguments.targetFL, gis)
+    # First step is to authenticate
+    gis = GIS(arguments.org_url, username=arguments.username, password=arguments.password,
+              verify_cert= not arguments.skip_ssl_verification)
+
+    # Get the target feature layer
+    target_fl = arcgis.features.FeatureLayer(arguments.target_fl, gis)
+
     # Get the project info
-    item = gis.content.get(arguments.projectId)
+    item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
 
     # Open the field mappings config file
     logging.getLogger().info("Reading field mappings...")
-    with open(arguments.configFile, 'r') as f:
+    with open(arguments.config_file, 'r') as f:
         field_mappings = json.load(f)
     logging.getLogger().info("Validating field mappings...")
 
-    # validate the config
-    validate_config(target_fl, field_mappings)
-
-    # Copy the assignments
     # Query the source to get the features specified by the query string
     logger.info("Querying source features...")
-
-    # removed the assignment_fl.query call and replaced with assignments.search
     current_assignments = project.assignments.search(where=arguments.where)
 
     # Query the archived assignments to get all of the currently archived ones
     logger.info("Querying target features")
-
-    # Removed out_fields from target_fl query
-    archived_assignments = target_fl.query()
+    archived_assignments = target_fl.query(out_fields=field_mappings[project._assignment_schema.global_id])
 
     # Create a list of GlobalIDs - These should be unique
-    global_ids = [feature.attributes[field_mappings["GlobalID"]] for feature in archived_assignments.features]
+    global_ids = [feature.attributes[field_mappings[project._assignment_schema.global_id]] for feature in archived_assignments.features]
+
     # Iterate through the the assignments returned and only add those that don't exist in the Feature Layer
     assignments_to_copy = []
     # Updated loop to get the global_id and only copy if it doesn't already exist in global_ids
     for assignment in current_assignments:
-        # calling the .global_id to replace the attributes and "get field name"
         if assignment.global_id not in global_ids:
             assignments_to_copy.append(assignment)
-            # Create a new list to store the updated feature-dictionaries
+
+    # Create a new list to store the updated feature-dictionaries
     assignments_to_submit = []
     # Loop over all assignments that we want to add,
     for assignment in assignments_to_copy:
@@ -181,16 +125,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Export assignments from Workforce Project")
     parser.add_argument('-u', dest='username', help="The username to authenticate with", required=True)
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
-    parser.add_argument('-url', dest='org_url', help="The url of the org/portal to use", required=True)
+    parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
-    parser.add_argument('-pid', dest='projectId', help="The id of the project to delete assignments from",
+    parser.add_argument('-project-id', dest='project_id', help="The id of the project to delete assignments from",
                         required=True)
     parser.add_argument('-where', dest='where', help="The where clause to use", default="1=1")
-    parser.add_argument('-targetFL', dest='targetFL', help="The feature layer to copy the assignments to",
+    parser.add_argument('-target-fl', dest='target_fl', help="The feature layer to copy the assignments to",
                         required=True)
-    parser.add_argument('-configFile', dest="configFile", help="The json configuration file to use", required=True)
-    parser.add_argument('-logFile', dest='logFile', help="The log file to write to", required=True)
-    parser.add_argument('--skipSSL', dest='skipSSLVerification', action='store_true',
+    parser.add_argument('-config-file', dest="config_file", help="The json configuration file to use", required=True)
+    parser.add_argument('-log-file', dest='log_file', help="The log file to write to", required=True)
+    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
