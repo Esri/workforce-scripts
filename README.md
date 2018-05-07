@@ -16,7 +16,7 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 |----------------------------------------------------------------------|----------------------------------------------------------------------------------------|
 | [Create Assignment Types ](create_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
 | [Import Workers](import_workers.md)                                  | [import_workers.py](scripts/import_workers.py)                       |
-| [Import Dispatchers](import_dispatchers.md)                          | [import_dispatchers.py](scripts/import_workers.py)
+| [Import Dispatchers](import_dispatchers.md)                          | [import_dispatchers.py](scripts/import_dispatchers.py)
 | [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [create_assignments_from_csv.py](scripts/create_assignments_from_csv.py)          |
 | [Copy Assignments To Feature Service](copy_assignments_to_fs_readme.md) | [copy_assignments_to_fs.py](scripts/copy_assignments_to_fs.py)                  |
 | [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [export_assignments_from_csv.py](scripts/export_assignments_from_csv.py)          |
