@@ -243,7 +243,10 @@ if __name__ == "__main__":
                         help='The distance tolerance to use (meters- based on SR of Assignments FL)')
     parser.add_argument('-min-accuracy', dest='min_accuracy', default=50,
                         help="The minimum accuracy to use (meters - based on SR of Assignments FL)")
-    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true', help="Verify the SSL Certificate of the server")
+    parser.add_argument('--skip-ssl-verification',
+                        dest='skip_ssl_verification',
+                        action='store_true',
+                        help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)
