@@ -151,6 +151,11 @@ def get_invalid_assignments(project, time_tolerance, dist_tolerance, min_accurac
     completed_assignments = get_completed_assignments(project, workers)
     # Find invalid assignments
     invalid_assignments = []
+    # Bug in the Workforce module at 1.4.1 causes accuracy to not be an available property on the schema
+    if "Accuracy" in [field["name"] for field in project.tracks_layer.properties.fields]:
+        accuracy_field = "Accuracy"
+    else:
+        accuracy_field = "accuracy"
     for assignment in completed_assignments:
         # The coordinates of the assignment
         start_coords = (assignment.geometry["x"], assignment.geometry["y"])
@@ -164,7 +169,7 @@ def get_invalid_assignments(project, time_tolerance, dist_tolerance, min_accurac
             .format(project._track_schema.editor, assignment.editor,
                     project._track_schema.creation_date,
                     start_date.strftime('%Y-%m-%d %H:%M:%S'), project._track_schema.creation_date,
-                    end_date.strftime('%Y-%m-%d %H:%M:%S'), "Accuracy",
+                    end_date.strftime('%Y-%m-%d %H:%M:%S'), accuracy_field,
                     min_accuracy)
         # Query the feature layer
         locations_to_check = project.tracks.search(where=loc_query_string)
@@ -173,10 +178,8 @@ def get_invalid_assignments(project, time_tolerance, dist_tolerance, min_accurac
         for location in locations_to_check:
             # Make a list of coordinate pairs to get the distance of
             coords = [(location.geometry["x"], location.geometry["y"])]
+            accuracy = float(location.feature.attributes[accuracy_field])
             # If we include the accuracy, we need to make four variations (+- the accuracy)
-            # Bug in the Workforce module at 1.4.1 causes accuracy to not be an available property
-            # Will be fixed in the next release
-            accuracy = float(location.feature.attributes["Accuracy"])
             coords.append((location.geometry["x"] + accuracy,
                            location.geometry["y"] + accuracy))
             coords.append((location.geometry["x"] + accuracy,
