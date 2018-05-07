@@ -18,7 +18,7 @@ The script uses the following parameters:
 
 Example Usage:
 ```python
-python copy_assignments_to_fs.py -config-file "../sample_data/archive_config.json" -u username -p password -org "https://<org>.maps.arcgis.com" -target-fl "http://services.arcgis.com/<server>/arcgis/rest/services/AssignmentsArchives/FeatureServer/0" -where "1=1" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -log "log.txt"
+python copy_assignments_to_fs.py -config-file "../sample_data/fieldMappings.json" -u username -p password -org "https://<org>.maps.arcgis.com" -target-fl "http://services.arcgis.com/<server>/arcgis/rest/services/AssignmentsArchives/FeatureServer/0" -where "1=1" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -log-file "log.txt"
 ```
 
 ## What it does
