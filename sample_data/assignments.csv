@@ -1,2 +1,2 @@
 xField,yField,Type,Location,Dispatcher,Description,Priority,Work Order Id,Due Date,Attachment,Worker
--118.15,33.8,Demolition,123 Street # 765,1,Test Description,none,1,4/28/2016 23:59:59,../sample_data/attachments/logo1.png,jane_doe
+-118.15,33.8,Demolition,123 Street # 765,john_doe_dispatcher,Test Description,none,1,4/28/2016 23:59:59,../sample_data/attachments/logo1.png,jane_doe
