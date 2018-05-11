@@ -137,7 +137,7 @@ def main(arguments):
 
         # Set the dispatcher
         if args.dispatcher_field and assignment[args.dispatcher_field]:
-            assignment_to_add.dispatcher = dispatchers_dict[args.dispatcher_field]
+            assignment_to_add.dispatcher = dispatchers_dict[assignment[args.dispatcher_field]]
         else:
             assignment_to_add.dispatcher = dispatcher
 
