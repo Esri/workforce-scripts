@@ -36,7 +36,7 @@ Due to the various naming conventions organizations may have, this script has ma
 
 Example Usage:
 ```python
-python create_assignments_from_csv.py -csv-file "../sample_data/assignments.csv" -u username -p password -org "https://<org>.maps.arcgis.com" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -x-field "xField" -y-field "yField" -assignment-type-field "Type" -location-field "Location" -description-field "Description" -priority-field "Priority" -work-order-id-field "Work Order Id" -due-date-field "Due Date" -attachmentFileField "Attachment" -wkid 102100 -log-file "../log.txt" -worker-field "Worker" -timezone "US/Eastern"
+python create_assignments_from_csv.py -csv-file "../sample_data/assignments.csv" -u username -p password -org "https://<org>.maps.arcgis.com" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -x-field "xField" -y-field "yField" -assignment-type-field "Type" -location-field "Location" -description-field "Description" -priority-field "Priority" -work-order-id-field "Work Order Id" -due-date-field "Due Date" -attachment-file-field "Attachment" -wkid 102100 -log-file "../log.txt" -worker-field "Worker" -timezone "US/Eastern"
 ```
 
 ## What it does
