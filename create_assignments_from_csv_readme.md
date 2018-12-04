@@ -10,8 +10,8 @@ Consider the following CSV example table that is to be imported into Workforce:
 
 | xField  | yField | Type | Location         | Dispatcher | Description      | Priority | Work Order Id | Due Date  | Attachment                           |
 |---------|--------|------|------------------|------------|------------------|----------|---------------|-----------|--------------------------------------|
-| -118.15 | 33.8   | 1    | 123 Street # 765 | 1          | Test Description | 4        | 1             | 4/28/2016 | ../sample_data/attachments/logo1.png |
-| -118.37 | 34.086 | 2    | 124 Street # 765 | 2          | Test Description | 3        | 2             | 4/29/2016 |                                      |
+| -118.15 | 33.8   | Inspection    | 123 Street # 765 | aaron_username          | Test Description | high        | 1             | 4/28/2016 | ../sample_data/attachments/logo1.png |
+| -118.37 | 34.086 | Inspection    | 124 Street # 765 | aaron_username         | Test Description | low        | 2             | 4/29/2016 |                                      |
 
 
 Due to the various naming conventions organizations may have, this script has many options allowing the user to specify the names of each column as well as the date format. In addition to the authentication arguments, the script specific arguments are as follows:
