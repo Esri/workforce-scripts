@@ -112,7 +112,10 @@ def main(arguments):
 
     assignments_to_add = []
     for assignment in assignments_in_csv:
-        assignment_to_add = workforce.Assignment(project)
+        assignment_to_add = workforce.Assignment(project,
+                                                 assignment_type=assignment_type_dict[assignment[args.assignment_type_field]],
+                                                 )
+
         # Create the geometry
         geometry = dict(x=float(assignment[args.x_field]),
                         y=float(assignment[args.y_field]),
@@ -128,9 +131,6 @@ def main(arguments):
                 d = d.replace(hour=23, minute=59, second=59)
             # Convert date to UTC time
             assignment_to_add.due_date = d.to('utc').datetime
-
-        # Set the assignment type
-        assignment_to_add.assignment_type = assignment_type_dict[assignment[args.assignment_type_field]]
 
         # Set the location
         assignment_to_add.location = assignment[args.location_field]
