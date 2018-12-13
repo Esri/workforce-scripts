@@ -48,6 +48,7 @@ def post_to_slack(slack_webhook, assignment):
     # create the message to send
     message = """
     *Assignment Completed*:
+    *Assignment Type:* {}
     *Location*: {}
     *Description*: {}
     *Notes*: {}
@@ -55,6 +56,7 @@ def post_to_slack(slack_webhook, assignment):
     *Time*: {}
     *Link*: {}
     """.format(
+        assignment.assignment_type.name,
         assignment.location,
         assignment.description,
         assignment.notes,
