@@ -1,5 +1,18 @@
 # Workforce Scripts
-A set of python scripts (using multiple libraries) to help administer Workforce projects and services.
+A set of Python scripts and notebooks to help administer and configure Workforce projects.
+
+## Notebooks
+
+Several example Jupyter notebooks are provided to demonstrate some more advanced workflows that are possible via the ArcGIS API for Python and Workforce:
+- [1 - Configuring a Project](notebooks/examples/1%20-%20Configuring%20a%20Project.ipynb)
+- [2 - Importing Assignments](notebooks/examples/2%20-%20Importing%20Assignments.ipynb)
+- [3 - Assigning Work](notebooks/examples/3%20-%20Assigning%20Work.ipynb)
+- [4 - Optimally Creating and Assigning Work Orders Based on Routes](notebooks/examples/4%20-%20Optimally%20Creating%20and%20Assigning%20Work%20Orders%20Based%20on%20Routes.ipynb)
+
+Notebooks used for previous demos are also available:
+- [UC 2018](notebooks/UC_2018)
+
+## Scripts
 
 Supports:
 - Python 3.5+
@@ -10,7 +23,7 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 
 
 
-## Features
+### Features
 
 | Functionality                                                        | Script                                                                            
 |----------------------------------------------------------------------|----------------------------------------------------------------------------------------|
@@ -27,7 +40,7 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 
 
 
-## Instructions
+### Instructions
 
 
 1. Install ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
