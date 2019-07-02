@@ -138,7 +138,7 @@ def main(arguments):
         assignments_to_export.append(assignment_to_export)
     logger.info("Writing to CSV...")
     # Create the CSV
-    with open(arguments.csv_file, 'w', newline='') as csv_file:
+    with open(arguments.csv_file, 'w', newline='', encoding='utf-8') as csv_file:
         fieldnames = ["OBJECTID",
                       "X",
                       "Y",
