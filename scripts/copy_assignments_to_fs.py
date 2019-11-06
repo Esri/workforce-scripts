@@ -26,6 +26,7 @@ import argparse
 import json
 import logging
 import logging.handlers
+import tempfile
 import traceback
 import sys
 import arcgis
@@ -119,6 +120,18 @@ def main(arguments):
     logger.info("Copying assignments...")
     response = target_fl.edit_features(adds=arcgis.features.FeatureSet(assignments_to_submit))
     logger.info(response)
+    if arguments.copy_attachments:
+        if target_fl.properties.get("hasAttachments", None):
+            logger.info("Copying Attachments...")
+            for assignment in assignments_to_copy:
+                with tempfile.TemporaryDirectory() as d:
+                    attachments = assignment.attachments.download(out_folder=d)
+                    if attachments:
+                        feature = target_fl.query(where="{} = {}".format(field_mappings[project._assignment_schema.object_id], assignment.object_id)).features[0]
+                        for attachment in attachments:
+                            target_fl.attachments.add(feature.attributes[target_fl.properties["objectIdField"]], attachment)
+        else:
+            logger.warning("Attachments not supported on the target layer")
     logger.info("Completed")
 
 
@@ -138,6 +151,7 @@ if __name__ == "__main__":
     parser.add_argument('-log-file', dest='log_file', help="The log file to write to", required=True)
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
+    parser.add_argument('--copy-attachments', dest="copy_attachments", action="store_true", default=False)
     args = parser.parse_args()
     try:
         main(args)

@@ -15,10 +15,11 @@ The script uses the following parameters:
 - -project-id \<projectId\> - The workforce project ID (from AGOL)
 - -target-fl \<targetFL\> - The full url of the target feature layer where the assignments will be copied to
 - -where \<where\> - The where clause to use when querying the assignments to copy (Optional - Defaults to '1=1')
+- --copy-attachments - A flag that when set will copy the attachments to the target feature layer (this can be slow if there are a lot attachments or features)
 
 Example Usage:
 ```python
-python copy_assignments_to_fs.py -config-file "../sample_data/fieldMappings.json" -u username -p password -org "https://<org>.maps.arcgis.com" -target-fl "http://services.arcgis.com/<server>/arcgis/rest/services/AssignmentsArchives/FeatureServer/0" -where "1=1" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -log-file "log.txt"
+python copy_assignments_to_fs.py -config-file "../sample_data/fieldMappings.json" -u username -p password -org "https://<org>.maps.arcgis.com" -target-fl "http://services.arcgis.com/<server>/arcgis/rest/services/AssignmentsArchives/FeatureServer/0" -where "1=1" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -log-file "log.txt" --copy-attachments
 ```
 
 ## What it does
@@ -30,3 +31,4 @@ python copy_assignments_to_fs.py -config-file "../sample_data/fieldMappings.json
  5. The features in the target feature layer are queried
  6. Assignments not already in the target feature layer are determined
  7. The assignments are added to the target feature layer
+ 8. Attachments are copied to the target feature layer (optional)
