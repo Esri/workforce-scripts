@@ -86,7 +86,7 @@ def main(arguments):
                 dispatcher.contact_number = row.get(arguments.contact_number_field)
             dispatchers.append(dispatcher)
         # Batch add dispatchers
-        logger.info("Adding Workers...")
+        logger.info("Adding Dispatchers...")
         project.dispatchers.batch_add(dispatchers)
     logger.info("Completed")
 
