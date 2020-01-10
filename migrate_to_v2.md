@@ -22,7 +22,7 @@ In addition to the authentication arguments, the script specific arguments are a
 - --skip-dispatchers - (Optional) If provided, the dispatcher data will not be migrated (in case you do not want your dispatchers seeing the project yet) 
 
 Example Usage:
-```python
+```bash
 python migrate_to_v2.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -project-id <project-id> -new-title <title>
 ```
 
