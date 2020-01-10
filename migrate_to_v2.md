@@ -4,6 +4,13 @@ This script takes a Version 1 Workforce Project and migrates it to a Version 2 p
 
 **This script requires the logged in user to be an admin or to be the owner of the project and requires a version of the Python API which supports Version 2 Projects**
 
+To install the version of the Python API which supports Version 2 Projects, run in Terminal:
+```
+conda install -c esri-field-apps/label/workforce-beta arcgis
+```
+
+Then follow the directions to run the migration script below.
+
 Supports Python 3.5+
 
 ----
