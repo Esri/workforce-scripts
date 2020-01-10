@@ -2,7 +2,7 @@
 
 This script takes a Version 1 Workforce Project and migrates it to a Version 2 project. It will preserve your assignment, worker, assignment type, webmap, integration and (optionally) dispatcher data in the new project.
 
-**This script requires the logged in user to be an admin or to be the owner of the project**
+**This script requires the logged in user to be an admin or to be the owner of the project and requires a version of the Python API which supports Version 2 Projects**
 
 Supports Python 3.5+
 
