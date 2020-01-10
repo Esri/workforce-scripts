@@ -39,6 +39,7 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 | [Delete Assignments](delete_assignments_readme.md)                   | [delete_assignments.py](scripts/delete_assignments.py)          |                   |
 | [Delete Assignment Types ](delete_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
 | [Assignment Monitor (Slack Integration)](assignment_monitor.md)                           | [assignment_monitor.py](scripts/assignment_monitor.py) |
+| [Migrate to Version 2 Project](migrate_to_v2.md) | [migrate_to_v2.py](scripts/migrate_to_v2.py) |
 
 
 
