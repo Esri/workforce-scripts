@@ -3,7 +3,7 @@
 This script checks the location and time of when an assignment was completed against the location of the worker at that same time. It is designed to find out if workers are completing assignments without visiting the location.
 It is an extension of the [Copy Assignments](copy_assignments_fs_readme.md) script in that assignments that were improperly completed are copied to a different feature service so they can be analyzed.
 
-Supports Python 3.5+
+Supports Python 3.5+, Version 1 (connected) Projects only
 
 ----
 
