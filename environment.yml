@@ -1,8 +1,8 @@
 name: workforce-scripts
 channels:
-  - http://zion.esri.com/conda/origin/workforce_v2_publish
+  - esri-field-apps/label/workforce-beta
+  - esri
   - defaults
-  - conda-forge
 dependencies:
   - arrow
   - arcgis>=1.7.0
