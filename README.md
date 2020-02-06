@@ -51,12 +51,12 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 3. In terminal/cmd navigate to the `scripts` folder
 
 Without Conda:
-4. Install arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
+- Install arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
 
 With Conda:
-4. Install Anaconda
-5. Run `conda env create --file environment.yml` to create the virtual environment with the correct dependencies
-6. Run `conda activate workforce-scripts` to activate the environment
+- Install Anaconda
+- Run `conda env create --file environment.yml` to create the virtual environment with the correct dependencies
+- Run `conda activate workforce-scripts` to activate the environment
 
 You should now be able to run all scripts in the `scripts` folder (provided you use the correct arguments) and notebooks in the `notebooks` folder
 
