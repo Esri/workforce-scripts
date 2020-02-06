@@ -1,7 +1,6 @@
 name: workforce-scripts
 channels:
   - esri-field-apps/label/workforce-beta
-  - esri
   - defaults
 dependencies:
   - arrow
