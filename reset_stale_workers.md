@@ -1,6 +1,6 @@
 ## Reset Status of Stale Workers
 
-This script takes workers who have not been edited (changed their location, status, or contact info) at or after a certain date and resets their status to "not working". This allows the administrator to remove "stale" workers.
+This script takes workers who have not been edited (changed their location, status, or contact info) at or after a certain date and resets their status to "not working". This allows the administrator to modify "stale" workers.
 
 **This script requires the logged in user to be an admin or to be the owner of the project**
 
