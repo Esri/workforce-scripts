@@ -2,7 +2,7 @@
 
 This script reads a CSV file containing the required fields to add unassigned or assigned assignments to a workforce project. Attachments can also be uploaded if the path to the file is specified in the CSV file.
 
-Supports Python 3.5+
+Supports Python 3.5+. This script requires the pendulum Python module
 
 ----
 

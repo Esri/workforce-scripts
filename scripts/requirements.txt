@@ -1,2 +1,2 @@
-arrow>=0.10.0
+pendulum==2.0.5
 arcgis>=1.4.1
