@@ -30,8 +30,7 @@ import sys
 import traceback
 from arcgis.apps import workforce
 from arcgis.gis import GIS
-import datetime
-import pytz
+import pendulum
 
 
 def initialize_logging(log_file=None):
@@ -84,19 +83,12 @@ def main(arguments):
         logger.info("Invalid project id")
         sys.exit(0)
 
-    # Determine cutoff
     try:
-        local = pytz.timezone(args.timezone)
-    except Exception:
-        logger.info("Incorrect timezone string. Please check documentation for correct formatting")
-        sys.exit(0)
-    try:
-        local_cutoff_date = datetime.datetime.strptime(arguments.cutoff_date, "%m/%d/%Y %H:%M:%S")
+        local_cutoff_date = pendulum.from_format(arguments.cutoff_date, "MM/DD/YYYY hh:mm:ss", tz=args.timezone, formatter='alternative')
     except Exception:
         logger.info("Invalid date format. Please check documentation and try again")
         sys.exit(0)
-    cutoff_dt = local.localize(local_cutoff_date, is_dst=None)
-    utc_dt = cutoff_dt.astimezone(pytz.utc)
+    utc_dt = local_cutoff_date.in_tz('UTC')
     formatted_date = utc_dt.strftime("%Y-%m-%d %H:%M:%S")
     logger.info("Querying workers")
     where = f"{project._worker_schema.edit_date} < TIMESTAMP '{formatted_date}'"
@@ -116,7 +108,7 @@ if __name__ == "__main__":
     parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
     parser.add_argument('-project-id', dest='project_id', help="The id of the project to migrate", required=True)
-    parser.add_argument('-cutoff-date', dest='cutoff_date', help="If a worker has not been updated at or after this date, change its status to not working. %m/%d/%Y %H:%M:%S format, either in UTC or a timezone you provide", required=True)
+    parser.add_argument('-cutoff-date', dest='cutoff_date', help="If a worker has not been updated at or after this date, change its status to not working. MM/DD/YYYY hh:mm:ss format, either in UTC or a timezone you provide", required=True)
     parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone for the assignments")
     parser.add_argument('-log-file', dest='log_file', help='The log file to use')
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',help="Verify the SSL Certificate of the server")

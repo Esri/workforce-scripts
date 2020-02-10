@@ -29,8 +29,8 @@ import logging
 import logging.handlers
 import traceback
 import sys
-import arrow
-import dateutil
+import pendulum
+import datetime
 import types
 from arcgis.apps import workforce
 from arcgis.gis import GIS
@@ -125,12 +125,12 @@ def main(arguments):
 
         # Determine the assignment due date, and if no time is provided, make the due date all day
         if args.due_date_field and assignment[args.due_date_field]:
-            d = arrow.Arrow.strptime(assignment[args.due_date_field], args.date_format).replace(
-            tzinfo=dateutil.tz.gettz(args.timezone))
-            if d.datetime.second == 0 and d.datetime.hour == 0 and d.datetime.minute == 0:
-                d = d.replace(hour=23, minute=59, second=59)
+            d = datetime.datetime.strptime(assignment[args.due_date_field], args.date_format)
+            p_date = pendulum.instance(d, tz=args.timezone)
+            if p_date.second == 0 and p_date.hour == 0 and p_date.minute == 0:
+                p_date = p_date.at(hour=23, minute=59, second=59)
             # Convert date to UTC time
-            assignment_to_add.due_date = d.to('utc').datetime
+            assignment_to_add.due_date = datetime.datetime.fromtimestamp(p_date.in_tz('UTC').timestamp())
 
         # Set the location
         assignment_to_add.location = assignment[args.location_field]
@@ -144,7 +144,7 @@ def main(arguments):
         # Fetch workers and assign the worker to the assignment
         if args.worker_field and assignment[args.worker_field]:
             assignment_to_add.worker = workers_dict[assignment[args.worker_field]]
-            assignment_to_add.assigned_date = arrow.now().to('utc').datetime
+            assignment_to_add.assigned_date = datetime.datetime.fromtimestamp(pendulum.now('UTC').timestamp())
             assignment_to_add.status = "assigned"
         else:
             assignment_to_add.status = "unassigned"
