@@ -3,9 +3,9 @@ channels:
   - esri-field-apps/label/workforce-beta
   - defaults
 dependencies:
-  - arrow
   - arcgis>=1.7.0
   - pip>=19.1.1
+  - pendulum=1.4.4
   - python=3.7.0
   - seaborn=0.9.0
   - shapely=1.6.4
