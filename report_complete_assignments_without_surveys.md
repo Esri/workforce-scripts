@@ -1,10 +1,10 @@
-## Report Incomplete Assignments with Survey
+## Report Complete Assignments without Survey
 
-This script takes assignments that have not been started (status = unassigned, assigned, or declined) that have a corresponding completed survey, reports them to the user, and if the user specifies, changes the status of those assignments to "canceled"
+This script takes assignments that have been completed (status = "completed") that do not have a corresponding completed survey and reports them to the user. 
 
 Whether or not the user has a corresponding survey is defined by searching a particular field in the survey data for the value stored in the assignment's work order id.
 
-For example, if I have an assignment with the work_order_id "6" that has status "declined", but there's a survey that has already been submitted with the value 6 in the field I'm using to integrate the two apps, then this is a potential assignment for this script to cancel. You provide the name of that field the script searches on.
+For example, if I have an assignment with the work_order_id "6" that has status "completed", but there is not a survey that has already been submitted with the value 6 in the field I'm using to integrate the two apps, then this is an assignment that will get logged. You provide the name of that field the script searches on.
 
 This script assumes a 1:1 relationship between surveys and assignments.
 
@@ -19,7 +19,6 @@ In addition to the authentication arguments (org, gis, password), the script spe
 - -project-id \<project_id\> - The workforce project ID (found in the project URL)
 - -survey-id \<survey_id\> - The portal item id for the feature layer collection associated with your Survey123 Survey
 - -survey-field-name \<survey_field_name\> (Optional) - The field name of the field you use to integrate with Workforce. Do not use the alias for the field name - for example, `work_id` should be provided here instead of `Work ID`. Check your Survey feature layer to find the field name. Defaults to `work_order_id`
-- --close-assignments - (Optional) - If provided, close the assignments returned without an associated survey
 - -log-file \<logFile\> (Optional) - The log file to use for logging messages
 
 Example Usage:
@@ -30,5 +29,5 @@ python report_incomplete_assignments_with_surveys.py -u <username> -p <password>
 ## What it does
 
  1. Gets workforce assignment data and survey data
- 2. For every assignment, if the assignment has a work order id value, check if there's a corresponding survey by querying the survey layer on the field -survey-field-name
- 3. Report the assignment to the log. If --close-assignments is included as a parameter, cancel the assignment
+ 2. For every assignment, if the assignment has a work order id value and has status "completed", check if there's a corresponding survey by querying the survey layer on the field -survey-field-name
+ 3. If a corresponding survey is not found, report the assignment to the user
