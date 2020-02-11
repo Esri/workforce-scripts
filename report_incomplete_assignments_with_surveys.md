@@ -1,10 +1,10 @@
 ## Report Incomplete Assignments with Survey
 
-This script takes assignments that have not been started (status = unassigned, assigned, or declined) that have a corresponding completed survey, reports them to the user, and if the user specifies, changes the status of those assignments to "completed"
+This script takes assignments that have not been started (status = unassigned, assigned, or declined) that have a corresponding completed survey, reports them to the user, and if the user specifies, changes the status of those assignments to "canceled"
 
 Whether or not the user has a corresponding survey is defined by searching a particular field in the survey data for the value stored in the assignment's work order id.
 
-For example, if I have an assignment with the work_order_id "6" that has status "declined", but there's a survey that has already been submitted with the value 6 in the field I'm using to integrate the two apps, then this is a potential assignment for this script to cancel.
+For example, if I have an assignment with the work_order_id "6" that has status "declined", but there's a survey that has already been submitted with the value 6 in the field I'm using to integrate the two apps, then this is a potential assignment for this script to cancel. You provide the name of that field the script searches on.
 
 This script assumes a 1:1 relationship between surveys and assignments.
 
