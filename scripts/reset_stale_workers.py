@@ -20,7 +20,7 @@
 
    limitations under the License.​
 
-   This sample creates workers from CSV files
+   This sample resets stale workers to status "not_working"
 """
 
 import argparse

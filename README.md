@@ -39,8 +39,9 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 | [Delete Assignments](delete_assignments_readme.md)                   | [delete_assignments.py](scripts/delete_assignments.py)          |                   |
 | [Delete Assignment Types ](delete_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
 | [Assignment Monitor (Slack Integration)](assignment_monitor.md)                           | [assignment_monitor.py](scripts/assignment_monitor.py) |
-
-
+| [Reset Stale Workers ](reset_stale_workers.md)               | [reset_stale_workers.py](scripts/reset_stale_workers.py)              |
+| [Report Incomplete Assignments with Work Orders ](report_incomplete_assignments_with_work_orders.md)               | [report_incomplete_assignments_with_work_orders.py](scripts/report_incomplete_assignments_with_work_orders.py)    
+| [Report Complete Assignments without Work Orders](report_complete_assignments_without_work_orders.md)               | [report_complete_assignments_without_work_orders.py](scripts/report_complete_assignments_without_work_orders.py)    
 
 ### Instructions
 
