@@ -114,7 +114,7 @@ def main(arguments):
 		if assignment.work_order_id and (assignment.status == "unassigned" or assignment.status == "assigned" or assignment.status == "declined"):
 			where = f"{arguments.field_name} = '{assignment.work_order_id}'"
 			if len(layer.query(where=where).features) > 0:
-				logger.info("Potential Assignment to Cancel: " + str(assignment) + f" with OBJECTID {assignment.object_id}")
+				logger.info(f"Potential Assignment to Cancel: " + str(assignment) + f" with OBJECTID {assignment.object_id}")
 				if arguments.cancel_assignments:
 					logger.info("Canceling assignment")
 					assignment.update(status="canceled")
