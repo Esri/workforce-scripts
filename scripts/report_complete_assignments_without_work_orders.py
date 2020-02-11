@@ -113,7 +113,8 @@ def main(arguments):
 		if assignment.status == "completed" and assignment.work_order_id:
 			where = f"{arguments.field_name} = '{assignment.work_order_id}'"
 			if len(layer.query(where=where).features) == 0:
-				logger.info(f"Potential Assignment without corresponding survey: " + str(assignment) + f" with OBJECTID {assignment.object_id}")
+				logger.info(f"Potential Assignment without corresponding work order: {str(assignment)} with OBJECTID {assignment.object_id}")
+				logger.info(f"Assignment Link: https://workforce.arcgis.com/projects/{arguments.project_id}/dispatch/assignments/{assignment.object_id}")
 	logger.info("Completed!")
 
 
