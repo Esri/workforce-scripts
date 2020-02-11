@@ -27,12 +27,12 @@ In addition to the authentication arguments (org, gis, password), the script spe
 
 Example Usage:
 ```bash
-python report_incomplete_assignments_with_surveys.py -u username -p password -org https://arcgis.com -project-id faec0353ffe441e8ac5ef191083a3b58 -survey-id bc9033ba8f4c46b3ae7df0a7fd10b771 -field-name work_order_id --cancel-assignments
+python report_incomplete_assignments_with_work_orders.py -u username -p password -org https://arcgis.com -project-id faec0353ffe441e8ac5ef191083a3b58 -survey-id bc9033ba8f4c46b3ae7df0a7fd10b771 -field-name work_order_id --cancel-assignments
 ```
 
 Example Usage 2:
 ```bash
-python report_incomplete_assignments_with_surveys.py -u username -p password -org https://arcgis.com -project-id faec0353ffe441e8ac5ef191083a3b58 -survey-id bc9033ba8f4c46b3ae7df0a7fd10b771 -field-name work_order_id
+python report_incomplete_assignments_with_work_orders.py -u username -p password -org https://arcgis.com -project-id faec0353ffe441e8ac5ef191083a3b58 -survey-id bc9033ba8f4c46b3ae7df0a7fd10b771 -field-name work_order_id
 ```
 
 ## What it does

@@ -103,7 +103,7 @@ def main(arguments):
 		json = layer._lyr_json
 	except Exception as e:
 		logger.info(e)
-		logger.info("Layer could not be found. Please check your parameters again. Exiting the script")
+		logger.info("Layer could not be found based on given input. Please check your parameters again. Exiting the script")
 		sys.exit(0)
 	
 	# Updating Assignments
@@ -114,7 +114,11 @@ def main(arguments):
 			where = f"{arguments.field_name} = '{assignment.work_order_id}'"
 			if len(layer.query(where=where).features) == 0:
 				logger.info(f"Potential Assignment without corresponding work order: {str(assignment)} with OBJECTID {assignment.object_id}")
-				logger.info(f"Assignment Link: https://workforce.arcgis.com/projects/{arguments.project_id}/dispatch/assignments/{assignment.object_id}")
+				if gis.properties["isPortal"]:
+					portal_url = gis._portal.url
+					logger.info(f"Assignment Link: {portal_url}/apps/workforce/#/{arguments.project_id}/dispatch/assignments/{assignment.object_id}")
+				else:
+					logger.info(f"Assignment Link: https://workforce.arcgis.com/projects/{arguments.project_id}/dispatch/assignments/{assignment.object_id}")
 	logger.info("Completed!")
 
 
@@ -125,7 +129,7 @@ if __name__ == "__main__":
 	parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
 	parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
 	# Parameters for workforce
-	parser.add_argument('-project-id', dest='project_id', help="The id of the project to migrate", required=True)
+	parser.add_argument('-project-id', dest='project_id', help="The id of the Workforce project", required=True)
 	parser.add_argument('-survey-id', dest='survey_id',
 						help="The portal item id for the feature layer collection associated with your Survey123 Survey",
 						default=None)
