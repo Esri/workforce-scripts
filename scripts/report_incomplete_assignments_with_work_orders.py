@@ -84,20 +84,26 @@ def main(arguments):
 		logger.info("Invalid project id")
 		sys.exit(0)
 		
+	layer = None
 	# Get Survey or Collector Feature Layer
 	if arguments.survey_id and arguments.layer_url:
 		logger.info("Please try again with either survey id or layer url provided, not both")
 		sys.exit(0)
 	elif arguments.survey_id:
 		survey_item = gis.content.get(arguments.survey_id)
-		layer = survey_item.layers[0]
+		if survey_item:
+			layer = survey_item.layers[0]
 	elif arguments.layer_url:
 		layer = FeatureLayer(arguments.layer_url)
 	else:
 		logger.info("Please provide either a portal id for your survey feature layer or a feature service URL for your survey/collector layer")
 		sys.exit(0)
-	
-	if layer is None:
+		
+	# Check if layer exists
+	try:
+		json = layer._lyr_json
+	except Exception as e:
+		logger.info(e)
 		logger.info("Layer could not be found. Please check your parameters again. Exiting the script")
 		sys.exit(0)
 	
