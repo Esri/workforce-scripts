@@ -30,6 +30,7 @@ import sys
 import traceback
 from arcgis.apps import workforce
 from arcgis.gis import GIS
+from arcgis.features import FeatureLayer
 
 
 def initialize_logging(log_file=None):
@@ -82,10 +83,23 @@ def main(arguments):
 	except Exception:
 		logger.info("Invalid project id")
 		sys.exit(0)
-
-	# Get Survey Feature Layer
-	survey_item = gis.content.get(arguments.survey_id)
-	survey_layer = survey_item.layers[0]
+		
+	# Get Survey or Collector Feature Layer
+	if arguments.survey_id and arguments.layer_url:
+		logger.info("Please try again with either survey id or layer url provided, not both")
+		sys.exit(0)
+	elif arguments.survey_id:
+		survey_item = gis.content.get(arguments.survey_id)
+		layer = survey_item.layers[0]
+	elif arguments.layer_url:
+		layer = FeatureLayer(arguments.layer_url)
+	else:
+		logger.info("Please provide either a portal id for your survey feature layer or a feature service URL for your survey/collector layer")
+		sys.exit(0)
+	
+	if layer is None:
+		logger.info("Layer could not be found. Please check your parameters again. Exiting the script")
+		sys.exit(0)
 	
 	# Updating Assignments
 	logger.info("Querying assignments")
@@ -93,9 +107,9 @@ def main(arguments):
 	for assignment in assignments:
 		if assignment.work_order_id and (assignment.status == "unassigned" or assignment.status == "assigned" or assignment.status == "declined"):
 			where = f"{arguments.field_name} = '{assignment.work_order_id}'"
-			if len(survey_layer.query(where=where).features) > 0:
+			if len(layer.query(where=where).features) > 0:
 				logger.info("Potential Assignment to Cancel: " + str(assignment) + f" with OBJECTID {assignment.object_id}")
-				if arguments.close_assignments:
+				if arguments.cancel_assignments:
 					logger.info("Canceling assignment")
 					assignment.update(status="canceled")
 	project.assignments.batch_update(assignments)
@@ -112,9 +126,12 @@ if __name__ == "__main__":
 	parser.add_argument('-project-id', dest='project_id', help="The id of the project to migrate", required=True)
 	parser.add_argument('-survey-id', dest='survey_id',
 						help="The portal item id for the feature layer collection associated with your Survey123 Survey",
-						required=True)
-	parser.add_argument('-survey-field-name', dest='field_name', default="work_order_id", help="The field name within the Survey you use to integrate with Workforce. Use actual field name, not alias. Default is work_order_id")
-	parser.add_argument('--close-assignments', action='store_true', default=False, help="If provided, cancel the assignments returned without an associated survey if they have not been started or completed")
+						default=None)
+	parser.add_argument('-layer-url', dest='layer_url',
+						help="The feature service URL for your Survey or Collector layer",
+						default=None)
+	parser.add_argument('-field-name', dest='field_name', default="work_order_id", help="The field name within the Survey or Collector Layer you use to integrate with Workforce. Use actual field name, not alias. Default is work_order_id")
+	parser.add_argument('--cancel-assignments', action='store_true', default=False, help="If provided, cancel the assignments returned without an associated survey if they have not been started or completed")
 	parser.add_argument('-log-file', dest='log_file', help='The log file to use')
 	parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
 						help="Verify the SSL Certificate of the server")
