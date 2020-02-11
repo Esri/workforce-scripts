@@ -79,13 +79,15 @@ def main(arguments):
     item = gis.content.get(arguments.project_id)
     try:
         project = workforce.Project(item)
-    except Exception:
+    except Exception as e:
+        logger.info(e)
         logger.info("Invalid project id")
         sys.exit(0)
 
     try:
         local_cutoff_date = pendulum.from_format(arguments.cutoff_date, "MM/DD/YYYY hh:mm:ss", tz=args.timezone, formatter='alternative')
-    except Exception:
+    except Exception as e:
+        logger.info(e)
         logger.info("Invalid date format. Please check documentation and try again")
         sys.exit(0)
     utc_dt = local_cutoff_date.in_tz('UTC')

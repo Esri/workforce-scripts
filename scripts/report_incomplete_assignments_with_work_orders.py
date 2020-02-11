@@ -80,7 +80,8 @@ def main(arguments):
 	item = gis.content.get(arguments.project_id)
 	try:
 		project = workforce.Project(item)
-	except Exception:
+	except Exception as e:
+		logger.info(e)
 		logger.info("Invalid project id")
 		sys.exit(0)
 		
