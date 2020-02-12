@@ -117,7 +117,7 @@ def main(arguments):
 				logger.info(f"Potential Assignment without corresponding work order: {str(assignment)} with OBJECTID {assignment.object_id}")
 				if gis.properties["isPortal"]:
 					portal_url = gis.properties['portalHostname']
-					logger.info(f"Assignment Link: {portal_url}/apps/workforce/#/{arguments.project_id}/dispatch/assignments/{assignment.object_id}")
+					logger.info(f"Assignment Link: {portal_url}/apps/workforce/#/projects/{arguments.project_id}/dispatch/assignments/{assignment.object_id}")
 				else:
 					logger.info(f"Assignment Link: https://workforce.arcgis.com/projects/{arguments.project_id}/dispatch/assignments/{assignment.object_id}")
 	logger.info("Completed!")

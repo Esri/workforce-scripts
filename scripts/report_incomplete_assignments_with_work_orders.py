@@ -111,6 +111,7 @@ def main(arguments):
 	# Updating Assignments
 	logger.info("Querying assignments")
 	assignments = project.assignments.search()
+	to_update = []
 	for assignment in assignments:
 		if assignment.work_order_id and (assignment.status == "unassigned" or assignment.status == "assigned" or assignment.status == "declined"):
 			where = f"{arguments.field_name} = '{assignment.work_order_id}'"
@@ -118,14 +119,15 @@ def main(arguments):
 				logger.info(f"Potential Assignment to Cancel: {str(assignment)} with OBJECTID {assignment.object_id}")
 				if gis.properties["isPortal"]:
 					portal_url = gis.properties['portalHostname']
-					logger.info(f"Assignment Link: {portal_url}/apps/workforce/#/{arguments.project_id}/dispatch/assignments/{assignment.object_id}")
+					logger.info(f"Assignment Link: {portal_url}/apps/workforce/#/projects/{arguments.project_id}/dispatch/assignments/{assignment.object_id}")
 				else:
 					logger.info(f"Assignment Link: https://workforce.arcgis.com/projects/{arguments.project_id}/dispatch/assignments/{assignment.object_id}")
 				if arguments.cancel_assignments:
 					logger.info("Canceling assignment")
 					assignment.update(status="canceled")
+					to_update.append(assignment)
 	if arguments.cancel_assignments:
-		project.assignments.batch_update(assignments)
+		project.assignments.batch_update(to_update)
 	logger.info("Completed!")
 	
 	

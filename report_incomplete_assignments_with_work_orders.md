@@ -8,6 +8,8 @@ Whether or not the user has a corresponding survey/feature is defined by searchi
 
 For example, if I have an assignment with the work_order_id "6" that has status "declined", but there's a survey that has already been submitted with the value 6 in the field I'm using to integrate the two apps, then this is a potential assignment for this script to cancel. You provide the name of that field the script searches on.
 
+Note that an assignment will only get reported if it has a value for Work Order ID.
+
 This script assumes a 1:1 relationship between surveys/features and assignments.
 
 **This script requires the logged in user to be an admin or to be the owner of the project**
