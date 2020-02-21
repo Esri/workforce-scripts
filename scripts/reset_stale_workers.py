@@ -20,7 +20,7 @@
 
    limitations under the License.​
 
-   This sample creates workers from CSV files
+   This sample resets stale workers to status "not_working"
 """
 
 import argparse
@@ -79,13 +79,15 @@ def main(arguments):
     item = gis.content.get(arguments.project_id)
     try:
         project = workforce.Project(item)
-    except Exception:
+    except Exception as e:
+        logger.info(e)
         logger.info("Invalid project id")
         sys.exit(0)
 
     try:
         local_cutoff_date = pendulum.from_format(arguments.cutoff_date, "MM/DD/YYYY hh:mm:ss", tz=args.timezone, formatter='alternative')
-    except Exception:
+    except Exception as e:
+        logger.info(e)
         logger.info("Invalid date format. Please check documentation and try again")
         sys.exit(0)
     utc_dt = local_cutoff_date.in_tz('UTC')
@@ -107,7 +109,7 @@ if __name__ == "__main__":
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
     parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
-    parser.add_argument('-project-id', dest='project_id', help="The id of the project to migrate", required=True)
+    parser.add_argument('-project-id', dest='project_id', help="The id of the Workforce project", required=True)
     parser.add_argument('-cutoff-date', dest='cutoff_date', help="If a worker has not been updated at or after this date, change its status to not working. MM/DD/YYYY hh:mm:ss format, either in UTC or a timezone you provide", required=True)
     parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone for the assignments")
     parser.add_argument('-log-file', dest='log_file', help='The log file to use')
