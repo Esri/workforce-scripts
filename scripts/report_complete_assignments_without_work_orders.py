@@ -113,7 +113,7 @@ def main(arguments):
 	for assignment in assignments:
 		if assignment.status == "completed" and assignment.work_order_id:
 			where = f"{arguments.field_name} = '{assignment.work_order_id}'"
-			if len(layer.query(where=where).features) == 0:
+			if layer.query(where=where, return_count_only=True) == 0:
 				logger.info(f"Potential Assignment without corresponding work order: {str(assignment)} with OBJECTID {assignment.object_id}")
 				if gis.properties["isPortal"]:
 					portal_url = gis.properties['portalHostname']

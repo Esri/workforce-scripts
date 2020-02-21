@@ -115,7 +115,7 @@ def main(arguments):
 	for assignment in assignments:
 		if assignment.work_order_id and (assignment.status == "unassigned" or assignment.status == "assigned" or assignment.status == "declined"):
 			where = f"{arguments.field_name} = '{assignment.work_order_id}'"
-			if len(layer.query(where=where).features) > 0:
+			if layer.query(where=where, return_count_only=True) > 0:
 				logger.info(f"Potential Assignment to Cancel: {str(assignment)} with OBJECTID {assignment.object_id}")
 				if gis.properties["isPortal"]:
 					portal_url = gis.properties['portalHostname']

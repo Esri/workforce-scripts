@@ -12,13 +12,13 @@ Note that an assignment will only get reported if it has a value for Work Order 
 
 This script assumes a 1:1 relationship between surveys/features and assignments.
 
-**This script requires the logged in user to be an admin or to be the owner of the project**
+**This script requires the logged in user to be an admin, dispatcher, or to be the owner of the project**
 
 Supports Python 3.5+
 
 ----
 
-In addition to the authentication arguments (org, gis, password), the script specific arguments are as follows:
+In addition to the authentication arguments (org, username, password), the script specific arguments are as follows:
 
 - -project-id \<project_id\> - The workforce project ID (found in the project URL)
 - -survey-id \<survey_id\> - (Optional) The portal item id for the feature layer collection associated with your Survey123 Survey. Use EITHER this parameter or `layer_url`. Defaults to `None`
