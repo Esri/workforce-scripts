@@ -86,16 +86,13 @@ def main(arguments):
 	
 	# Clone dispatcher map if desired by user
 	if arguments.clone_map:
-		try:
-			map_id = project.dispatcher_webmap.save(item_properties={"title": project.title + " Dashboard Map", "tags": [], "snippet": "Dashboard Map"}).id
-		except Exception as e:
-			logger.info(e)
-			logger.info(f"You already have a webmap called {project.title} Dashboard Map, please delete that map in order to clone")
-			sys.exit(0)
+		logger.info("Saving copy of dispatcher webmap")
+		map_id = project.dispatcher_webmap.save(item_properties={"title": project.title + " Dashboard Map", "tags": [], "snippet": "Dashboard Map"}).id
 	else:
 		map_id = project.dispatcher_web_map_id
 		
-	# Get example ops dashboard
+	# Get example ops dashboard from workforce_scripts, map to your project
+	logger.info("Getting example dashboard")
 	if arguments.light_mode:
 		item = gis.content.get('1cbac058ce1b4a008a6baa0f3cfd506a')
 		item_mapping = {'2249c41dcec34b91b3990074ed8c8ffc': project.assignments_item.id,
@@ -103,7 +100,6 @@ def main(arguments):
 						 'e605c140ecf14cccaf1e7b3bcb4b1710': map_id}
 	else:
 		item = gis.content.get("af7cd356c21a4ded87d8cdd452fd8be3")
-	
 		item_mapping = {'377b2b2014f24b0ab9b053d9b2fed113': project.assignments_item.id,
 						'e1904f5c56484163a021155f447adf34': project.workers_item.id,
 						'bb7d2b495ecc4ea7810b28f16ef71cba': map_id}
@@ -114,9 +110,10 @@ def main(arguments):
 	if len(cloned_items) == 0:
 		logger.info("You have already cloned a dashboard of this name! Check your item content and if necessary, set a title")
 		sys.exit(0)
+	logger.info("This dashboard was cloned: " + cloned_items[0])
 	
-	logger.info(cloned_items[0])
-	logger.info("Updating title")
+	# Save new name and share to group
+	logger.info("Updating title and sharing to project group")
 	if arguments.title:
 		new_title = arguments.title
 	else:

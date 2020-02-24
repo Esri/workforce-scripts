@@ -11,7 +11,7 @@ Supports Python 3.5+
 In addition to the authentication arguments (org, username, password), the script specific arguments are as follows:
 
 - -project-id \<project_id\> - The workforce project ID (found in the project URL)
-- -title' \<title\> - Title of your new Ops Dashboard. Defaults to project title + "Dashboard"
+- -title \<title\> - Title of your new Ops Dashboard. Defaults to project title + "Dashboard"
 - --light-mode \<light_mode> - Whether you want your dashboard to be in light mode. Default dashboard is in dark mode
 - --clone-map \<clone_map> - Provide this parameter if you want a copy of the dispatcher webmap to be used rather than the actual webmap. Default is False
 - -log-file \<logFile\> The log file to use for logging messages
