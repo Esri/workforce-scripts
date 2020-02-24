@@ -91,12 +91,16 @@ def main(arguments):
 		except Exception as e:
 			logger.info(e)
 			logger.info(f"You already have a webmap called {project.title} Dashboard Map, please delete that map in order to clone")
+			sys.exit(0)
 	else:
 		map_id = project.dispatcher_web_map_id
 		
 	# Get example ops dashboard
 	if arguments.light_mode:
-		item = ""
+		item = gis.content.get('1cbac058ce1b4a008a6baa0f3cfd506a')
+		item_mapping = {'2249c41dcec34b91b3990074ed8c8ffc': project.assignments_item.id,
+						'6afe245f9f3f48e8884dc7e691841973': project.workers_item.id,
+						 'e605c140ecf14cccaf1e7b3bcb4b1710': map_id}
 	else:
 		item = gis.content.get("af7cd356c21a4ded87d8cdd452fd8be3")
 	
