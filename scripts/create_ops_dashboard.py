@@ -110,7 +110,6 @@ def main(arguments):
 	if len(cloned_items) == 0:
 		logger.info("You have already cloned a dashboard of this name! Check your item content and if necessary, set a title")
 		sys.exit(0)
-	logger.info("This dashboard was cloned: " + cloned_items[0])
 	
 	# Save new name and share to group
 	logger.info("Updating title and sharing to project group")
@@ -118,7 +117,7 @@ def main(arguments):
 		new_title = arguments.title
 	else:
 		new_title = project.title + " Dashboard"
-	cloned_items[0].update(item_properties={"title": new_title}, thumbnail=None)
+	cloned_items[0].update(item_properties={"title": new_title}, thumbnail="https://www.arcgis.com/apps/opsdashboard/assets/images/no-dashboard-thumb-84c2afc9d73774823c7865b4cc776b9b.png")
 	cloned_items[0].share(groups=[project.group])
 	logger.info("Completed")
 
