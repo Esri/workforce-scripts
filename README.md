@@ -42,6 +42,7 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 | [Reset Stale Workers ](reset_stale_workers.md)               | [reset_stale_workers.py](scripts/reset_stale_workers.py)              |
 | [Report Incomplete Assignments with Work Orders ](report_incomplete_assignments_with_work_orders.md)               | [report_incomplete_assignments_with_work_orders.py](scripts/report_incomplete_assignments_with_work_orders.py)    
 | [Report Complete Assignments without Work Orders](report_complete_assignments_without_work_orders.md)               | [report_complete_assignments_without_work_orders.py](scripts/report_complete_assignments_without_work_orders.py)    
+| [Create Default Ops Dashboard](create_ops_dashboard.md)              | [create_ops_dashboard.py](scripts/create_ops_dashboard.py)|
 
 ### Instructions
 
