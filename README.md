@@ -13,6 +13,7 @@ Notebooks used for previous demos are also available:
 - [UC 2018](notebooks/UC_2018)
 - [Dev Summit 2019](notebooks/dev_summit_2019)
 - [UC 2019](notebooks/UC_2019)
+- [Dev Summit 2020](notebooks/dev_summit_2020)
 
 ## Scripts
 
