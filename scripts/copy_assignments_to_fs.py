@@ -34,15 +34,15 @@ from arcgis.apps import workforce
 from arcgis.gis import GIS
 
 
-def initialize_logging(log_file):
+def initialize_logging(log_file=None):
     """
     Setup logging
     :param log_file: (string) The file to log to
     :return: (Logger) a logging instance
     """
     # initialize logging
-    formatter = logging.Formatter("[%(asctime)s] [%(filename)30s:%(lineno)4s - %(funcName)30s()]\
-             [%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
+    formatter = logging.Formatter(
+        "[%(asctime)s] [%(filename)30s:%(lineno)4s - %(funcName)30s()][%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
     # Grab the root logger
     logger = logging.getLogger()
     # Set the root logger logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -52,12 +52,13 @@ def initialize_logging(log_file):
     sh.setFormatter(formatter)
     sh.setLevel(logging.INFO)
     # Create a handler to log to the specified file
-    rh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=10485760)
-    rh.setFormatter(formatter)
-    rh.setLevel(logging.DEBUG)
+    if log_file:
+        rh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=10485760)
+        rh.setFormatter(formatter)
+        rh.setLevel(logging.DEBUG)
+        logger.addHandler(rh)
     # Add the handlers to the root logger
     logger.addHandler(sh)
-    logger.addHandler(rh)
     return logger
 
 
@@ -148,7 +149,7 @@ if __name__ == "__main__":
     parser.add_argument('-target-fl', dest='target_fl', help="The feature layer to copy the assignments to",
                         required=True)
     parser.add_argument('-config-file', dest="config_file", help="The json configuration file to use", required=True)
-    parser.add_argument('-log-file', dest='log_file', help="The log file to write to", required=True)
+    parser.add_argument('-log-file', dest='log_file', help="The log file to write to")
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
     parser.add_argument('--copy-attachments', dest="copy_attachments", action="store_true", default=False)
