@@ -203,8 +203,10 @@ def get_invalid_assignments(project, time_tolerance, dist_tolerance, min_accurac
 def main(arguments):
     # initialize logger
     logger = initialize_logging(arguments.log_file)
+    
     # Create the GIS
     logger.info("Authenticating...")
+    
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,

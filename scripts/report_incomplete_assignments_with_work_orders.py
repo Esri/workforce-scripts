@@ -84,9 +84,9 @@ def main(arguments):
 		logger.info(e)
 		logger.info("Invalid project id")
 		sys.exit(0)
-		
-	layer = None
+	
 	# Get Survey or Collector Feature Layer
+	layer = None
 	if arguments.survey_id and arguments.layer_url:
 		logger.info("Please try again with either survey id or layer url provided, not both")
 		sys.exit(0)

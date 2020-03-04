@@ -75,6 +75,7 @@ def main(arguments):
               verify_cert=not arguments.skip_ssl_verification)
 
     logger.info("Getting workforce project")
+    
     # Get the workforce project
     item = gis.content.get(arguments.project_id)
     try:
@@ -84,6 +85,7 @@ def main(arguments):
         logger.info("Invalid project id")
         sys.exit(0)
 
+    # Attach timezone to naive date value
     try:
         local_cutoff_date = pendulum.from_format(arguments.cutoff_date, "MM/DD/YYYY hh:mm:ss", tz=args.timezone, formatter='alternative')
     except Exception as e:
@@ -92,6 +94,8 @@ def main(arguments):
         sys.exit(0)
     utc_dt = local_cutoff_date.in_tz('UTC')
     formatted_date = utc_dt.strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Query using UTC-formatted date and reset those workers
     logger.info("Querying workers")
     where = f"{project._worker_schema.edit_date} < TIMESTAMP '{formatted_date}'"
     workers = project.workers.search(where=where)

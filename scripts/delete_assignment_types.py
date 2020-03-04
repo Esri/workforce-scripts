@@ -59,6 +59,7 @@ def initialize_logging(log_file=None):
     logger.addHandler(sh)
     return logger
 
+
 def main(arguments):
     # initialize logging
     logger = initialize_logging(arguments.log_file)
@@ -75,7 +76,6 @@ def main(arguments):
     project = workforce.Project(item)
     # Find all assignment_types and assign
     assignment_types = project.assignment_types.search()
-
     logger.info("Deleting assignment types...")
     # batch delete assignment_types
     project.assignment_types.batch_delete(assignment_types)

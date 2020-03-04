@@ -72,19 +72,23 @@ def initialize_logging(log_file=None):
 def main(arguments):
     # initialize logging
     logger = initialize_logging(arguments.log_file)
+    
     # Create the GIS
     logger.info("Authenticating...")
+    
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,
               password=arguments.password,
               verify_cert=not arguments.skip_ssl_verification)
+    
     # Get the project and data
     item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
     dispatcher = project.dispatchers.search(where="{}='{}'".format(project._dispatcher_schema.user_id, arguments.username))
     if not dispatcher:
         log_critical_and_raise_exception("{} is not a dispatcher".format(args.username))
+        
     # Read the csv file
     logger.info("Reading CSV file: {}...".format(arguments.csv_file))
     assignments_in_csv = []
