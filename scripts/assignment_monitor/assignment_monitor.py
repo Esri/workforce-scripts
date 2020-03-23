@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """
-Copyright 2018 Esri
+Copyright 2020 Esri
 
    Licensed under the Apache License, Version 2.0 (the "License");
 
@@ -72,15 +72,15 @@ def post_to_slack(slack_webhook, assignment):
     logging.getLogger().info("Status code: {}".format(response.status_code))
 
 
-def initialize_logging(log_file):
+def initialize_logging(log_file=None):
     """
     Setup logging
     :param log_file: (string) The file to log to
     :return: (Logger) a logging instance
     """
     # initialize logging
-    formatter = logging.Formatter("[%(asctime)s] [%(filename)30s:%(lineno)4s - %(funcName)30s()]\
-             [%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
+    formatter = logging.Formatter(
+        "[%(asctime)s] [%(filename)30s:%(lineno)4s - %(funcName)30s()][%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
     # Grab the root logger
     logger = logging.getLogger()
     # Set the root logger logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -90,12 +90,13 @@ def initialize_logging(log_file):
     sh.setFormatter(formatter)
     sh.setLevel(logging.INFO)
     # Create a handler to log to the specified file
-    rh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=10485760)
-    rh.setFormatter(formatter)
-    rh.setLevel(logging.DEBUG)
+    if log_file:
+        rh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=10485760)
+        rh.setFormatter(formatter)
+        rh.setLevel(logging.DEBUG)
+        logger.addHandler(rh)
     # Add the handlers to the root logger
     logger.addHandler(sh)
-    logger.addHandler(rh)
     return logger
 
 

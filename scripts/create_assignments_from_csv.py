@@ -41,15 +41,15 @@ def log_critical_and_raise_exception(message):
     raise Exception(message)
 
 
-def initialize_logging(log_file):
+def initialize_logging(log_file=None):
     """
     Setup logging
     :param log_file: (string) The file to log to
     :return: (Logger) a logging instance
     """
     # initialize logging
-    formatter = logging.Formatter("[%(asctime)s] [%(filename)30s:%(lineno)4s - %(funcName)30s()]\
-             [%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
+    formatter = logging.Formatter(
+        "[%(asctime)s] [%(filename)30s:%(lineno)4s - %(funcName)30s()][%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
     # Grab the root logger
     logger = logging.getLogger()
     # Set the root logger logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -59,31 +59,36 @@ def initialize_logging(log_file):
     sh.setFormatter(formatter)
     sh.setLevel(logging.INFO)
     # Create a handler to log to the specified file
-    rh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=10485760)
-    rh.setFormatter(formatter)
-    rh.setLevel(logging.DEBUG)
+    if log_file:
+        rh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=10485760)
+        rh.setFormatter(formatter)
+        rh.setLevel(logging.DEBUG)
+        logger.addHandler(rh)
     # Add the handlers to the root logger
     logger.addHandler(sh)
-    logger.addHandler(rh)
     return logger
 
 
 def main(arguments):
     # initialize logging
     logger = initialize_logging(arguments.log_file)
+    
     # Create the GIS
     logger.info("Authenticating...")
+    
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,
               password=arguments.password,
               verify_cert=not arguments.skip_ssl_verification)
+    
     # Get the project and data
     item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
     dispatcher = project.dispatchers.search(where="{}='{}'".format(project._dispatcher_schema.user_id, arguments.username))
     if not dispatcher:
         log_critical_and_raise_exception("{} is not a dispatcher".format(args.username))
+        
     # Read the csv file
     logger.info("Reading CSV file: {}...".format(arguments.csv_file))
     assignments_in_csv = []
@@ -207,7 +212,7 @@ if __name__ == "__main__":
     parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone for the assignments")
     parser.add_argument('-csv-file', dest='csv_file', help="The path/name of the csv file to read")
     parser.add_argument('-wkid', dest='wkid', help='The wkid that the x,y values are use', type=int, default=4326)
-    parser.add_argument('-log-file', dest='log_file', help='The log file to use', required=True)
+    parser.add_argument('-log-file', dest='log_file', help='The log file to use')
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
     args = parser.parse_args()

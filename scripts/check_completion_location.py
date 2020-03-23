@@ -36,15 +36,15 @@ from arcgis.apps import workforce
 from arcgis.gis import GIS
 
 
-def initialize_logging(log_file):
+def initialize_logging(log_file=None):
     """
     Setup logging
     :param log_file: (string) The file to log to
     :return: (Logger) a logging instance
     """
     # initialize logging
-    formatter = logging.Formatter("[%(asctime)s] [%(filename)30s:%(lineno)4s - %(funcName)30s()]\
-             [%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
+    formatter = logging.Formatter(
+        "[%(asctime)s] [%(filename)30s:%(lineno)4s - %(funcName)30s()][%(threadName)5s] [%(name)10.10s] [%(levelname)8s] %(message)s")
     # Grab the root logger
     logger = logging.getLogger()
     # Set the root logger logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -54,12 +54,13 @@ def initialize_logging(log_file):
     sh.setFormatter(formatter)
     sh.setLevel(logging.INFO)
     # Create a handler to log to the specified file
-    rh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=10485760)
-    rh.setFormatter(formatter)
-    rh.setLevel(logging.DEBUG)
+    if log_file:
+        rh = logging.handlers.RotatingFileHandler(log_file, mode='a', maxBytes=10485760)
+        rh.setFormatter(formatter)
+        rh.setLevel(logging.DEBUG)
+        logger.addHandler(rh)
     # Add the handlers to the root logger
     logger.addHandler(sh)
-    logger.addHandler(rh)
     return logger
 
 
@@ -202,8 +203,10 @@ def get_invalid_assignments(project, time_tolerance, dist_tolerance, min_accurac
 def main(arguments):
     # initialize logger
     logger = initialize_logging(arguments.log_file)
+    
     # Create the GIS
     logger.info("Authenticating...")
+    
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,
@@ -238,7 +241,7 @@ if __name__ == "__main__":
     parser.add_argument('-target-fl', dest='target_fl', help="The feature layer to copy the assignments to",
                         required=True)
     parser.add_argument('-config-file', dest="config_file", help="The json configuration file to use", required=True)
-    parser.add_argument('-log-file', dest='log_file', help="The log file to write to", required=True)
+    parser.add_argument('-log-file', dest='log_file', help="The log file to write to")
     parser.add_argument('-workers', dest='workers', nargs="+", help="The id of the worker to check")
     parser.add_argument('-time-tolerance', dest='time_tolerance',
                         help="The tolerance (in minutes) to check completion date vs location", type=int, default=5)
