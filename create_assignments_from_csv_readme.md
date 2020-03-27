@@ -2,7 +2,7 @@
 
 This script reads a CSV file containing the required fields to add unassigned or assigned assignments to a workforce project. Attachments can also be uploaded if the path to the file is specified in the CSV file.
 
-You can also use this script without the "xField" and "yField" parameters - the script will then geocode based on the "Location" field. Please note that geocoding consumes credits.
+You can also use this script without the "xField" and "yField" parameters - it will then geocode the provided location-field to get the assignments location. Please note that geocoding consumes credits.
 
 Supports Python 3.5+. This script requires the pendulum Python module
 
@@ -30,7 +30,7 @@ Due to the various naming conventions organizations may have, this script has ma
 - -priority-field \<priorityField\> - The name of field in the CSV file that contains the priority (Optional)
 - -work-order-id-field \<workOrderIdField\> - The name of the field in the CSV file that contains the workerOrderId (Optional)
 - -due-date-field \<dueDateField\> - The name of the field in the CSV file that contains the dueDate (Optional)
-- -attachment-file-field \<attachmentFileField\> - The name of the CSV file that contains the file (if any) to upload with the assignmnent (Optional)
+- -attachment-file-field \<attachmentFileField\> - The name of the CSV file that contains the file (if any) to upload with the assignment (Optional)
 - -date-format \<dateFormat\> - The date format to use (Optional - defaults to "%m/%d/%Y %H:%M:%S")
 - -wkid \<wkid\> - The spatial reference wkid that the x and y fields are in (Optional - defaults to 4236 (GCS_WGS_1984))
 - -worker-field \<workerField\> - The field in the CSV file that contains the worker username to assign the assignment to

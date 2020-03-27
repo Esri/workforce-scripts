@@ -134,7 +134,13 @@ def main(arguments):
                         spatialReference=dict(
                             wkid=int(args.wkid)))
         else:
-            location_geometry = addresses[i]['location']
+            try:
+                location_geometry = addresses[i]['location']
+            except Exception as e:
+                logger.info(e)
+                logger.info("Geocoding did not work for the assignment with location {}. Please check your addresses again".format(assignment[args.location_field]))
+                logger.info("Continuing on to the next assignment")
+                continue
             location_geometry['spatialReference'] = dict(wkid=int(args.wkid))
             geometry = location_geometry
         assignment_to_add.geometry = geometry
