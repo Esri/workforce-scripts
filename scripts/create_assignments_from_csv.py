@@ -33,6 +33,7 @@ import pendulum
 import datetime
 import types
 from arcgis.apps import workforce
+from arcgis.geocoding import batch_geocode
 from arcgis.gis import GIS
 
 
@@ -92,9 +93,11 @@ def main(arguments):
     # Read the csv file
     logger.info("Reading CSV file: {}...".format(arguments.csv_file))
     assignments_in_csv = []
+    locations = []
     with open(arguments.csv_file, 'r') as file:
         reader = csv.DictReader(file)
         for row in reader:
+            locations.append(row[args.location_field])
             assignments_in_csv.append(row)
 
     # Fetch assignment types
@@ -115,17 +118,30 @@ def main(arguments):
     for worker in workers:
         workers_dict[worker.user_id] = worker
 
+    if not (args.x_field and args.y_field):
+        addresses = batch_geocode(locations, out_sr=args.wkid)
     assignments_to_add = []
-    for assignment in assignments_in_csv:
+    for i, assignment in enumerate(assignments_in_csv):
         assignment_to_add = workforce.Assignment(project,
                                                  assignment_type=assignment_type_dict[assignment[args.assignment_type_field]],
                                                  )
 
         # Create the geometry
-        geometry = dict(x=float(assignment[args.x_field]),
+        if args.x_field and args.y_field:
+            geometry = dict(x=float(assignment[args.x_field]),
                         y=float(assignment[args.y_field]),
                         spatialReference=dict(
                             wkid=int(args.wkid)))
+        else:
+            try:
+                location_geometry = addresses[i]['location']
+            except Exception as e:
+                logger.info(e)
+                logger.info("Geocoding did not work for the assignment with location {}. Please check your addresses again".format(assignment[args.location_field]))
+                logger.info("Continuing on to the next assignment")
+                continue
+            location_geometry['spatialReference'] = dict(wkid=int(args.wkid))
+            geometry = location_geometry
         assignment_to_add.geometry = geometry
 
         # Determine the assignment due date, and if no time is provided, make the due date all day
@@ -192,8 +208,8 @@ if __name__ == "__main__":
     parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
     parser.add_argument('-project-id', dest='project_id', help="The id of the project to add assignments to", required=True)
-    parser.add_argument('-x-field', dest='x_field', help="The field that contains the x SHAPE information", required=True)
-    parser.add_argument('-y-field', dest='y_field', help="The field that contains the y SHAPE information", required=True)
+    parser.add_argument('-x-field', dest='x_field', help="The field that contains the x SHAPE information. Failing to pass this parameter will use geocoding", required=False)
+    parser.add_argument('-y-field', dest='y_field', help="The field that contains the y SHAPE information. Failing to pass this parameter will use geocoding", required=False)
     parser.add_argument('-assignment-type-field', dest='assignment_type_field',
                         help="The field that contains the assignmentType", required=True)
     parser.add_argument('-location-field', dest='location_field',
