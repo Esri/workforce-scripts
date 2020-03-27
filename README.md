@@ -18,10 +18,10 @@ Notebooks used for previous demos are also available:
 ## Scripts
 
 Supports:
-- Python 3.6+
-- Python API for ArcGIS 1.7.0+
+- Python 3.5+
+- Python API for ArcGIS 1.4.1+
 
-A set of Python scripts using the [ArcGIS API for Python v1.7.0+](https://developers.arcgis.com/python/).
+A set of Python scripts using the [ArcGIS API for Python v1.4.1+](https://developers.arcgis.com/python/).
 These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 
 
@@ -51,16 +51,9 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 1. Install ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
 2. Clone or download this repository
 3. In terminal/cmd navigate to the `scripts` folder
+4. Install arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
+5. You should now be able to run all scripts in the `scripts` folder (provided you use the correct arguments)
 
-Without Conda:
-- Install arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
-
-With Conda:
-- Install Anaconda
-- Run `conda env create --file environment.yml` to create the virtual environment with the correct dependencies
-- Run `conda activate workforce-scripts` to activate the environment
-
-You should now be able to run all scripts in the `scripts` folder (provided you use the correct arguments) and notebooks in the `notebooks` folder
 
 ## Resources
 

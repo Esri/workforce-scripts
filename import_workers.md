@@ -28,7 +28,7 @@ Due to the various naming conventions organizations may have, this script has ma
 - -contact-number-field \<contactNumberField\> (optional) The name of the column that stores the workers contact number
 
 Example Usage:
-```bash
+```python
 python import_workers.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -name-field name -status-field status -user-id-field userId -log-file log.txt -csv-file ../sample_data/workers.csv -project-id <project-id> -title-field title -contact-number-field contactNumber
 ```
 

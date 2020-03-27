@@ -13,7 +13,7 @@ This script deletes assignments based a query or list of OBJECTIDs. The script u
 - -where \<where\> - The where clause to use when querying the assignments to export (Optional - Defaults to None)
 
 Example Usage:
-```bash
+```python
 python delete_assignments.py -u username -p password -org "https://<org>.maps.arcgis.com" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -log-file "../log.txt" -where "1=1"
 ```
 

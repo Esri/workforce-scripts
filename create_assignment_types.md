@@ -20,7 +20,7 @@ In addition to the authentication arguments, the script specific arguments are a
 - -project-id \<projectId\> - The workforce project ID (from AGOL)
 
 Example Usage:
-```bash
+```python
 python create_assignment_types.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -project-id <project-id> -csv-file ../sample_data/assignment_types.csv -log-file log.txt
 ```
 
