@@ -3,7 +3,7 @@
 This script checks the location and time of when an assignment was completed against the location of the worker at that same time. It is designed to find out if workers are completing assignments without visiting the location.
 It is an extension of the [Copy Assignments](copy_assignments_fs_readme.md) script in that assignments that were improperly completed are copied to a different feature service so they can be analyzed.
 
-Supports Python 3.5+
+Supports Python 3.5+, Version 1 (connected) Projects only
 
 ----
 
@@ -19,7 +19,7 @@ This script relies on a JSON configuration file that maps the original field nam
 - -min-accuracy \<minAccuracy\> - The minimum accuracy required when querying worker locations (optional - defaults to 50 (m))
 
 Example Usage:
-```python
+```bash
 python check_completion_location.py -config-file "../sample_data/fieldMappings.json" -u username -p password -org "https://<org>.maps.arcgis.com" -target-fl "http://services.arcgis.com/<server>/arcgis/rest/services/AssignmentsArchives/FeatureServer/0" -where "1=1" -pid "e2293b52beef439ca475427287969466" -log-file "log.txt" -workers worker_1 -time-tolerance 5 -distance-tolerance 100 -min-accuracy 25
 ```
 
