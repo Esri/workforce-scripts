@@ -121,8 +121,7 @@ def main(arguments):
     if not (args.x_field and args.y_field):
         addresses = batch_geocode(locations, out_sr=args.wkid)
     assignments_to_add = []
-    i = 0
-    for assignment in assignments_in_csv:
+    for i, assignment in enumerate(assignments_in_csv):
         assignment_to_add = workforce.Assignment(project,
                                                  assignment_type=assignment_type_dict[assignment[args.assignment_type_field]],
                                                  )
@@ -190,7 +189,6 @@ def main(arguments):
 
         # Add all assignments to the list created
         assignments_to_add.append(assignment_to_add)
-        i = i + 1
 
     # Batch add all assignments to the project
     logger.info("Adding Assignments...")
