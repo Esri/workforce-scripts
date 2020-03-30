@@ -30,3 +30,4 @@ python migrate_to_v2.py -u <username> -p <password> -org https://<org>.maps.arcg
 
  1. First the script creates a new blank version 2 project
  2. Then data is migrated over from your version 1 project to version 2
+ 

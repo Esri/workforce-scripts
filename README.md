@@ -13,6 +13,7 @@ Notebooks used for previous demos are also available:
 - [UC 2018](notebooks/UC_2018)
 - [Dev Summit 2019](notebooks/dev_summit_2019)
 - [UC 2019](notebooks/UC_2019)
+- [Dev Summit 2020](notebooks/dev_summit_2020)
 
 ## Scripts
 
@@ -44,7 +45,6 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 | [Report Incomplete Assignments with Work Orders ](report_incomplete_assignments_with_work_orders.md)               | [report_incomplete_assignments_with_work_orders.py](scripts/report_incomplete_assignments_with_work_orders.py)    
 | [Report Complete Assignments without Work Orders](report_complete_assignments_without_work_orders.md)               | [report_complete_assignments_without_work_orders.py](scripts/report_complete_assignments_without_work_orders.py)    
 | [Create Default Ops Dashboard](create_ops_dashboard.md)              | [create_ops_dashboard.py](scripts/create_ops_dashboard.py)|
-
 
 ### Instructions
 

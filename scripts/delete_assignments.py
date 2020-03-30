@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """
-   Copyright 2020 Esri
+   Copyright 2018 Esri
 
    Licensed under the Apache License, Version 2.0 (the "License");
 
@@ -44,15 +44,17 @@ def main(arguments):
     sh.setFormatter(formatter)
     sh.setLevel(logging.INFO)
     # Create a handler to log to the specified file
-    rh = logging.handlers.RotatingFileHandler(arguments.log_file, mode='a', maxBytes=10485760)
-    rh.setFormatter(formatter)
-    rh.setLevel(logging.DEBUG)
+    if arguments.log_file:
+        rh = logging.handlers.RotatingFileHandler(arguments.log_file, mode='a', maxBytes=10485760)
+        rh.setFormatter(formatter)
+        rh.setLevel(logging.DEBUG)
+        logger.addHandler(rh)
     # Add the handlers to the root logger
     logger.addHandler(sh)
-    logger.addHandler(rh)
 
     # Create the GIS
     logger.info("Authenticating...")
+    
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,
@@ -82,7 +84,7 @@ if __name__ == "__main__":
                         required=True)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-where', dest='where', help="The where clause to use", default="1=1")
-    parser.add_argument('-log-file', dest="log_file", help="The file to log to", required=True)
+    parser.add_argument('-log-file', dest="log_file", help="The file to log to")
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
 

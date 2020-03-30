@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """
-   Copyright 2018 Esri
+   Copyright 2020 Esri
 
    Licensed under the Apache License, Version 2.0 (the "License");
 
@@ -20,7 +20,7 @@
 
    limitations under the License.​
 
-   This sample deletes all assignment types (Will mess up your assignments if you have any)
+   This sample resets stale workers to status "not_working"
 """
 
 import argparse
@@ -30,6 +30,7 @@ import sys
 import traceback
 from arcgis.apps import workforce
 from arcgis.gis import GIS
+import pendulum
 
 
 def initialize_logging(log_file=None):
@@ -61,38 +62,62 @@ def initialize_logging(log_file=None):
 
 
 def main(arguments):
-    # initialize logging
+    # Initialize logging
     logger = initialize_logging(arguments.log_file)
+
     # Create the GIS
     logger.info("Authenticating...")
+
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,
               password=arguments.password,
               verify_cert=not arguments.skip_ssl_verification)
 
-    # Get the project and data
+    logger.info("Getting workforce project")
+    
+    # Get the workforce project
     item = gis.content.get(arguments.project_id)
-    project = workforce.Project(item)
-    # Find all assignment_types and assign
-    assignment_types = project.assignment_types.search()
-    logger.info("Deleting assignment types...")
-    # batch delete assignment_types
-    project.assignment_types.batch_delete(assignment_types)
-    logger.info("Completed")
+    try:
+        project = workforce.Project(item)
+    except Exception as e:
+        logger.info(e)
+        logger.info("Invalid project id")
+        sys.exit(0)
+
+    # Attach timezone to naive date value
+    try:
+        local_cutoff_date = pendulum.from_format(arguments.cutoff_date, "MM/DD/YYYY hh:mm:ss", tz=args.timezone, formatter='alternative')
+    except Exception as e:
+        logger.info(e)
+        logger.info("Invalid date format. Please check documentation and try again")
+        sys.exit(0)
+    utc_dt = local_cutoff_date.in_tz('UTC')
+    formatted_date = utc_dt.strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Query using UTC-formatted date and reset those workers
+    logger.info("Querying workers")
+    where = f"{project._worker_schema.edit_date} < TIMESTAMP '{formatted_date}'"
+    workers = project.workers.search(where=where)
+    for worker in workers:
+        worker.status = "not_working"
+    logger.info("Updating workers")
+    project.workers.batch_update(workers)
+    logger.info("Completed!")
 
 
 if __name__ == "__main__":
     # Get all of the commandline arguments
-    parser = argparse.ArgumentParser("Add Assignments to Workforce Project")
+    parser = argparse.ArgumentParser("Reset stale workers' status to not working")
     parser.add_argument('-u', dest='username', help="The username to authenticate with", required=True)
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
     parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
-    parser.add_argument('-project-id', dest='project_id', help="The id of the project to add assignments to", required=True)
+    parser.add_argument('-project-id', dest='project_id', help="The id of the Workforce project", required=True)
+    parser.add_argument('-cutoff-date', dest='cutoff_date', help="If a worker has not been updated at or after this date, change its status to not working. MM/DD/YYYY hh:mm:ss format, either in UTC or a timezone you provide", required=True)
+    parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone for the assignments")
     parser.add_argument('-log-file', dest='log_file', help='The log file to use')
-    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
-                        help="Verify the SSL Certificate of the server")
+    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)

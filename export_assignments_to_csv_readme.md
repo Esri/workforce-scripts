@@ -2,7 +2,7 @@
 
 This script exports assignments based on a query to a CSV file
 
-Supports Python 3.5+
+Supports Python 3.5+. Note that this script requires the `arrow` package, which must be installed separately.
 
 ----
 
