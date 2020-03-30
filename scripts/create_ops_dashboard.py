@@ -85,7 +85,7 @@ def main(arguments):
 		sys.exit(0)
 	
 	# Clone dispatcher map if desired by user
-	if arguments.clone_map:
+	if not arguments.use_dispatcher_webmap:
 		logger.info("Saving copy of dispatcher webmap")
 		map_id = project.dispatcher_webmap.save(item_properties={"title": project.title + " Dashboard Map", "tags": [], "snippet": "Dashboard Map"}).id
 	else:
@@ -132,8 +132,8 @@ if __name__ == "__main__":
 	parser.add_argument('-project-id', dest='project_id', help="The id of the Workforce project", required=True)
 	parser.add_argument('-title', dest='title', help="Title of your new Ops Dashboard. Defaults to project title", required=False)
 	parser.add_argument('--light-mode', dest='light_mode', action='store_true', help="Light mode dashboard. Default is dark mode")
-	parser.add_argument('--clone-map', dest='clone_map', action='store_true',
-						help="Create a new copy of the dispatcher webmap to use in your ops dashboard, as opposed to the actual dispatcher webmap")
+	parser.add_argument('--use-dispatcher-webmap', dest='use_dispatcher_webmap', action='store_true', default=False,
+						help="Use the actual dispatcher webmap in your dashboard as opposed to a copy of the webmap")
 	parser.add_argument('-log-file', dest='log_file', help='The log file to use')
 	parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
 						help="Verify the SSL Certificate of the server")
