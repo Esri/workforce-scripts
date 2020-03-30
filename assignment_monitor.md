@@ -1,11 +1,12 @@
-# Assignment Monitor
-A demo showing how completed assignments can be stored in SQLite database and pushed to a slack channel in near real-time.
+# Assignment Monitor (Slack and Email Notifications)
+A demo showing how completed assignments can be stored in SQLite database and pushed to a slack channel in near real-time or emailed to you.
 
 ## Installation
 
 1. Install Conda or Miniconda (plus requests) and the ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
 2. Clone or download this repository
-3. Modify the config.ini file to use your ArcGIS online credentials, the workforce project, the slack web-hook, and the log file.
+3. Install the repo requirements (`pip install -r requirements.txt`)
+4. Modify the config.ini file to use your ArcGIS online credentials, the workforce project, (optionally) the slack web-hook, (optionally) Gmail email credentials, and the log file.
 
 ## Running it
 
@@ -25,3 +26,4 @@ In a real-world scenario, this script can be modified to run once (not loop fore
 6. It then waits for 5 seconds and repeats steps 3-6 until manually stopped (CTRL-C)
 
 Info about Slack Webhooks can be found [here](https://api.slack.com/incoming-webhooks).
+Info about setting up a Gmail account (we recommend you have a dedicated account, rather than using personal email) with Yagmail [here](https://github.com/kootenpv/yagmail#username-and-password)
