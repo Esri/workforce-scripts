@@ -124,10 +124,28 @@ if __name__ == "__main__":
                                               project.assignment_types_table,
                                               project._assignment_schema.assignment_type,
                                               project._assignment_types.global_id,
-                                              "AssignmentsToTypes")
+                                              "AssignmentsToTypes5")
     assignments_to_workers = create_joined_view(gis,
                                               project.assignments_layer,
                                               project.workers_layer,
                                               project._assignment_schema.worker_id,
                                               project._worker_schema.global_id,
-                                              "AssignmentsToWorkers")
+                                              "AssignmentsToWorkers5")
+    assignments_to_dispatchers = create_joined_view(gis,
+                                                    project.assignments_layer,
+                                                    project.dispatchers_layer,
+                                                    project._assignment_schema.dispatcher_id,
+                                                    project._dispatcher_schema.global_id,
+                                                    "AssignmentsToDispatchers5")
+    assignments_types_workers = create_joined_view(gis,
+                                                   assignments_to_types.layers[0],
+                                                   assignments_to_workers.layers[0],
+                                                   project._assignment_schema.global_id,
+                                                   project._assignment_schema.global_id,
+                                                   "AssignmentsToTypesToWorkers5")
+    assignment_types_workers_dispatchers = create_joined_view(gis,
+                                                              assignments_types_workers.layers[0],
+                                                              assignments_to_dispatchers.layers[0],
+                                                              project._assignment_schema.global_id,
+                                                              project._assignment_schema.global_id,
+                                                              "AssignmentsToTypesToWorkersToDispatchers5")
