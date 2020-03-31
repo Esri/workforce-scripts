@@ -152,14 +152,14 @@ def send_email(gmail_username, recipient_emails, assignment):
     recipient_emails = recipient_emails.replace(" ", "").split(",")
     subject = str(assignment) + " has been completed"
     body = """
-    *Assignment Completed*:
-    *Assignment Type:* {}
-    *Location*: {}
-    *Description*: {}
-    *Notes*: {}
-    *Worker*: {}
-    *Time*: {}
-    *Link*: {}
+    Assignment Completed:
+    Assignment Type: {}
+    Location: {}
+    Description: {}
+    Notes: {}
+    Worker: {}
+    Time: {}
+    Link: {}
     """.format(
         assignment.assignment_type.name,
         assignment.location,
