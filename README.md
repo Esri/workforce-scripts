@@ -45,6 +45,7 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 | [Report Incomplete Assignments with Work Orders ](report_incomplete_assignments_with_work_orders.md)               | [report_incomplete_assignments_with_work_orders.py](scripts/report_incomplete_assignments_with_work_orders.py)    
 | [Report Complete Assignments without Work Orders](report_complete_assignments_without_work_orders.md)               | [report_complete_assignments_without_work_orders.py](scripts/report_complete_assignments_without_work_orders.py)    
 | [Create Default Ops Dashboard](create_ops_dashboard.md)              | [create_ops_dashboard.py](scripts/create_ops_dashboard.py)|
+| [Create Joined View](create_joined_view.md) | [create_joined_view](scripts/created_joined_view.py) |
 
 ### Instructions
 

@@ -404,7 +404,7 @@ if __name__ == "__main__":
     parser.add_argument('-log-file', dest="log_file", help="The file to log to")
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
-    parser.add_argument('-n', dest='name', help="The name of the resulting joined view")
+    parser.add_argument('-name', dest='name', help="The name of the resulting joined view")
     args = parser.parse_args()
     try:
         main(args)
