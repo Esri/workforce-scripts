@@ -1,7 +1,33 @@
+# -*- coding: UTF-8 -*-
+"""
+   Copyright 2020 Esri
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+
+   you may not use this file except in compliance with the License.
+
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+
+   distributed under the License is distributed on an "AS IS" BASIS,
+
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+   See the License for the specific language governing permissions and
+
+   limitations under the License.​
+
+   This sample creates a joined view layer combining the 4 Workforce layers and tables
+"""
+
 import argparse
 import logging
 import logging.handlers
 import sys
+import traceback
 from arcgis.gis import GIS
 from arcgis.apps.workforce.project import Project
 from arcgis.features import FeatureLayerCollection
@@ -25,7 +51,7 @@ def create_joined_view(gis, source_layer, join_layer, primary_key_field, foreign
         name=name,
         is_view=True,
         create_params={
-            "currentVersion": 10.2,
+            "currentVersion": 10.7,
             "serviceDescription": "",
             "hasVersionedData": False,
             "supportsDisconnectedEditing": False,
@@ -48,9 +74,7 @@ def create_joined_view(gis, source_layer, join_layer, primary_key_field, foreign
                 "xssPreventionRule": "InputOnly",
                 "xssInputRule": "rejectInvalid"
             },
-            "tables": [
-
-            ],
+            "tables": [],
             "name": f"{name}"
         }
     )
@@ -91,6 +115,11 @@ def worker_fields(use_joined_name=False):
             "name": "worker_name",
             "alias": "Worker Name",
             "source": "name"
+        },
+        {
+            "name": "worker_title",
+            "alias": "Worker Title",
+            "source": "title"
         },
         {
             "name": "worker_status",
@@ -324,7 +353,12 @@ def main(args):
     logger.info("Authenticating...")
     gis = GIS(args.org, args.username, args.password)
     logger.info("Getting Workforce Project...")
+    item = gis.content.get(args.project_id)
+    if item is None:
+        raise RuntimeError("Invalid Project Id")
     project = Project(gis.content.get(args.project_id))
+    if int(project.version.split(".")[0]) < 2:
+        raise RuntimeError("This script only works with offline-enabled projects")
     logger.info("Phase 1: Joining assignments and assignment types...")
     assignments_to_types = create_joined_view(gis,
                                               project.assignments_layer,
@@ -377,7 +411,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser("Creates a hosted view layer that joins the 4 offline-enabled Workforce layers/tables together")
     parser.add_argument('-u', dest='username', help="The username to authenticate with", required=True)
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
     parser.add_argument('-org', dest='org', help="The url of the org/portal to use", required=True)
@@ -387,5 +421,10 @@ if __name__ == "__main__":
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
-    main(args)
+    try:
+        main(args)
+    except Exception as e:
+        logging.getLogger().critical("Exception detected, script exiting")
+        logging.getLogger().critical(e)
+        logging.getLogger().critical(traceback.format_exc().replace("\n", " | "))
 
