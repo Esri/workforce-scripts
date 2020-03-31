@@ -24,6 +24,7 @@
 """
 
 import argparse
+import datetime
 import logging
 import logging.handlers
 import sys
@@ -31,6 +32,153 @@ import traceback
 from arcgis.gis import GIS
 from arcgis.apps.workforce.project import Project
 from arcgis.features import FeatureLayerCollection
+
+
+# Define the set of fields to include for each layer in the joined layer
+
+assignment_type_fields = [
+    {
+        "name": "assignment_type_description",
+        "alias": "Assignment Type",
+        "source": "description"
+    }
+]
+
+
+assignment_fields = [
+    {
+        "name": "description",
+        "alias": "Description",
+        "source": "description"
+    },
+    {
+        "name": "status",
+        "alias": "Status",
+        "source": "status"
+    },
+    {
+        "name": "notes",
+        "alias": "Notes",
+        "source": "notes"
+    },
+    {
+        "name": "priority",
+        "alias": "Priority",
+        "source": "priority"
+    },
+    {
+        "name": "workorderid",
+        "alias": "WorkOrder ID",
+        "source": "workorderid"
+    },
+    {
+        "name": "duedate",
+        "alias": "Due Date",
+        "source": "duedate"
+    },
+    {
+        "name": "GlobalID",
+        "alias": "GlobalID",
+        "source": "GlobalID"
+    },
+    {
+        "name": "location",
+        "alias": "Location",
+        "source": "location"
+    },
+    {
+        "name": "declinedcomment",
+        "alias": "Declined Comment",
+        "source": "declinedcomment"
+    },
+    {
+        "name": "assigneddate",
+        "alias": "Assigned on Date",
+        "source": "assigneddate"
+    },
+    {
+        "name": "inprogressdate",
+        "alias": "In Progress Date",
+        "source": "inprogressdate"
+    },
+    {
+        "name": "completeddate",
+        "alias": "Completed on Date",
+        "source": "completeddate"
+    },
+    {
+        "name": "declineddate",
+        "alias": "Declined on Date",
+        "source": "declineddate"
+    },
+    {
+        "name": "pauseddate",
+        "alias": "Paused on Date",
+        "source": "pauseddate"
+    },
+    {
+        "name": "CreationDate",
+        "alias": "Creation Date",
+        "source": "CreationDate"
+    },
+    {
+        "name": "Creator",
+        "alias": "Creator",
+        "source": "Creator"
+    },
+    {
+        "name": "EditDate",
+        "alias": "Edit Date",
+        "source": "EditDate"
+    },
+    {
+        "name": "Editor",
+        "alias": "Editor",
+        "source": "Editor"
+    }
+]
+
+
+worker_fields = [
+    {
+        "name": "worker_name",
+        "alias": "Worker Name",
+        "source": "name"
+    },
+    {
+        "name": "worker_title",
+        "alias": "Worker Title",
+        "source": "title"
+    },
+    {
+        "name": "worker_status",
+        "alias": "Worker Status",
+        "source": "status"
+    },
+    {
+        "name": "worker_contactnumber",
+        "alias": "Worker Contact Number",
+        "source": "contactnumber"
+    },
+    {
+        "name": "worker_notes",
+        "alias": "Worker Notes",
+        "source": "notes"
+    }
+]
+
+dispatcher_fields = [
+    {
+        "name": "dispatcher_name",
+        "alias": "Dispatcher Name",
+        "source": "name"
+    },
+    {
+        "name": "dispatcher_contactnumber",
+        "alias": "Dispatcher Contact Number",
+        "source": "contactnumber"
+    }
+]
 
 
 def create_joined_view(gis, source_layer, join_layer, primary_key_field, foreign_key_field, name, source_fields,
@@ -85,186 +233,13 @@ def create_joined_view(gis, source_layer, join_layer, primary_key_field, foreign
     return new_item
 
 
-def assignment_type_fields(use_joined_name=False):
+def change_source_field_name_to_joined_field_name(fields):
     """
-    Creates the list of field configuration objects to use in the joined layer
-    :param use_joined_name: Determines if the source field should be the same as the name (used when creating a view on a view)
-    :return: List of field configuration objects
+    Switches the source of the field name to be the name of the field after it was added to a joined layer
+    :param fields: The list of field objects
     """
-    fields = [
-        {
-            "name": "assignment_type_description",
-            "alias": "Assignment Type",
-            "source": "description"
-        }
-    ]
-    if use_joined_name:
-        for f in fields:
-            f["source"] = f["name"]
-    return fields
-
-
-def worker_fields(use_joined_name=False):
-    """
-    Creates the list of field configuration objects to use in the joined layer
-    :param use_joined_name: Determines if the source field should be the same as the name (used when creating a view on a view)
-    :return: List of field configuration objects
-    """
-    fields = [
-        {
-            "name": "worker_name",
-            "alias": "Worker Name",
-            "source": "name"
-        },
-        {
-            "name": "worker_title",
-            "alias": "Worker Title",
-            "source": "title"
-        },
-        {
-            "name": "worker_status",
-            "alias": "Worker Status",
-            "source": "status"
-        },
-        {
-            "name": "worker_contactnumber",
-            "alias": "Worker Contact Number",
-            "source": "contactnumber"
-        },
-        {
-            "name": "worker_notes",
-            "alias": "Worker Notes",
-            "source": "notes"
-        }
-    ]
-    if use_joined_name:
-        for f in fields:
-            f["source"] = f["name"]
-    return fields
-
-
-def dispatcher_fields(use_joined_name=False):
-    """
-    Creates the list of field configuration objects to use in the joined layer
-    :param use_joined_name: Determines if the source field should be the same as the name (used when creating a view on a view)
-    :return: List of field configuration objects
-    """
-    fields = [
-        {
-            "name": "dispatcher_name",
-            "alias": "Dispatcher Name",
-            "source": "name"
-        },
-        {
-            "name": "dispatcher_contactnumber",
-            "alias": "Dispatcher Contact Number",
-            "source": "contactnumber"
-        }
-    ]
-    if use_joined_name:
-        for f in fields:
-            f["source"] = f["name"]
-    return fields
-
-
-def assignment_fields():
-    """
-    Creates the list of field configuration objects to use in the joined layer
-    :return: List of field configuration objects
-    """
-    fields = [
-        {
-            "name": "description",
-            "alias": "Description",
-            "source": "description"
-        },
-        {
-            "name": "status",
-            "alias": "Status",
-            "source": "status"
-        },
-        {
-            "name": "notes",
-            "alias": "Notes",
-            "source": "notes"
-        },
-        {
-            "name": "priority",
-            "alias": "Priority",
-            "source": "priority"
-        },
-        {
-            "name": "workorderid",
-            "alias": "WorkOrder ID",
-            "source": "workorderid"
-        },
-        {
-            "name": "duedate",
-            "alias": "Due Date",
-            "source": "duedate"
-        },
-        {
-            "name": "GlobalID",
-            "alias": "GlobalID",
-            "source": "GlobalID"
-        },
-        {
-            "name": "location",
-            "alias": "Location",
-            "source": "location"
-        },
-        {
-            "name": "declinedcomment",
-            "alias": "Declined Comment",
-            "source": "declinedcomment"
-        },
-        {
-            "name": "assigneddate",
-            "alias": "Assigned on Date",
-            "source": "assigneddate"
-        },
-        {
-            "name": "inprogressdate",
-            "alias": "In Progress Date",
-            "source": "inprogressdate"
-        },
-        {
-            "name": "completeddate",
-            "alias": "Completed on Date",
-            "source": "completeddate"
-        },
-        {
-            "name": "declineddate",
-            "alias": "Declined on Date",
-            "source": "declineddate"
-        },
-        {
-            "name": "pauseddate",
-            "alias": "Paused on Date",
-            "source": "pauseddate"
-        },
-        {
-            "name": "CreationDate",
-            "alias": "Creation Date",
-            "source": "CreationDate"
-        },
-        {
-            "name": "Creator",
-            "alias": "Creator",
-            "source": "Creator"
-        },
-        {
-            "name": "EditDate",
-            "alias": "Edit Date",
-            "source": "EditDate"
-        },
-        {
-            "name": "Editor",
-            "alias": "Editor",
-            "source": "Editor"
-        }
-    ]
-    return fields
+    for f in fields:
+        f["source"] = f["name"]
 
 
 def generate_layer_definition(source_layer, join_layer, primary_key_field, foreign_key_field, name, source_fields,
@@ -351,7 +326,9 @@ def main(args):
 
     # Create the GIS
     logger.info("Authenticating...")
-    gis = GIS(args.org, args.username, args.password)
+    gis = GIS(args.org, args.username, args.password, verify_cert=not args.skip_ssl_verification)
+    if gis.properties["isPortal"]:
+        raise RuntimeError("This script only works with ArcGIS Online")
     logger.info("Getting Workforce Project...")
     item = gis.content.get(args.project_id)
     if item is None:
@@ -359,53 +336,60 @@ def main(args):
     project = Project(gis.content.get(args.project_id))
     if int(project.version.split(".")[0]) < 2:
         raise RuntimeError("This script only works with offline-enabled projects")
-    logger.info("Phase 1: Joining assignments and assignment types...")
+    logger.info("Phase 1: Joining assignments to assignment types...")
+    d = int(datetime.datetime.now().timestamp())
     assignments_to_types = create_joined_view(gis,
                                               project.assignments_layer,
                                               project.assignment_types_table,
                                               project._assignment_schema.assignment_type,
                                               project._assignment_types.global_id,
-                                              f"{project.title}_IntermediateView0",
-                                              assignment_fields(),
-                                              assignment_type_fields())
-    logger.info("Phase 2: Joining assignments and workers...")
+                                              f"{project.title} Intermediate View 0 {d}",
+                                              assignment_fields,
+                                              assignment_type_fields)
+    logger.info("Phase 2: Joining assignments to workers...")
     assignments_to_workers = create_joined_view(gis,
                                                 project.assignments_layer,
                                                 project.workers_layer,
                                                 project._assignment_schema.worker_id,
                                                 project._worker_schema.global_id,
-                                                f"{project.title}_IntermediateView1",
-                                                assignment_fields(),
-                                                worker_fields(),
+                                                f"{project.title} Intermediate View 1 {d}",
+                                                assignment_fields,
+                                                worker_fields,
                                                 )
-    logger.info("Phase 3: Joining assignments, assignment types, and workers...")
-    assignments_types_workers = create_joined_view(gis,
-                                                   assignments_to_types.layers[0],
-                                                   assignments_to_workers.layers[0],
-                                                   project._assignment_schema.global_id,
-                                                   project._assignment_schema.global_id,
-                                                   f"{project.title}_IntermediateView2",
-                                                   assignment_type_fields(True) + assignment_fields(),
-                                                   worker_fields(True))
-    logger.info("Phase 4: Joining assignments and dispatchers...")
+    logger.info("Phase 3: Joining assignments to dispatchers...")
     assignments_to_dispatchers = create_joined_view(gis,
                                                     project.assignments_layer,
                                                     project.dispatchers_layer,
                                                     project._assignment_schema.dispatcher_id,
                                                     project._dispatcher_schema.global_id,
-                                                    f"{project.title}_IntermediateView3",
-                                                    assignment_fields(),
-                                                    dispatcher_fields())
-    logger.info("Phase 5: Joining assignments, assignment types, workers, and dispatchers...")
+                                                    f"{project.title} Intermediate View 2 {d}",
+                                                    assignment_fields,
+                                                    dispatcher_fields)
+    change_source_field_name_to_joined_field_name(assignment_type_fields)
+    change_source_field_name_to_joined_field_name(worker_fields)
+    change_source_field_name_to_joined_field_name(dispatcher_fields)
+    logger.info("Phase 4: Joining assignments and assignment types to assignments and workers...")
+    assignments_types_workers = create_joined_view(gis,
+                                                   assignments_to_types.layers[0],
+                                                   assignments_to_workers.layers[0],
+                                                   project._assignment_schema.global_id,
+                                                   project._assignment_schema.global_id,
+                                                   f"{project.title} Intermediate View 3 {d}",
+                                                   assignment_type_fields + assignment_fields,
+                                                   worker_fields)
+    logger.info("Phase 5: Joining assignments and types and workers to  assignments and workers...")
+    if args.name:
+        name = args.name
+    else:
+        name = f"{project.title} Joined View {d}"
     final_item = create_joined_view(gis,
                                     assignments_types_workers.layers[0],
                                     assignments_to_dispatchers.layers[0],
                                     project._assignment_schema.global_id,
                                     project._assignment_schema.global_id,
-                                    f"{project.title}_Joined_View",
-                                    assignment_fields() + assignment_type_fields(
-                                        True) + worker_fields(True),
-                                    dispatcher_fields(True))
+                                    name,
+                                    assignment_fields + assignment_type_fields+ worker_fields,
+                                    dispatcher_fields)
     logger.info(f"Final Item: {final_item.title}")
     logger.info("Completed")
 
@@ -420,6 +404,7 @@ if __name__ == "__main__":
     parser.add_argument('-log-file', dest="log_file", help="The file to log to")
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
+    parser.add_argument('-n', dest='name', help="The name of the resulting joined view")
     args = parser.parse_args()
     try:
         main(args)
