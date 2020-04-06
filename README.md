@@ -15,13 +15,6 @@ Notebooks used for previous demos are also available:
 - [UC 2019](notebooks/UC_2019)
 - [Dev Summit 2020](notebooks/dev_summit_2020)
 
-Jupyter notebooks can either be run locally using the instructions below or online through ArcGIS Notebooks. 
-
-You can view Workforce Jupyter notebooks in our ArcGIS Online group and run them in ArcGIS Notebooks [here](https://www.arcgis.com/home/group.html?id=c1695c0c2f9945a8a7fee7dd106c74ae&view=list#content)
-
-Ensure you have the correct user permissions before using ArcGIS Notebooks. Note that as of April 2020 (8.1), ArcGIS Notebooks is in Beta.
-
-
 ## Scripts
 
 Supports:
@@ -66,7 +59,6 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 
  * [ArcGIS API for Python](https://developers.arcgis.com/python)
  * [Workforce for ArcGIS](http://www.esri.com/products/workforce-for-arcgis)
- * [Workforce Jupyter Notebooks](https://www.arcgis.com/home/group.html?id=c1695c0c2f9945a8a7fee7dd106c74ae&view=list#content)
 
 ## Issues
 
