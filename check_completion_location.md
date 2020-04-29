@@ -3,6 +3,8 @@
 This script checks the location and time of when an assignment was completed against the location of the worker at that same time. It is designed to find out if workers are completing assignments without visiting the location.
 It is an extension of the [Copy Assignments](copy_assignments_fs_readme.md) script in that assignments that were improperly completed are copied to a different feature service so they can be analyzed.
 
+To check completion location using the Tracker Location Tracking Service as opposed to a Workforce tracks layer, please see: https://github.com/Esri/tracker-scripts/blob/master/check_edit_location.md
+
 Supports Python 3.5+
 
 ----
