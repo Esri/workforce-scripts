@@ -77,6 +77,14 @@ def main(arguments):
 
     # Get the target feature layer
     target_fl = arcgis.features.FeatureLayer(arguments.target_fl, gis)
+    # Check if layer exists
+    try:
+        json = target_fl._lyr_json
+    except Exception as e:
+        logger.info(e)
+        logger.info(
+            "Layer could not be found based on given input. Please check your parameters again. Exiting the script")
+        sys.exit(0)
 
     # Get the project info
     item = gis.content.get(arguments.project_id)
@@ -120,6 +128,7 @@ def main(arguments):
             arcgis.features.Feature(geometry=assignment.geometry, attributes=assignment_attributes))
     logger.info("Copying assignments...")
     response = target_fl.edit_features(adds=arcgis.features.FeatureSet(assignments_to_submit))
+    
     logger.info(response)
     if arguments.copy_attachments:
         if target_fl.properties.get("hasAttachments", None):
