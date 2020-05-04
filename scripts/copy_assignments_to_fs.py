@@ -128,7 +128,6 @@ def main(arguments):
             arcgis.features.Feature(geometry=assignment.geometry, attributes=assignment_attributes))
     logger.info("Copying assignments...")
     response = target_fl.edit_features(adds=arcgis.features.FeatureSet(assignments_to_submit))
-    
     logger.info(response)
     if arguments.copy_attachments:
         if target_fl.properties.get("hasAttachments", None):
