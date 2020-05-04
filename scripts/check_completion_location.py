@@ -225,6 +225,13 @@ def main(arguments):
     with open(arguments.config_file, 'r') as f:
         field_mappings = json.load(f)
     target_fl = arcgis.features.FeatureLayer(arguments.target_fl, gis)
+    # Check if layer exists
+    try:
+        x = target_fl.properties
+    except Exception as e:
+        logger.info(e)
+        logger.info("Layer could not be found based on given input. Please check your parameters again. Exiting the script")
+        sys.exit(0)
     copy_assignments(project, invalid_assignments, target_fl, field_mappings)
 
 

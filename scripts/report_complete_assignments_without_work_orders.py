@@ -101,7 +101,7 @@ def main(arguments):
 	
 	# Check if layer exists
 	try:
-		json = layer._lyr_json
+		x = layer.properties
 	except Exception as e:
 		logger.info(e)
 		logger.info("Layer could not be found based on given input. Please check your parameters again. Exiting the script")
