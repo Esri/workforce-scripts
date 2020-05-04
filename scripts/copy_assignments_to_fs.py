@@ -79,7 +79,7 @@ def main(arguments):
     target_fl = arcgis.features.FeatureLayer(arguments.target_fl, gis)
     # Check if layer exists
     try:
-        json = target_fl._lyr_json
+        x = target_fl.properties
     except Exception as e:
         logger.info(e)
         logger.info(
