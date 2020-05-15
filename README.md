@@ -61,7 +61,7 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
  * [Workforce for ArcGIS](http://www.esri.com/products/workforce-for-arcgis)
  * [Usecases for the Workforce Python module](https://www.esri.com/arcgis-blog/products/workforce/field-mobility/automate-workforce-with-arcgis-api-for-python/)
  * [Scheduling Workforce Python scripts with Windows Task Scheduler](https://community.esri.com/groups/workforce-for-arcgis/blog/2020/05/14/schedule-tasks-for-workforce)
- * [Scheduling Workforce Python scripts using Python schedule library](scheduling_with_python.md)
+ * [Scheduling Workforce Python scripts in Linux / MacOS](scheduling_with_python.md)
 
 ## Issues
 

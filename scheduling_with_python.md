@@ -1,4 +1,4 @@
-# Scheduling using Python's schedule library
+# Scheduling Workforce Scripts in Linux / macOS
 
 Users may want to have the scripts in this repository run at certain frequencies. For example, a user may want to 
 run `delete_assignments.py` once a day to delete all completed assignments, or run `reset_stale_workers.py`. once a
@@ -7,7 +7,12 @@ week to reset workers that aren't working to the correct status.
 On Windows, we recommend using Windows Task Scheduler for this action. See our blog post here [here](https://community.esri.com/groups/workforce-for-arcgis/blog/2020/05/14/schedule-tasks-for-workforce)
 for more on how to set that up.
 
-However, if you're not on a Windows machine and you want a barebones way of scheduling tasks, you can use Python's
+On Linux and Mac, you have two options: either use `crontab`, a [job scheduler](http://man7.org/linux/man-pages/man5/crontab.5.html) 
+built into Unix, or refactor your script to use the `schedule` library from Python. Crontab has the advantage of running
+in the background, while `schedule` may be easier to configure. There are a variety of online resources on configuring
+a Cron job to run a Python script periodically.
+
+However, if you want a barebones way of scheduling tasks (in any platform), you can use Python's
 `schedule` library to schedule any task you'd wish. It will require very minor adaptation to the script on your part.
 
 Take the example of `delete_assignments.py`. To schedule `delete_assignments` to run every 2 hours, for example,
