@@ -19,12 +19,10 @@ import logging.handlers
 import tempfile
 import sys
 import traceback
-import arcgis
 from arcgis.gis import GIS
 from arcgis.apps import workforce
-from arcgis.features import Feature, FeatureSet, FeatureLayer, FeatureLayerCollection
+from arcgis.features import Feature, FeatureSet
 import json
-import concurrent
 
 
 def initialize_logging(log_file=None):
@@ -55,113 +53,38 @@ def initialize_logging(log_file=None):
     return logger
 
 
-def delete_projects(projects):
-    """
-    Attempts to delete each project
-    :param projects: List of items or projects
-    :return:
-    """
-    for project in projects:
-        try:
-            if isinstance(project, workforce.Project):
-                try:
-                    _delete_project(project)
-                except:
-                    _delete_workforce_item(project._item)
-            elif isinstance(project, arcgis.gis.Item):
-                try:
-                    _delete_project(workforce.Project(project))
-                except:
-                    _delete_workforce_item(project)
-        except Exception as e:
-            pass
-
-
-def _delete_workforce_item(project):
-    data = project.get_data()
+def _delete_workforce_items(fs_item):
     try:
-        project._gis.content.get(data['assignments']['serviceItemId']).protect(False)
-    except Exception as e:
+        fs_item._gis.content.get(fs_item.properties['workforceWorkerWebMapId']).protect(False)
+    except Exception:
         pass
     try:
-        project._gis.content.get(data['assignments']['serviceItemId']).delete()
-    except Exception as e:
+        fs_item._gis.content.get(fs_item.properties['workforceWorkerWebMapId']).delete()
+    except Exception:
         pass
     try:
-        project._gis.content.get(data['workers']['serviceItemId']).protect(False)
-    except Exception as e:
+        fs_item._gis.content.get(fs_item.properties['workforceDispatcherWebMapId']).protect(False)
+    except Exception:
         pass
     try:
-        project._gis.content.get(data['workers']['serviceItemId']).delete()
-    except Exception as e:
+        fs_item._gis.content.get(fs_item.properties['workforceDispatcherWebMapId']).delete()
+    except Exception:
         pass
     try:
-        project._gis.content.get(data['dispatchers']['serviceItemId']).protect(False)
-    except Exception as e:
+        fs_item.protect(False)
+    except Exception:
         pass
     try:
-        project._gis.content.get(data['dispatchers']['serviceItemId']).delete()
-    except Exception as e:
+        fs_item.delete()
+    except Exception:
         pass
-    try:
-        project._gis.content.get(data['workerWebMapId']).protect(False)
-    except Exception as e:
-        pass
-    try:
-        project._gis.content.get(data['workerWebMapId']).delete()
-    except Exception as e:
-        pass
-    try:
-        project._gis.content.get(data['dispatcherWebMapId']).protect(False)
-    except Exception as e:
-        pass
-    try:
-        project._gis.content.get(data['dispatcherWebMapId']).delete()
-    except Exception as e:
-        pass
-    try:
-        project.protect(False)
-    except Exception as e:
-        pass
-    try:
-        project.delete()
-    except Exception as e:
-        pass
-    try:
-        project.delete()
-    except Exception as e:
-        pass
-    try:
-        for folder in project._gis.users.get(project.owner).folders:
-            if folder['id'] == data['folderId']:
-                project._gis.content.delete_folder(folder['title'], owner=project.owner)
-    except Exception as e:
-        pass
-
-
-def _delete_project(project):
-    owner = project._item.owner
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        executor.submit(project.assignments_item.protect, False).add_done_callback(project.tracks_item.delete)
-        executor.submit(project.tracks_item.protect, False).add_done_callback(project.assignments_item.delete)
-        executor.submit(project.workers_item.protect, False).add_done_callback(project.workers_item.delete)
-        executor.submit(project.dispatchers_item.protect, False).add_done_callback(project.dispatchers_item.delete)
-        executor.submit(project.dispatcher_webmap.item.protect, False).add_done_callback(
-            project.dispatcher_webmap.item.delete)
-        executor.submit(project.worker_webmap.item.protect, False).add_done_callback(project.worker_webmap.item.delete)
-        executor.submit(project._item.protect, False).add_done_callback(project._item.delete)
-    project.group.protected = False
-    project.group.delete()
-    for folder in project.gis.users.get(owner).folders:
-        if folder['id'] == project._item_data['folderId']:
-            project.gis.content.delete_folder(folder['title'], owner=owner)
 
 
 def cleanup_project(gis, project_name):
     try:
         items = gis.content.search(f'"{project_name}" AND typeKeyword:"Workforce Project"')
         if items:
-            delete_projects(items)
+            _delete_workforce_items(items[0])
     except:
         pass
     try:
