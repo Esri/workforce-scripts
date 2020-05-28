@@ -9,6 +9,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.​
+    
     This sample migrates version 1 projects to version 2
 """
 
@@ -158,7 +159,7 @@ def _delete_project(project):
 
 def cleanup_project(gis, project_name):
     try:
-        items = gis.content.search(f'"{project_name}" AND type:"Workforce Project"')
+        items = gis.content.search(f'"{project_name}" AND typeKeyword:"Workforce Project"')
         if items:
             delete_projects(items)
     except:
@@ -223,6 +224,12 @@ def add_custom_fields(old_layer, new_layer):
     return custom_fields
 
 
+def get_wf_operational_layer(data, layer_id):
+    for layer in data["operationalLayers"]:
+        if layer["id"] == layer_id:
+            return layer
+
+
 def main(arguments):
     # Initialize logging
     logger = initialize_logging(arguments.log_file)
@@ -258,6 +265,8 @@ def main(arguments):
     with tempfile.TemporaryDirectory() as dirpath:
         thumbnail = item.download_thumbnail(save_folder=dirpath)
         v2_project._item.update(thumbnail=thumbnail)
+        gis.content.get(v2_project.worker_web_map_id).update(thumbnail=thumbnail)
+        gis.content.get(v2_project.dispatcher_web_map_id).update(thumbnail=thumbnail)
 
     # Migrate Assignment Types
     logger.info("Migrating assignment types...")
@@ -297,7 +306,6 @@ def main(arguments):
 
             # Validate that there is a user id populated and that the user id isn't yourself (since that was added during project creation). Otherwise, skip adding the dispatcher
             if dispatcher.user_id and dispatcher.user_id != arguments.username:
-                logger.info(dispatcher.user_id)
 
                 # Validate a name exists, otherwise populate with an empty string
                 dispatcher_name = dispatcher.user_id if dispatcher.name is None else dispatcher.name
@@ -392,6 +400,8 @@ def main(arguments):
     # Prepare Assignments to be Added
     for assignment in existing_assignments:
         if assignment.attributes[project._assignment_schema.assignment_type]:
+            
+            # set attributes in case they are empty
             assignment_location = (str(assignment.geometry["x"]) + " " + str(assignment.geometry["y"])) if \
             assignment.attributes[project._assignment_schema.location] is None else \
                 assignment.attributes[project._assignment_schema.location]
@@ -399,6 +409,7 @@ def main(arguments):
                 assignment.attributes[project._assignment_schema.status]
             assignment_priority = 0 if assignment.attributes[project._assignment_schema.priority] is None else \
                 assignment.attributes[project._assignment_schema.priority]
+            
             assignment_type_name = ""
             for at in existing_assignment_types:
                 if at.code == assignment.attributes[project._assignment_schema.assignment_type]:
@@ -475,7 +486,7 @@ def main(arguments):
 
     # Migrate Integrations
     logger.info("Migrating Integrations")
-    v2_project.integrations.batch_delete([v2_project.integrations.get("default-navigator")])
+    v2_project.integrations.batch_delete([v2_project.integrations.get("arcgis-navigator")[0]])
     previous_integrations = project.integrations.search()
 
     # Replacing AT Code with GUID
@@ -484,23 +495,15 @@ def main(arguments):
             types = integration["assignmentTypes"]
             key_list = list(sorted(types.keys()))
             for key in key_list:
-                at_code = key
-                at_name = project.assignment_types.get(code=int(at_code)).name
+                at_name = project.assignment_types.get(code=int(key)).name
                 guid = get_assignment_type_global_id(new_assignment_types, at_name)
-                types[guid] = types[at_code]
-                types.pop(at_code)
-            integration["assignmentTypes"] = types
+                v2_project.integrations.add(integration_id=integration["id"], prompt=integration["prompt"],
+                                            url_template=types[key]["urlTemplate"], assignment_types=guid)
+        else:
+            v2_project.integrations.add(integration_id=integration["id"], prompt=integration["prompt"],
+                                        url_template=integration["urlTemplate"])
 
-        v2_project._item_data["assignmentIntegrations"].append(integration)
-    v2_project._update_data()
-
-    # Add Integrations and Validate
-    if len(v2_project.integrations.search()) == len(project.integrations.search()):
-        logger.info("Integrations successfully migrated")
-    else:
-        raise Exception("Integrations not successfully migrated")
-
-    # Migrate Webmaps
+    # Migrate Webmaps - Retain non-WF layers
     logger.info("Migrating Webmaps")
     upgrade_webmaps(project.worker_webmap, v2_project.worker_webmap)
     upgrade_webmaps(project.dispatcher_webmap, v2_project.dispatcher_webmap)
@@ -518,6 +521,9 @@ def upgrade_webmaps(old_webmap, new_webmap):
             old_data["operationalLayers"][i] = get_wf_operational_layer(new_data, "Assignments_0")
         else:
             old_data["operationalLayers"][i] = layer
+    # retain dispatchers, AT, and integratioons table
+    if "tables" in new_data:
+        old_data["tables"] = new_data["tables"]
     # remove location tracking layer
     for i, layer in enumerate(old_data["operationalLayers"]):
         if "Location Tracking_0" == layer["id"]:
@@ -530,12 +536,6 @@ def upgrade_webmaps(old_webmap, new_webmap):
     new_data = new_webmap.item.get_data()
     if not len(new_data["operationalLayers"]) == expected_layers:
         raise Exception("Layers not added successfully")
-
-
-def get_wf_operational_layer(data, layer_id):
-    for layer in data["operationalLayers"]:
-        if layer["id"] == layer_id:
-            return layer
 
 
 if __name__ == "__main__":
