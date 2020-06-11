@@ -23,6 +23,7 @@ from arcgis.gis import GIS
 from arcgis.apps import workforce
 from arcgis.features import Feature, FeatureSet
 import json
+import math
 
 
 def initialize_logging(log_file=None):
@@ -82,7 +83,7 @@ def _delete_workforce_items(fs_item):
 
 def cleanup_project(gis, project_name):
     try:
-        items = gis.content.search(f'"{project_name}" AND typeKeyword:"Workforce Project"')
+        items = gis.content.search(f'"{project_name}" AND typekeywords:"Workforce Project" AND NOT type:"Web Map"')
         if items:
             _delete_workforce_items(items[0])
     except:
@@ -255,6 +256,11 @@ def main(arguments):
 
         # Add Dispatchers
         layer.edit_features(adds=FeatureSet(dispatchers_to_add), use_global_ids=True)
+        # add dispatcher named users to the project's group.
+        max_add_per_call = 25
+        for i in range(0, math.ceil(len(dispatchers_to_add) / max_add_per_call)):
+            v2_project.group.add_users(
+                [d.attributes[v2_project._dispatcher_schema.user_id] for d in dispatchers_to_add[i * max_add_per_call:(i * max_add_per_call) + max_add_per_call]])
         new_dispatchers = v2_project.dispatchers_layer.query("1=1", return_all_records=True).features
         if len(existing_dispatchers) == len(new_dispatchers) or dispatcher_ghost:
             logger.info("Dispatchers successfully migrated")
@@ -301,6 +307,12 @@ def main(arguments):
 
     # Add Workers
     layer.edit_features(adds=FeatureSet(workers_to_add), use_global_ids=True)
+    # add worker named users to the project's group.
+    max_add_per_call = 25
+    for i in range(0, math.ceil(len(workers_to_add) / max_add_per_call)):
+        v2_project.group.add_users(
+            [w.attributes[v2_project._worker_schema.user_id] for w in
+             workers_to_add[i * max_add_per_call:(i * max_add_per_call) + max_add_per_call]])
     new_workers = v2_project.workers_layer.query("1=1", return_all_records=True).features
     if (len(existing_workers) == len(new_workers)) or worker_ghost:
         logger.info("Workers successfully migrated")
