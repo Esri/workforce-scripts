@@ -437,12 +437,28 @@ def main(arguments):
         else:
             v2_project.integrations.add(integration_id=integration["id"], prompt=integration["prompt"],
                                         url_template=integration["urlTemplate"])
-
+    # Get rid of old URL patterns
+    integrations = v2_project.integrations.search()
+    universal_link_integrations = generate_universal_links(integrations)
+    v2_project.integrations.batch_update(universal_link_integrations)
+    
     # Migrate Webmaps - Retain non-WF layers
     logger.info("Migrating Webmaps")
     upgrade_webmaps(project.worker_webmap, v2_project.worker_webmap)
     upgrade_webmaps(project.dispatcher_webmap, v2_project.dispatcher_webmap)
     logger.info("Script Completed")
+
+
+def generate_universal_links(integrations):
+    for integration in integrations:
+        if integration.url_template:
+            if "arcgis-navigator://" in integration.url_template:
+                integration.url_template = integration.url_template.replace("arcgis-navigator://", "https://navigator.arcgis.app")
+            if "arcgis-collector://" in integration.url_template:
+                integration.url_template = integration.url_template.replace("arcgis-collector://", "https://collector.arcgis.app")
+            if "arcgis-explorer://" in integration.url_template:
+                integration.url_template = integration.url_template.replace("arcgis-explorer://", "https://explorer.arcgis.app")
+    return integrations
 
 
 def upgrade_webmaps(old_webmap, new_webmap):
