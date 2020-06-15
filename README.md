@@ -68,6 +68,9 @@ You should now be able to run all scripts in the `scripts` folder (provided you 
 
  * [ArcGIS API for Python](https://developers.arcgis.com/python)
  * [Workforce for ArcGIS](http://www.esri.com/products/workforce-for-arcgis)
+ * [Usecases for the Workforce Python module](https://www.esri.com/arcgis-blog/products/workforce/field-mobility/automate-workforce-with-arcgis-api-for-python/)
+ * [Scheduling Workforce Python scripts with Windows Task Scheduler](https://community.esri.com/groups/workforce-for-arcgis/blog/2020/05/14/schedule-tasks-for-workforce)
+ * [Scheduling Workforce Python scripts in Linux / MacOS](scheduling_with_python.md)
 
 ## Issues
 

@@ -77,6 +77,14 @@ def main(arguments):
 
     # Get the target feature layer
     target_fl = arcgis.features.FeatureLayer(arguments.target_fl, gis)
+    # Check if layer exists
+    try:
+        x = target_fl.properties
+    except Exception as e:
+        logger.info(e)
+        logger.info(
+            "Layer could not be found based on given input. Please check your parameters again. Exiting the script")
+        sys.exit(0)
 
     # Get the project info
     item = gis.content.get(arguments.project_id)

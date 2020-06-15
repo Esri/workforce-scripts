@@ -85,14 +85,20 @@ def main(arguments):
         logger.info("Invalid project id")
         sys.exit(0)
 
-    # Attach timezone to naive date value
+    # First check if relative date
+    logger.info("Formatting date")
     try:
-        local_cutoff_date = pendulum.from_format(arguments.cutoff_date, "MM/DD/YYYY hh:mm:ss", tz=args.timezone, formatter='alternative')
-    except Exception as e:
-        logger.info(e)
-        logger.info("Invalid date format. Please check documentation and try again")
-        sys.exit(0)
-    utc_dt = local_cutoff_date.in_tz('UTC')
+        delta = int(args.cutoff_date)
+        utc_dt = pendulum.now().subtract(minutes=delta).in_tz('UTC')
+    except Exception:
+        # If not relative date, then attempt to convert date and attach timezone to naive date value
+        try:
+            local_cutoff_date = pendulum.from_format(arguments.cutoff_date, "MM/DD/YYYY hh:mm:ss", tz=args.timezone, formatter='alternative')
+        except Exception as e:
+            logger.info(e)
+            logger.info("Invalid date format. Please check documentation and try again")
+            sys.exit(0)
+        utc_dt = local_cutoff_date.in_tz('UTC')
     formatted_date = utc_dt.strftime("%Y-%m-%d %H:%M:%S")
     
     # Query using UTC-formatted date and reset those workers
@@ -114,8 +120,8 @@ if __name__ == "__main__":
     parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
     parser.add_argument('-project-id', dest='project_id', help="The id of the Workforce project", required=True)
-    parser.add_argument('-cutoff-date', dest='cutoff_date', help="If a worker has not been updated at or after this date, change its status to not working. MM/DD/YYYY hh:mm:ss format, either in UTC or a timezone you provide", required=True)
-    parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone for the assignments")
+    parser.add_argument('-cutoff-date', dest='cutoff_date', help="If a worker has not been updated at or after this date, change its status to not working. Either int (in minutes from UTC now) or MM/DD/YYYY hh:mm:ss format. So if '10' is provided then reset workers who have not been updated in the last 10 minutes", required=True)
+    parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone for the cutoff date")
     parser.add_argument('-log-file', dest='log_file', help='The log file to use')
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',help="Verify the SSL Certificate of the server")
     args = parser.parse_args()

@@ -36,6 +36,7 @@ from arcgis.apps import workforce
 from arcgis.gis import GIS
 import requests
 import inspect
+import yagmail
 
 
 def post_to_slack(slack_webhook, assignment):
@@ -146,6 +147,34 @@ def is_assignment_processed(db, assignment):
     return bool(global_ids)
 
 
+def send_email(gmail_username, recipient_emails, assignment):
+    client = yagmail.SMTP(gmail_username)
+    recipient_emails = recipient_emails.replace(" ", "").split(",")
+    subject = str(assignment) + " has been completed"
+    body = """
+    Assignment Completed:
+    Assignment Type: {}
+    Location: {}
+    Description: {}
+    Notes: {}
+    Worker: {}
+    Time: {}
+    Link: {}
+    """.format(
+        assignment.assignment_type.name,
+        assignment.location,
+        assignment.description,
+        assignment.notes,
+        assignment.worker.name,
+        assignment.completed_date.strftime("%Y-%m-%d %H:%M"),
+        "https://workforce.arcgis.com/projects/{}/dispatch/assignments/{}".format(
+            assignment.project.id,
+            assignment.object_id
+        )
+    )
+    client.send(to=recipient_emails, subject=subject,contents=body)
+    
+
 if __name__ == "__main__":
     # parse the config file
     config = configparser.ConfigParser()
@@ -180,6 +209,9 @@ if __name__ == "__main__":
                 logger.info("Adding new assignment to sqlite database...")
                 # append the global id to the csv file (in-case we need to restart script)
                 add_assignment_to_db(config["DB"]["DATABASE"], assignment)
+                if config.has_section("EMAIL") and config.has_option("EMAIL", "GMAIL_USERNAME") and config["EMAIL"]["SEND_EMAIL"]:
+                    send_email(config["EMAIL"]["GMAIL_USERNAME"], config["EMAIL"]["RECIPIENT_EMAILS"], assignment)
+                    logger.info("Email sent")
                 # post message to slack, if configured
                 if config.has_section("SLACK") and config.has_option("SLACK", "WEBHOOK"):
                     logger.info("Posting assignment to slack...")
