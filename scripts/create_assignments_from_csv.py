@@ -33,7 +33,7 @@ import pendulum
 import datetime
 import types
 from arcgis.apps import workforce
-from arcgis.geocoding import batch_geocode
+from arcgis.geocoding import batch_geocode, Geocoder
 from arcgis.gis import GIS
 
 
@@ -119,7 +119,10 @@ def main(arguments):
         workers_dict[worker.user_id] = worker
 
     if not (args.x_field and args.y_field):
-        addresses = batch_geocode(locations, out_sr=args.wkid)
+        geocoder = None
+        if args.custom_geocoder:
+            geocoder = Geocoder.fromitem(gis.content.get(args.custom_geocoder))
+        addresses = batch_geocode(locations, geocoder=geocoder, out_sr=args.wkid)
     assignments_to_add = []
     for i, assignment in enumerate(assignments_in_csv):
         assignment_to_add = workforce.Assignment(project,
@@ -210,6 +213,7 @@ if __name__ == "__main__":
     parser.add_argument('-project-id', dest='project_id', help="The id of the project to add assignments to", required=True)
     parser.add_argument('-x-field', dest='x_field', help="The field that contains the x SHAPE information. Failing to pass this parameter will use geocoding", required=False)
     parser.add_argument('-y-field', dest='y_field', help="The field that contains the y SHAPE information. Failing to pass this parameter will use geocoding", required=False)
+    parser.add_argument('-custom-geocoder-id', dest='custom_geocoder', help="The item id of the custom geocoding service you would like to use", required=False)
     parser.add_argument('-assignment-type-field', dest='assignment_type_field',
                         help="The field that contains the assignmentType", required=True)
     parser.add_argument('-location-field', dest='location_field',
