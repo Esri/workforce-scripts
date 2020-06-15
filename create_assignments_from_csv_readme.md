@@ -4,7 +4,7 @@ This script reads a CSV file containing the required fields to add unassigned or
 
 You can also use this script without the "xField" and "yField" parameters - it will then geocode the provided location-field to get the assignments location. 
 
-You can use a custom geocoder by providing the "custom-geocoder-id" field to the command line. If not, the script will default to World Geocoding Service (please note that this consumes credits).
+You can use a custom geocoder by providing the "custom-geocoder-id" field to the command line. If not, the script will default to your first priority geocoder, which if you have not configured a custom solution is the ArcGIS World Geocoding Service (please note that this consumes credits).
 
 Supports Python 3.5+. This script requires the pendulum Python module
 
