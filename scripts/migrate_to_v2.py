@@ -187,10 +187,13 @@ def main(arguments):
 
     # Update thumbnail
     with tempfile.TemporaryDirectory() as dirpath:
-        thumbnail = item.download_thumbnail(save_folder=dirpath)
-        v2_project._item.update(thumbnail=thumbnail)
-        gis.content.get(v2_project.worker_web_map_id).update(thumbnail=thumbnail)
-        gis.content.get(v2_project.dispatcher_web_map_id).update(thumbnail=thumbnail)
+        try:
+            thumbnail = item.download_thumbnail(save_folder=dirpath)
+            v2_project._item.update(thumbnail=thumbnail)
+            gis.content.get(v2_project.worker_web_map_id).update(thumbnail=thumbnail)
+            gis.content.get(v2_project.dispatcher_web_map_id).update(thumbnail=thumbnail)
+        except Exception:
+            logger.info("Thumbnail not migrated successfully")
 
     # Migrate Assignment Types
     logger.info("Migrating assignment types...")
