@@ -127,6 +127,7 @@ def main(arguments):
     for i, assignment in enumerate(assignments_in_csv):
         assignment_to_add = workforce.Assignment(project,
                                                  assignment_type=assignment_type_dict[assignment[args.assignment_type_field]],
+                                                 status="unassigned"
                                                  )
 
         # Create the geometry
