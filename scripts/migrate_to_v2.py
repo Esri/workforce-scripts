@@ -9,6 +9,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.​
+    
     This sample migrates version 1 projects to version 2
 """
 
@@ -18,12 +19,11 @@ import logging.handlers
 import tempfile
 import sys
 import traceback
-import arcgis
 from arcgis.gis import GIS
 from arcgis.apps import workforce
-from arcgis.features import Feature, FeatureSet, FeatureLayer, FeatureLayerCollection
+from arcgis.features import Feature, FeatureSet
 import json
-import concurrent
+import math
 
 
 def initialize_logging(log_file=None):
@@ -54,113 +54,38 @@ def initialize_logging(log_file=None):
     return logger
 
 
-def delete_projects(projects):
-    """
-    Attempts to delete each project
-    :param projects: List of items or projects
-    :return:
-    """
-    for project in projects:
-        try:
-            if isinstance(project, workforce.Project):
-                try:
-                    _delete_project(project)
-                except:
-                    _delete_workforce_item(project._item)
-            elif isinstance(project, arcgis.gis.Item):
-                try:
-                    _delete_project(workforce.Project(project))
-                except:
-                    _delete_workforce_item(project)
-        except Exception as e:
-            pass
-
-
-def _delete_workforce_item(project):
-    data = project.get_data()
+def _delete_workforce_items(fs_item):
     try:
-        project._gis.content.get(data['assignments']['serviceItemId']).protect(False)
-    except Exception as e:
+        fs_item._gis.content.get(fs_item.properties['workforceWorkerWebMapId']).protect(False)
+    except Exception:
         pass
     try:
-        project._gis.content.get(data['assignments']['serviceItemId']).delete()
-    except Exception as e:
+        fs_item._gis.content.get(fs_item.properties['workforceWorkerWebMapId']).delete()
+    except Exception:
         pass
     try:
-        project._gis.content.get(data['workers']['serviceItemId']).protect(False)
-    except Exception as e:
+        fs_item._gis.content.get(fs_item.properties['workforceDispatcherWebMapId']).protect(False)
+    except Exception:
         pass
     try:
-        project._gis.content.get(data['workers']['serviceItemId']).delete()
-    except Exception as e:
+        fs_item._gis.content.get(fs_item.properties['workforceDispatcherWebMapId']).delete()
+    except Exception:
         pass
     try:
-        project._gis.content.get(data['dispatchers']['serviceItemId']).protect(False)
-    except Exception as e:
+        fs_item.protect(False)
+    except Exception:
         pass
     try:
-        project._gis.content.get(data['dispatchers']['serviceItemId']).delete()
-    except Exception as e:
+        fs_item.delete()
+    except Exception:
         pass
-    try:
-        project._gis.content.get(data['workerWebMapId']).protect(False)
-    except Exception as e:
-        pass
-    try:
-        project._gis.content.get(data['workerWebMapId']).delete()
-    except Exception as e:
-        pass
-    try:
-        project._gis.content.get(data['dispatcherWebMapId']).protect(False)
-    except Exception as e:
-        pass
-    try:
-        project._gis.content.get(data['dispatcherWebMapId']).delete()
-    except Exception as e:
-        pass
-    try:
-        project.protect(False)
-    except Exception as e:
-        pass
-    try:
-        project.delete()
-    except Exception as e:
-        pass
-    try:
-        project.delete()
-    except Exception as e:
-        pass
-    try:
-        for folder in project._gis.users.get(project.owner).folders:
-            if folder['id'] == data['folderId']:
-                project._gis.content.delete_folder(folder['title'], owner=project.owner)
-    except Exception as e:
-        pass
-
-
-def _delete_project(project):
-    owner = project._item.owner
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        executor.submit(project.assignments_item.protect, False).add_done_callback(project.tracks_item.delete)
-        executor.submit(project.tracks_item.protect, False).add_done_callback(project.assignments_item.delete)
-        executor.submit(project.workers_item.protect, False).add_done_callback(project.workers_item.delete)
-        executor.submit(project.dispatchers_item.protect, False).add_done_callback(project.dispatchers_item.delete)
-        executor.submit(project.dispatcher_webmap.item.protect, False).add_done_callback(
-            project.dispatcher_webmap.item.delete)
-        executor.submit(project.worker_webmap.item.protect, False).add_done_callback(project.worker_webmap.item.delete)
-        executor.submit(project._item.protect, False).add_done_callback(project._item.delete)
-    project.group.protected = False
-    project.group.delete()
-    for folder in project.gis.users.get(owner).folders:
-        if folder['id'] == project._item_data['folderId']:
-            project.gis.content.delete_folder(folder['title'], owner=owner)
 
 
 def cleanup_project(gis, project_name):
     try:
-        items = gis.content.search(f'"{project_name}" AND type:"Workforce Project"')
+        items = gis.content.search(f'"{project_name}" AND typekeywords:"Workforce Project" AND NOT type:"Web Map"')
         if items:
-            delete_projects(items)
+            _delete_workforce_items(items[0])
     except:
         pass
     try:
@@ -223,6 +148,12 @@ def add_custom_fields(old_layer, new_layer):
     return custom_fields
 
 
+def get_wf_operational_layer(data, layer_id):
+    for layer in data["operationalLayers"]:
+        if layer["id"] == layer_id:
+            return layer
+
+
 def main(arguments):
     # Initialize logging
     logger = initialize_logging(arguments.log_file)
@@ -256,8 +187,13 @@ def main(arguments):
 
     # Update thumbnail
     with tempfile.TemporaryDirectory() as dirpath:
-        thumbnail = item.download_thumbnail(save_folder=dirpath)
-        v2_project._item.update(thumbnail=thumbnail)
+        try:
+            thumbnail = item.download_thumbnail(save_folder=dirpath)
+            v2_project._item.update(thumbnail=thumbnail)
+            gis.content.get(v2_project.worker_web_map_id).update(thumbnail=thumbnail)
+            gis.content.get(v2_project.dispatcher_web_map_id).update(thumbnail=thumbnail)
+        except Exception:
+            logger.info("Thumbnail not migrated successfully")
 
     # Migrate Assignment Types
     logger.info("Migrating assignment types...")
@@ -297,7 +233,6 @@ def main(arguments):
 
             # Validate that there is a user id populated and that the user id isn't yourself (since that was added during project creation). Otherwise, skip adding the dispatcher
             if dispatcher.user_id and dispatcher.user_id != arguments.username:
-                logger.info(dispatcher.user_id)
 
                 # Validate a name exists, otherwise populate with an empty string
                 dispatcher_name = dispatcher.user_id if dispatcher.name is None else dispatcher.name
@@ -324,6 +259,11 @@ def main(arguments):
 
         # Add Dispatchers
         layer.edit_features(adds=FeatureSet(dispatchers_to_add), use_global_ids=True)
+        # add dispatcher named users to the project's group.
+        max_add_per_call = 25
+        for i in range(0, math.ceil(len(dispatchers_to_add) / max_add_per_call)):
+            v2_project.group.add_users(
+                [d.attributes[v2_project._dispatcher_schema.user_id] for d in dispatchers_to_add[i * max_add_per_call:(i * max_add_per_call) + max_add_per_call]])
         new_dispatchers = v2_project.dispatchers_layer.query("1=1", return_all_records=True).features
         if len(existing_dispatchers) == len(new_dispatchers) or dispatcher_ghost:
             logger.info("Dispatchers successfully migrated")
@@ -370,6 +310,12 @@ def main(arguments):
 
     # Add Workers
     layer.edit_features(adds=FeatureSet(workers_to_add), use_global_ids=True)
+    # add worker named users to the project's group.
+    max_add_per_call = 25
+    for i in range(0, math.ceil(len(workers_to_add) / max_add_per_call)):
+        v2_project.group.add_users(
+            [w.attributes[v2_project._worker_schema.user_id] for w in
+             workers_to_add[i * max_add_per_call:(i * max_add_per_call) + max_add_per_call]])
     new_workers = v2_project.workers_layer.query("1=1", return_all_records=True).features
     if (len(existing_workers) == len(new_workers)) or worker_ghost:
         logger.info("Workers successfully migrated")
@@ -392,6 +338,8 @@ def main(arguments):
     # Prepare Assignments to be Added
     for assignment in existing_assignments:
         if assignment.attributes[project._assignment_schema.assignment_type]:
+            
+            # set attributes in case they are empty
             assignment_location = (str(assignment.geometry["x"]) + " " + str(assignment.geometry["y"])) if \
             assignment.attributes[project._assignment_schema.location] is None else \
                 assignment.attributes[project._assignment_schema.location]
@@ -399,6 +347,7 @@ def main(arguments):
                 assignment.attributes[project._assignment_schema.status]
             assignment_priority = 0 if assignment.attributes[project._assignment_schema.priority] is None else \
                 assignment.attributes[project._assignment_schema.priority]
+            
             assignment_type_name = ""
             for at in existing_assignment_types:
                 if at.code == assignment.attributes[project._assignment_schema.assignment_type]:
@@ -475,7 +424,7 @@ def main(arguments):
 
     # Migrate Integrations
     logger.info("Migrating Integrations")
-    v2_project.integrations.batch_delete([v2_project.integrations.get("default-navigator")])
+    v2_project.integrations.batch_delete([v2_project.integrations.get("arcgis-navigator")[0]])
     previous_integrations = project.integrations.search()
 
     # Replacing AT Code with GUID
@@ -484,27 +433,35 @@ def main(arguments):
             types = integration["assignmentTypes"]
             key_list = list(sorted(types.keys()))
             for key in key_list:
-                at_code = key
-                at_name = project.assignment_types.get(code=int(at_code)).name
+                at_name = project.assignment_types.get(code=int(key)).name
                 guid = get_assignment_type_global_id(new_assignment_types, at_name)
-                types[guid] = types[at_code]
-                types.pop(at_code)
-            integration["assignmentTypes"] = types
-
-        v2_project._item_data["assignmentIntegrations"].append(integration)
-    v2_project._update_data()
-
-    # Add Integrations and Validate
-    if len(v2_project.integrations.search()) == len(project.integrations.search()):
-        logger.info("Integrations successfully migrated")
-    else:
-        raise Exception("Integrations not successfully migrated")
-
-    # Migrate Webmaps
+                v2_project.integrations.add(integration_id=integration["id"], prompt=integration["prompt"],
+                                            url_template=types[key]["urlTemplate"], assignment_types=guid)
+        else:
+            v2_project.integrations.add(integration_id=integration["id"], prompt=integration["prompt"],
+                                        url_template=integration["urlTemplate"])
+    # Get rid of old URL patterns
+    integrations = v2_project.integrations.search()
+    universal_link_integrations = generate_universal_links(integrations)
+    v2_project.integrations.batch_update(universal_link_integrations)
+    
+    # Migrate Webmaps - Retain non-WF layers
     logger.info("Migrating Webmaps")
     upgrade_webmaps(project.worker_webmap, v2_project.worker_webmap)
     upgrade_webmaps(project.dispatcher_webmap, v2_project.dispatcher_webmap)
     logger.info("Script Completed")
+
+
+def generate_universal_links(integrations):
+    for integration in integrations:
+        if integration.url_template:
+            if "arcgis-navigator://" in integration.url_template:
+                integration.url_template = integration.url_template.replace("arcgis-navigator://", "https://navigator.arcgis.app")
+            if "arcgis-collector://" in integration.url_template:
+                integration.url_template = integration.url_template.replace("arcgis-collector://", "https://collector.arcgis.app")
+            if "arcgis-explorer://" in integration.url_template:
+                integration.url_template = integration.url_template.replace("arcgis-explorer://", "https://explorer.arcgis.app")
+    return integrations
 
 
 def upgrade_webmaps(old_webmap, new_webmap):
@@ -518,6 +475,9 @@ def upgrade_webmaps(old_webmap, new_webmap):
             old_data["operationalLayers"][i] = get_wf_operational_layer(new_data, "Assignments_0")
         else:
             old_data["operationalLayers"][i] = layer
+    # retain dispatchers, AT, and integratioons table
+    if "tables" in new_data:
+        old_data["tables"] = new_data["tables"]
     # remove location tracking layer
     for i, layer in enumerate(old_data["operationalLayers"]):
         if "Location Tracking_0" == layer["id"]:
@@ -530,12 +490,6 @@ def upgrade_webmaps(old_webmap, new_webmap):
     new_data = new_webmap.item.get_data()
     if not len(new_data["operationalLayers"]) == expected_layers:
         raise Exception("Layers not added successfully")
-
-
-def get_wf_operational_layer(data, layer_id):
-    for layer in data["operationalLayers"]:
-        if layer["id"] == layer_id:
-            return layer
 
 
 if __name__ == "__main__":
