@@ -15,6 +15,8 @@ Notebooks used for previous demos are also available:
 - [UC 2019](notebooks/UC_2019)
 - [Dev Summit 2020](notebooks/dev_summit_2020)
 
+In addition, we have uploaded our AGOL-compatible notebooks into a publicly accessible [group of Hosted Notebooks in ArcGIS Online](https://arcgis.com/home/group.html?id=c1695c0c2f9945a8a7fee7dd106c74ae)
+
 ## Scripts
 
 Supports:
@@ -67,7 +69,11 @@ With Conda:
 - Run `conda env create --file environment.yml` to create the virtual environment with the correct dependencies
 - Run `conda activate workforce-scripts` to activate the environment
 
-You should now be able to run all scripts in the `scripts` folder (provided you use the correct arguments) and notebooks in the `notebooks` folder
+To run in ArcGIS Notebooks:
+1. Visit our [AGOL Hosted Notebooks group](https://arcgis.com/home/group.html?id=c1695c0c2f9945a8a7fee7dd106c74ae#overview)
+2. Click on "Content"
+3. Choose a notebook you'd like
+4. Click on the thumbnail for "Open Notebook" to open in ArcGIS Notebooks
 
 ## Resources
 
