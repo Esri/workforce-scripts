@@ -19,12 +19,19 @@ Notebooks used for previous demos are also available:
 
 Supports:
 - Python 3.6+
-- Python API for ArcGIS 1.7.0+
+- Python API for ArcGIS 1.8.3+
 
-A set of Python scripts using the [ArcGIS API for Python v1.7.0+](https://developers.arcgis.com/python/).
+The Workforce team released a new version of the app supporting offline-enabled Projects in July 2020. To work with
+those projects in Python and deploy the corresponding scripts in this repo, users will need to update their version
+of the Python API to 1.8.3. This can be downloaded in Conda prior to 1.8.3's official release via:
+
+`conda install -c esri/label/prerelease -c esri arcgis`
+
+A set of Python scripts using the [ArcGIS API for Python v1.8.3+](https://developers.arcgis.com/python/).
 These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 
-
+Note that some may scripts may work with a Python API for ArcGIS version that is less than 1.8.3 but this cannot 
+be guaranteed.
 
 ### Features
 
@@ -50,12 +57,10 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 ### Instructions
 
 
-1. Install ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
-2. Clone or download this repository
-3. In terminal/cmd navigate to the `scripts` folder
-
-Without Conda:
-- Install arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
+1. Install ArcGIS API for Python package via Conda as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
+2. In terminal or Python console, run: `conda install -c esri/label/prerelease -c esri arcgis`
+3. Clone or download this repository
+4. In terminal/cmd navigate to the `scripts` folder
 
 With Conda:
 - Install Anaconda
