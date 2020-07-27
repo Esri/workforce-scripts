@@ -45,7 +45,7 @@ python create_assignments_from_csv.py -csv-file "../sample_data/assignments.csv"
 ```
 
 Example Usage 2:
-```python
+```bash
 python create_assignments_from_csv.py -csv-file "../sample_data/assignments.csv" -u username -p password -org "https://<org>.maps.arcgis.com" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -assignment-type-field "Type" -location-field "Location" -custom-geocoder-id "788a1926d2d741dc8acabefd5b2cc521" -description-field "Description" -priority-field "Priority" -work-order-id-field "Work Order Id" -due-date-field "Due Date" -attachment-file-field "Attachment" -log-file "../log.txt" -worker-field "Worker" -timezone "US/Eastern"
 ```
 
