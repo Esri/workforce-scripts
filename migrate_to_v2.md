@@ -2,12 +2,8 @@
 
 This script takes a Version 1 Workforce Project and migrates it to a Version 2 project. It will preserve your assignment, worker, assignment type, webmap, integration and (optionally) dispatcher data in the new project.
 
-**This script requires the logged in user to be an admin or to be the owner of the project and requires a version of the Python API which supports Version 2 Projects**
+**This script requires the logged in user to be an admin or to be the owner of the project and requires a version of the Python API (1.8.3+) which supports Version 2 Projects**
 
-To install the version of the Python API which supports Version 2 Projects, run in Terminal:
-```
-conda install -c esri-field-apps/label/workforce-beta arcgis
-```
 
 Then follow the directions to run the migration script below.
 
