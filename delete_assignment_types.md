@@ -15,7 +15,7 @@ In addition to the authentication arguments, the script specific arguments are a
 - -project-id \<project-id\> - The workforce project ID (from AGOL)
 
 Example Usage:
-```python
+```bash
 python delete_assignment_types.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -project-id <project-id> -log-file log.txt
 ```
 

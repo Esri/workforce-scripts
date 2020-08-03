@@ -5,7 +5,7 @@ A demo showing how completed assignments can be stored in SQLite database and pu
 
 1. Install Conda or Miniconda (plus requests) and the ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
 2. Clone or download this repository
-3. Install the repo requirements (`pip install -r requirements.txt`)
+3. Install the repo requirements via Conda
 4. Set up Slack webhook and/or Gmail account (with permissions for "less secure apps"). Use the yagmail directions [here](https://github.com/kootenpv/yagmail#username-and-password) to store credentials for your Gmail account before running this script
 5. Modify the config.ini file to use your ArcGIS online credentials, the workforce project, (optionally) the slack web-hook, (optionally) Gmail email credentials, and the log file.
 

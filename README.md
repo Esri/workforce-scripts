@@ -20,13 +20,20 @@ In addition, we have uploaded our AGOL-compatible notebooks into a publicly acce
 ## Scripts
 
 Supports:
-- Python 3.5+
-- Python API for ArcGIS 1.4.1+
+- Python 3.6+
+- Python API for ArcGIS 1.8.3+
 
-A set of Python scripts using the [ArcGIS API for Python v1.4.1+](https://developers.arcgis.com/python/).
+The Workforce team released a new version of the app supporting offline-enabled Projects in July 2020. To work with
+those projects in Python and deploy the corresponding scripts in this repo, users will need to update their version
+of the Python API to 1.8.3. This can be downloaded in Conda prior to 1.8.3's official release via:
+
+`conda install -c esri/label/prerelease -c esri arcgis`
+
+A set of Python scripts using the [ArcGIS API for Python v1.8.3+](https://developers.arcgis.com/python/).
 These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 
-
+Note that some may scripts may work with a Python API for ArcGIS version that is less than 1.8.3 but this cannot 
+be guaranteed.
 
 ### Features
 
@@ -42,19 +49,25 @@ These scripts support Workforce in both ArcGIS Online and ArcGIS Enterprise.
 | [Delete Assignments](delete_assignments_readme.md)                   | [delete_assignments.py](scripts/delete_assignments.py)          |                   |
 | [Delete Assignment Types ](delete_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
 | [Assignment Monitor (Slack Integration)](assignment_monitor.md)                           | [assignment_monitor.py](scripts/assignment_monitor.py) |
+| [Migrate to Version 2 Project](migrate_to_v2.md) | [migrate_to_v2.py](scripts/migrate_to_v2.py) |
 | [Reset Stale Workers ](reset_stale_workers.md)               | [reset_stale_workers.py](scripts/reset_stale_workers.py)              |
 | [Report Incomplete Assignments with Work Orders ](report_incomplete_assignments_with_work_orders.md)               | [report_incomplete_assignments_with_work_orders.py](scripts/report_incomplete_assignments_with_work_orders.py)    
 | [Report Complete Assignments without Work Orders](report_complete_assignments_without_work_orders.md)               | [report_complete_assignments_without_work_orders.py](scripts/report_complete_assignments_without_work_orders.py)    
 | [Create Default Ops Dashboard](create_ops_dashboard.md)              | [create_ops_dashboard.py](scripts/create_ops_dashboard.py)|
+| [Create Joined View](create_joined_view.md) | [create_joined_view](scripts/created_joined_view.py) |
 
 ### Instructions
 
-To run locally:
-1. Install ArcGIS API for Python package as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
-2. Clone or download this repository
-3. In terminal/cmd navigate to the `scripts` folder
-4. Install arrow from PyPi using pip and the requirements.txt file (`pip install -r requirements.txt`)
-5. You should now be able to run all scripts in the `scripts` folder (provided you use the correct arguments)
+
+1. Install ArcGIS API for Python package via Conda as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
+2. In terminal or Python console, run: `conda install -c esri/label/prerelease -c esri arcgis`
+3. Clone or download this repository
+4. In terminal/cmd navigate to the `scripts` folder
+
+With Conda:
+- Install Anaconda
+- Run `conda env create --file environment.yml` to create the virtual environment with the correct dependencies
+- Run `conda activate workforce-scripts` to activate the environment
 
 To run in ArcGIS Notebooks:
 1. Visit our [AGOL Hosted Notebooks group](https://arcgis.com/home/group.html?id=c1695c0c2f9945a8a7fee7dd106c74ae#overview)

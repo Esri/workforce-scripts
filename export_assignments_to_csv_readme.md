@@ -16,7 +16,7 @@ This script queries the assignment feature layer and exports the results to a CS
 - -timezone \<timezone\> - The timezone to convert the dates to
 
 Example Usage:
-```python
+```bash
 python export_assignments_to_csv.py -csv-file "../exported_assignments.csv" -u username -p password -org "https://<org>.maps.arcgis.com" -project-id "038a1926d2d741dc8acabefd5b2cc5d3" -log-file "../log.txt" -where "status=1" -date-format "%m/%d/%Y %H:%M:%S" -timezone "US/Eastern"
 ```
 
