@@ -1,9 +1,12 @@
 ## Migrate Version 1 Workforce Project to V2
 
-This script takes a Version 1 Workforce Project and migrates it to a Version 2 project. It will preserve your assignment, worker, assignment type, webmap, integration and (optionally) dispatcher data in the new project.
+NOTE: This script migrates the entire Version 1 Workforce project to a Version 2 project. 
+If you've already migrated your project using the Workforce web app and now want to migrate your assignments, please see the script:
+[Migrate Assignments](migrate_assignments.md)
+
+This script takes a Version 1 Workforce Project and migrates the entire project to a Version 2 project. It will preserve your assignment, worker, assignment type, webmap, integration and (optionally) dispatcher data in the new project.
 
 **This script requires the logged in user to be an admin or to be the owner of the project and requires a version of the Python API (1.8.3+) which supports Version 2 Projects**
-
 
 To install the correct version of the Python API, please follow the directions in the README for this repo. Then follow the directions to run the migration script below.
 
