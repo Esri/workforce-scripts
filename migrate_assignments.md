@@ -27,12 +27,12 @@ https://workforce.arcgis.com/projects/{project_id}/dispatch
 
 Example Usage 1 - if I only wanted to migrate unassigned assignments:
 ```bash
-python migrate_assignments.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -classic-project-id <project-item-id> -new-project-id <new-project-fs-item-id> -where status=0
+python migrate_assignments.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -classic-project-id <project-item-id> -new-project-id <new-project-fs-item-id> -where "status=0"
 ```
 
 Example Usage 2 - if I wanted to migrate unassigned, assigned, and in progress assignments:
 ```bash
-python migrate_assignments.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -classic-project-id <project-item-id> -new-project-id <new-project-fs-item-id> -where "status IN (0, 1, 2"
+python migrate_assignments.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -classic-project-id <project-item-id> -new-project-id <new-project-fs-item-id> -where "status IN (0, 1, 2)"
 ```
 
 ## What it does
