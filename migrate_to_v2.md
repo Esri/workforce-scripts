@@ -5,7 +5,7 @@ This script takes a Version 1 Workforce Project and migrates it to a Version 2 p
 **This script requires the logged in user to be an admin or to be the owner of the project and requires a version of the Python API (1.8.3+) which supports Version 2 Projects**
 
 
-Then follow the directions to run the migration script below.
+To install the correct version of the Python API, please follow the directions in the README for this repo. Then follow the directions to run the migration script below.
 
 Supports Python 3.5+
 
