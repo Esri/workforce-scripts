@@ -438,8 +438,13 @@ def main(arguments):
                 v2_project.integrations.add(integration_id=integration["id"], prompt=integration["prompt"],
                                             url_template=types[key]["urlTemplate"], assignment_types=guid)
         else:
+            # default id changed
+            if integration["id"] == "default-navigator":
+                integration["id"] = "arcgis-navigator"
             v2_project.integrations.add(integration_id=integration["id"], prompt=integration["prompt"],
                                         url_template=integration["urlTemplate"])
+    logger.info("Integrations migrated successfully")
+    
     # Get rid of old URL patterns
     integrations = v2_project.integrations.search()
     generate_universal_links(integrations)
