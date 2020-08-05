@@ -20,11 +20,19 @@ In addition to the authentication arguments, the script specific arguments are a
 
 - -classic-project-id \<projectId\> - The workforce project ID for your classic Workforce Project. This is the item ID of the item with type "Workforce Project"
 - -new-project-id \<newProjectId\> - The project ID for your offline-enabled Workforce Project. This is the item ID of the Workforce project's feature service.
-- --skip-dispatchers - (Optional) If provided, the dispatcher data will not be migrated (in case you do not want your dispatchers seeing the project yet) 
+- -where - The where clause for the assignments you want to migrate. This is optional - by default, we migrate assignments that are not completed or canceled.
 
-Example Usage:
+Both project IDs can easily be identified by looking at the URL in the Workforce web app, no matter the project version.
+https://workforce.arcgis.com/projects/{project_id}/dispatch
+
+Example Usage 1 - if I only wanted to migrate unassigned assignments:
 ```bash
-python migrate_to_v2.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -project-id <project-id> -new-title <title>
+python migrate_assignments.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -classic-project-id <project-item-id> -new-project-id <new-project-fs-item-id> -where status=0
+```
+
+Example Usage 2 - if I wanted to migrate unassigned, assigned, and in progress assignments:
+```bash
+python migrate_assignments.py -u <username> -p <password> -org https://<org>.maps.arcgis.com -classic-project-id <project-item-id> -new-project-id <new-project-fs-item-id> -where "status IN (0, 1, 2"
 ```
 
 ## What it does
@@ -32,4 +40,5 @@ python migrate_to_v2.py -u <username> -p <password> -org https://<org>.maps.arcg
  1. First the script validates the assignment types and workers have been successfully migrated (using the UI) from your v1 to v2 project.
  2. Then assignments are migrated to the v2 project
  3. Then attachments are migrated to the v2 project
+ 
  
