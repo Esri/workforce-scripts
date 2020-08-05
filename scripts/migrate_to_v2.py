@@ -411,10 +411,14 @@ def main(arguments):
     for assignment in existing_assignments:
         object_id = assignment.attributes[project._assignment_schema.object_id]
         if len(project.assignments_layer.attachments.get_list(object_id)) > 0:
-            with tempfile.TemporaryDirectory() as dirpath:
-                paths = project.assignments_layer.attachments.download(oid=object_id, save_path=dirpath)
-                for path in paths:
-                    v2_project.assignments_layer.attachments.add(oid=object_id, file_path=path)
+            try:
+                with tempfile.TemporaryDirectory() as dirpath:
+                    paths = project.assignments_layer.attachments.download(oid=object_id, save_path=dirpath)
+                    for path in paths:
+                        v2_project.assignments_layer.attachments.add(oid=object_id, file_path=path)
+            except Exception as e:
+                logger.info(e)
+                logger.info("Skipping migration of this attachment. It did not download successfully")
     if len(project.assignments_layer.attachments.search("1=1")) == len(
             v2_project.assignments_layer.attachments.search("1=1")):
         logger.info("Attachments successfully migrated")
