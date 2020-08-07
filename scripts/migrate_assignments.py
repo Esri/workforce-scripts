@@ -106,8 +106,11 @@ def main(arguments):
     # Get the old workforce project
     item = gis.content.get(arguments.classic_project_id)
     project = workforce.Project(item)
-    if project._is_v2_project:
-        raise Exception("The first project provided is a v2 project. Please migrate assignment data from v1 projects")
+    try:
+        if project._is_v2_project:
+            raise Exception("The first project provided is a v2 project. Please migrate assignment data from v1 projects")
+    except AttributeError:
+        raise Exception("Cannot find the attribute is v2 project. Are you sure you have the API version 1.8.3 or greater installed? Check with `arcgis.__version__` in your Python console")
     
     # Get new workforce project
     v2_project = workforce.Project(gis.content.get(arguments.new_project_id))
