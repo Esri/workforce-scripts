@@ -335,9 +335,9 @@ def main(args):
         raise RuntimeError("Invalid Project Id")
     project = Project(gis.content.get(args.project_id))
     try:
-        if project._is_v2_project:
+        if not project._is_v2_project:
             raise Exception(
-                "The first project provided is a v2 project. Please migrate assignment data from v1 projects")
+                "The project provided is not a v2 project. You can only use v2 (offline-enabled) projects with this script")
     except AttributeError:
         raise Exception(
             "Cannot find the attribute is v2 project. Are you sure you have the API version 1.8.3 or greater installed? Check with `arcgis.__version__` in your Python console")
