@@ -334,8 +334,13 @@ def main(args):
     if item is None:
         raise RuntimeError("Invalid Project Id")
     project = Project(gis.content.get(args.project_id))
-    if int(project.version.split(".")[0]) < 2:
-        raise RuntimeError("This script only works with offline-enabled projects")
+    try:
+        if project._is_v2_project:
+            raise Exception(
+                "The first project provided is a v2 project. Please migrate assignment data from v1 projects")
+    except AttributeError:
+        raise Exception(
+            "Cannot find the attribute is v2 project. Are you sure you have the API version 1.8.3 or greater installed? Check with `arcgis.__version__` in your Python console")
     logger.info("Phase 1: Joining assignments to assignment types...")
     d = int(datetime.datetime.now().timestamp())
     assignments_to_types = create_joined_view(gis,
