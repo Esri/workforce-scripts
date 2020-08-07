@@ -106,7 +106,7 @@ def main(arguments):
 	
 	# Create new dashboard using your project
 	logger.info("Creating dashboard")
-	cloned_items = gis.content.clone_items([item], item_mapping=item_mapping)
+	cloned_items = gis.content.clone_items([item], item_mapping=item_mapping, search_existing_items=False)
 	if len(cloned_items) == 0:
 		logger.info("You have already cloned a dashboard of this name! Check your item content and if necessary, set a title")
 		sys.exit(0)

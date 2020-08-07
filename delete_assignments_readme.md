@@ -9,7 +9,7 @@ Supports Python 3.5+
 This script deletes assignments based a query or list of OBJECTIDs. The script uses the following parameters:
 
 - -log-file \<log-file\> The log file to use for logging messages
-- -project-id \<project-id\> - The workforce project ID (from AGOL)
+- -project-id \<project-id\> - The workforce project ID (from AGOL). For a version 1 project, this is the item ID of the Workforce project item. For a version 2 project, this is the item ID of the Workforce feature service (both found in the web app URL "projects/{project_id}/dispatch")
 - -where \<where\> - The where clause to use when querying the assignments to export (Optional - Defaults to None)
 
 Example Usage:

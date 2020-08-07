@@ -2,7 +2,9 @@
 
 This script takes a Workforce project and creates a corresponding Ops Dashboard for monitoring that project, either in light or dark mode.
 
-**This script requires the logged in user to be an admin or to be the owner of the project. Version 1 Projects only **
+This scripts works for either offline or classic projects.
+
+**This script requires the logged in user to be an admin or to be the owner of the project.**
 
 Supports Python 3.5+
 

@@ -20,7 +20,7 @@ Supports Python 3.5+
 
 In addition to the authentication arguments (org, username, password), the script specific arguments are as follows:
 
-- -project-id \<project_id\> - The workforce project ID (found in the project URL)
+- -project-id \<project_id\> - The workforce project ID (found in the project URL). For a version 1 project, this is the item ID of the Workforce project item. For a version 2 project, this is the item ID of the Workforce feature service (both found in the web app URL "projects/{project_id}/dispatch")
 - -survey-id \<survey_id\> - (Optional) The portal item id for the feature layer collection associated with your Survey123 Survey. Use EITHER this parameter or `layer_url`. Defaults to `None`
 - -layer-url \<layer_url\> - (Optional) The feature service URL for your Survey or Collector layer. Make sure you use the url for the feature layer rather than the feature layer collection - the url ending in `FeatureServer/number` rather than just `FeatureServer`. Use EITHER this parameter or `survey_id`. Defaults to `None`
 - -field-name \<field_name\> (Optional) - The field name of the field you use to integrate with Workforce. Do not use the alias for the field name - for example, `work_id` should be provided here instead of `Work ID`. Check your Survey or Collector feature layer to find the field name. Defaults to `work_order_id`

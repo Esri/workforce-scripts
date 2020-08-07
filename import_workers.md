@@ -20,7 +20,7 @@ Due to the various naming conventions organizations may have, this script has ma
 
 - -csv-file \<csvFile\> The csv file to read
 - -log-file \<logFile\> The log file to use for logging messages
-- -project-id \<projectId\> The workforce project ID (from AGOL)
+- -project-id \<projectId\> The workforce project ID (from AGOL). For a version 1 project, this is the item ID of the Workforce project item. For a version 2 project, this is the item ID of the Workforce feature service (both found in the web app URL "projects/{project_id}/dispatch")
 - -name-field \<nameField\> The name of the column that stores the workers name
 - -status-field \<statusField\> The name of the column that stores the workers status. Statuses should be "not_working", "working", or "on_break".
 - -user-id-field \<userIdField\> The name of the column that stores the workers named user username
