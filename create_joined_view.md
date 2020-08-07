@@ -12,7 +12,7 @@ Supports Python 3.6+
 In addition to the authentication arguments, the script specific arguments are as follows:
 
 - -log-file \<log-file\> The log file to use for logging messages
-- -project-id \<project id\> - The workforce project ID (from AGOL)
+- -project-id \<project id\> - The workforce project ID (from AGOL). This is the item ID of the Workforce feature service (also found in the web app URL "projects/{project_id}/dispatch")
 - -name \<output layer name\> The name of the resulting layer (optional - a default name will be generated if not supplied)
 
 ```bash

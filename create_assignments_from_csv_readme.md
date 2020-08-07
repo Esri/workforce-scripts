@@ -22,7 +22,7 @@ Due to the various naming conventions organizations may have, this script has ma
 
 - -csv-file \<csvFile\> The csv file to read
 - -log-file \<logFile\> The log file to use for logging messages
-- -project-id \<projectId\> - The workforce project ID (from AGOL)
+- -project-id \<projectId\> - The workforce project ID (from AGOL). For a version 1 project, this is the item ID of the Workforce project item. For a version 2 project, this is the item ID of the Workforce feature service (both found in the web app URL "projects/{project_id}/dispatch")
 - -x-field \<xField\> - The name of the field in the CSV file that contains the x-coordinate geometry (Optional - location will be used if this field  is not provided)
 - -y-field \<yField\> - The name of the field in the CSV file that contains the y-coordinate geometry (Optional - location will be used if this field is not provided)
 - -custom-geocoder-id - The item id of the custom geocoding service you would like to use. Only used if x-field and y-field are not set, which triggers geocoding from the location field

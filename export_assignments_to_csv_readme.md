@@ -9,7 +9,7 @@ Supports Python 3.5+. Note that this script requires the `arrow` package, which 
 This script queries the assignment feature layer and exports the results to a CSV file. The script uses the following parameters:
 
 - -log-file \<log-file\> The log file to use for logging messages
-- -project-id \<project-id\> - The workforce project ID (from AGOL)
+- -project-id \<project-id\> - The workforce project ID (from AGOL). For a version 1 project, this is the item ID of the Workforce project item. For a version 2 project, this is the item ID of the Workforce feature service (both found in the web app URL "projects/{project_id}/dispatch")
 - -csv-file \<csv\> - The csv file to write the results to
 - -where \<where\> - The where clause to use when querying the assignments to export (Optional - Defaults to '1=1')
 - -date-format \<date-format\> - The date format to use in the exported CSV file

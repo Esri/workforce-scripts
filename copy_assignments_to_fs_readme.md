@@ -12,7 +12,7 @@ The script uses the following parameters:
 
 - -config-file \<configFile\> The json file containing the field mappings
 - -log-file \<logFile\> The log file to use for logging messages
-- -project-id \<projectId\> - The workforce project ID (from AGOL)
+- -project-id \<projectId\> - The workforce project ID (from AGOL). For a version 1 project, this is the item ID of the Workforce project item. For a version 2 project, this is the item ID of the Workforce feature service (both found in the web app URL "projects/{project_id}/dispatch")
 - -target-fl \<targetFL\> - The full url of the target feature layer where the assignments will be copied to
 - -where \<where\> - The where clause to use when querying the assignments to copy (Optional - Defaults to '1=1')
 - --copy-attachments - A flag that when set will copy the attachments to the target feature layer (this can be slow if there are a lot attachments or features)
