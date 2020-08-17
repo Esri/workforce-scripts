@@ -427,8 +427,7 @@ def main(arguments):
             v2_project.assignments_layer.attachments.search("1=1")):
         logger.info("Attachments successfully migrated")
     else:
-        cleanup_project(gis, title)
-        raise Exception("Attachments not migrated. Cleaning up new project")
+        logger.info("Not all of your attachments migrated successfully. Continuing with migration")
 
     # Migrate Integrations
     logger.info("Migrating Integrations")

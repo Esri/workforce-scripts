@@ -229,7 +229,7 @@ def main(arguments):
             v2_project.assignments_layer.attachments.search("1=1")):
         logger.info("Attachments successfully migrated")
     else:
-        raise Exception("Attachments not migrated successfully. Cleaning up new project")
+        logger.info("Not all of your attachments migrated successfully. Continuing with migration")
     logger.info("Script Completed")
 
 
