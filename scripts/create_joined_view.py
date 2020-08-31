@@ -398,8 +398,6 @@ def main(args):
                                     dispatcher_fields)
     logger.info(f"Final Item: {final_item.title}")
     if args.create_dashboard:
-        if gis.properties["isPortal"]:
-            raise ValueError("GIS needs to be AGOL for the --create-dashboard parameter to work")
         logger.info("Creating dashboard")
         
         # create new webmap
