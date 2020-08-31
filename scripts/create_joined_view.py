@@ -410,8 +410,9 @@ def main(args):
         # swizzle in joined layer instead of assignments layer
         for i, layer in enumerate(new_webmap.layers):
             if layer["id"] == "Assignments_0":
-                new_webmap.layers[i]["itemId"] = final_item.id
-                new_webmap.layers[i]["url"] = final_item.url + "/0"
+                new_webmap.remove_layer(layer)
+                new_webmap.add_layer(final_item)
+                new_webmap.layers[i]["id"] = "Assignments_0"
                 break
         new_webmap.update()
         
