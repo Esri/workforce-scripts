@@ -426,8 +426,7 @@ def main(args):
         # Save new name and share to group
         logger.info("Updating title and sharing to project group")
         new_title = project.title + " Dashboard"
-        cloned_items[0].update(item_properties={"title": new_title},
-                               thumbnail="https://www.arcgis.com/apps/opsdashboard/assets/images/no-dashboard-thumb-84c2afc9d73774823c7865b4cc776b9b.png")
+        cloned_items[0].update(item_properties={"title": new_title})
         cloned_items[0].share(groups=[project.group])
         logger.info("Dashboard creation completed")
     logger.info("Script completed")
