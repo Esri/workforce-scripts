@@ -422,8 +422,7 @@ def main(args):
                         'bb7d2b495ecc4ea7810b28f16ef71cba': new_webmap.item.id}
         cloned_items = gis.content.clone_items([item], item_mapping=item_mapping, search_existing_items=False)
         if len(cloned_items) == 0:
-            logger.info("Creating dashboard failed")
-            sys.exit(0)
+            raise ValueError("Creating dashboard failed")
             
         # Save new name and share to group
         logger.info("Updating title and sharing to project group")
