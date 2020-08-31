@@ -32,13 +32,14 @@ import traceback
 from arcgis.gis import GIS
 from arcgis.apps.workforce.project import Project
 from arcgis.features import FeatureLayerCollection
+from arcgis.mapping import WebMap
 
 
 # Define the set of fields to include for each layer in the joined layer
 
 assignment_type_fields = [
     {
-        "name": "assignment_type_description",
+        "name": "assignmentType",
         "alias": "Assignment Type",
         "source": "description"
     }
@@ -396,7 +397,39 @@ def main(args):
                                     assignment_fields + assignment_type_fields+ worker_fields,
                                     dispatcher_fields)
     logger.info(f"Final Item: {final_item.title}")
-    logger.info("Completed")
+    if args.create_dashboard:
+        logger.info("Creating dashboard")
+        
+        # create new webmap
+        map_item = project.dispatcher_webmap.save(
+            item_properties={"title": project.title + " Dashboard Map", "tags": [], "snippet": "Dashboard Map"})
+        new_webmap = WebMap(map_item)
+        
+        # swizzle in joined layer instead of assignments layer
+        for i, layer in enumerate(new_webmap.layers):
+            if layer["id"] == "Assignments_0":
+                new_webmap.remove_layer(layer)
+                new_webmap.add_layer(final_item)
+                new_webmap.layers[i]["id"] = "Assignments_0"
+                break
+        new_webmap.update()
+        
+        # clone dashboard with your data instead of our data
+        item = gis.content.get("af7cd356c21a4ded87d8cdd452fd8be3")
+        item_mapping = {'377b2b2014f24b0ab9b053d9b2fed113': final_item.id,
+                        'e1904f5c56484163a021155f447adf34': project.workers_item.id,
+                        'bb7d2b495ecc4ea7810b28f16ef71cba': new_webmap.item.id}
+        cloned_items = gis.content.clone_items([item], item_mapping=item_mapping, search_existing_items=False)
+        if len(cloned_items) == 0:
+            raise ValueError("Creating dashboard failed")
+            
+        # Save new name and share to group
+        logger.info("Updating title and sharing to project group")
+        new_title = project.title + " Dashboard"
+        cloned_items[0].update(item_properties={"title": new_title})
+        cloned_items[0].share(groups=[project.group])
+        logger.info("Dashboard creation completed")
+    logger.info("Script completed")
 
 
 if __name__ == "__main__":
@@ -406,6 +439,7 @@ if __name__ == "__main__":
     parser.add_argument('-org', dest='org', help="The url of the org/portal to use", required=True)
     parser.add_argument('-project-id', dest='project_id', help="The id of the project to create the view from",
                         required=True)
+    parser.add_argument('--create-dashboard', dest='create_dashboard', action='store_true', help="Create a dashboard using the joined view in AGOL")
     parser.add_argument('-log-file', dest="log_file", help="The file to log to")
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")
