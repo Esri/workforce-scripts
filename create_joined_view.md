@@ -2,6 +2,10 @@
 
 This script creates a joined hosted feature layer view that combines the assignments, assignment types, workers, and dispatchers into a single layer. This allows information like the worker name to be displayed with the assignment even though the data is stored in two different layers. This script only applies to offline-enabled Workforce projects.
 
+Additionally, this script can be used to create a simple Workforce dashboard showing assignments and workers. This
+differs from `create_ops_dashboard.py` in that the assignment types should show names rather than global ids, using
+the joined view created above.
+
 **This script requires the logged in user to be an admin or to be the owner of the project**
 
 Supports Python 3.6+
@@ -14,9 +18,10 @@ In addition to the authentication arguments, the script specific arguments are a
 - -log-file \<log-file\> The log file to use for logging messages
 - -project-id \<project id\> - The workforce project ID (from AGOL). This is the item ID of the Workforce feature service (also found in the web app URL "projects/{project_id}/dispatch")
 - -name \<output layer name\> The name of the resulting layer (optional - a default name will be generated if not supplied)
+- --create-dashboard - if provided, create a Dashboard for monitoring your Workforce project with your new joined view layer. AGOL only 
 
 ```bash
-python create_joined_view.py -org https://arcgis.com -u username -p password -project-id cc1ed9326f16474ba35679d34bb88691 -name "Example Joined View"
+python create_joined_view.py -org https://arcgis.com -u username -p password -project-id cc1ed9326f16474ba35679d34bb88691 -name "Example Joined View" --create-dashboard
 ```
 
 ## What it does

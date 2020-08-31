@@ -20,7 +20,7 @@ In addition to the authentication arguments (org, username, password), the scrip
 
 Example Usage:
 ```bash
-python create_ops_dashboard.py -u <username> -p <password> -org https://arcgis.com -project-id <project_id> --light-mode --clone-map
+python create_ops_dashboard.py -u <username> -p <password> -org https://arcgis.com -project-id <project_id> --light-mode --use-dispatcher-webmap
 ```
 
 ## What it does
