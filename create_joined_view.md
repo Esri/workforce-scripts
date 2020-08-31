@@ -3,7 +3,7 @@
 This script creates a joined hosted feature layer view that combines the assignments, assignment types, workers, and dispatchers into a single layer. This allows information like the worker name to be displayed with the assignment even though the data is stored in two different layers. This script only applies to offline-enabled Workforce projects.
 
 Additionally, this script can be used to create a simple Workforce dashboard showing assignments and workers. This
-differs from `create_ops_dashboard.py` in that the assignment types should show names rather than global ids, using
+differs from `create_ops_dashboard.py` in that the assignment types in the dashboard should show names rather than global ids, using
 the joined view created above.
 
 **This script requires the logged in user to be an admin or to be the owner of the project**
