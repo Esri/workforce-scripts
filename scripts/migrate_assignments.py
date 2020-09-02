@@ -216,12 +216,13 @@ def main(arguments):
     logger.info("Migrating Attachments")
     for assignment in existing_assignments:
         object_id = assignment.attributes[project._assignment_schema.object_id]
+        new_assignment_object_id = v2_project.assignments.get(global_id=assignment.attributes[project._assignment_schema.global_id]).object_id
         if len(project.assignments_layer.attachments.get_list(object_id)) > 0:
             try:
                 with tempfile.TemporaryDirectory() as dirpath:
                     paths = project.assignments_layer.attachments.download(oid=object_id, save_path=dirpath)
                     for path in paths:
-                        v2_project.assignments_layer.attachments.add(oid=object_id, file_path=path)
+                        v2_project.assignments_layer.attachments.add(oid=new_assignment_object_id, file_path=path)
             except Exception as e:
                 logger.info(e)
                 logger.info("Skipping migration of this attachment. It did not download successfully")
