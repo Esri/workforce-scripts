@@ -60,11 +60,9 @@ be guaranteed.
 
 
 1. Install ArcGIS API for Python package via Conda as described [here](https://developers.arcgis.com/python/guide/install-and-set-up/).
-2. In terminal or Python console, run: `conda install -c esri/label/prerelease -c esri arcgis`
-3. Clone or download this repository
-4. In terminal/cmd navigate to the `scripts` folder
-
-With Conda:
+2. Clone or download this repository
+3. In terminal/cmd navigate to the `scripts` folder
+4. Create Conda environment (which automatically comes with 1.8.3 prerelease of the Python API)
 - Install Anaconda
 - Run `conda env create --file environment.yml` to create the virtual environment with the correct dependencies
 - Run `conda activate workforce-scripts` to activate the environment
