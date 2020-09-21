@@ -1,9 +1,10 @@
 name: workforce-scripts
 channels:
-  - esri
+  - esri/label/prerelease
+  - conda-forge
   - defaults
 dependencies:
-  - arcgis>=1.7.0
+  - arcgis=1.8.3
   - pip>=19.1.1
   - pendulum=1.4.4
   - python=3.7.0
