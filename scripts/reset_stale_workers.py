@@ -75,7 +75,7 @@ def main(arguments):
               verify_cert=not arguments.skip_ssl_verification)
 
     logger.info("Getting workforce project")
-    
+
     # Get the workforce project
     item = gis.content.get(arguments.project_id)
     try:
@@ -100,7 +100,7 @@ def main(arguments):
             sys.exit(0)
         utc_dt = local_cutoff_date.in_tz('UTC')
     formatted_date = utc_dt.strftime("%Y-%m-%d %H:%M:%S")
-    
+
     # Query using UTC-formatted date and reset those workers
     logger.info("Querying workers")
     where = f"{project._worker_schema.edit_date} < TIMESTAMP '{formatted_date}'"
@@ -120,10 +120,14 @@ if __name__ == "__main__":
     parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
     parser.add_argument('-project-id', dest='project_id', help="The id of the Workforce project", required=True)
-    parser.add_argument('-cutoff-date', dest='cutoff_date', help="If a worker has not been updated at or after this date, change its status to not working. Either int (in minutes from UTC now) or MM/DD/YYYY hh:mm:ss format. So if '10' is provided then reset workers who have not been updated in the last 10 minutes", required=True)
+    parser.add_argument('-cutoff-date', dest='cutoff_date',
+                        help="If a worker has not been updated at or after this date, change its status to not working. "
+                             "Either int (in minutes from UTC now) or MM/DD/YYYY hh:mm:ss format. "
+                             "So if '10' is provided then reset workers who have not been updated in the last 10 minutes",
+                        required=True)
     parser.add_argument('-timezone', dest='timezone', default="UTC", help="The timezone for the cutoff date")
     parser.add_argument('-log-file', dest='log_file', help='The log file to use')
-    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',help="Verify the SSL Certificate of the server")
+    parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true', help="Verify the SSL Certificate of the server")
     args = parser.parse_args()
     try:
         main(args)

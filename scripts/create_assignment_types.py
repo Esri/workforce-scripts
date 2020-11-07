@@ -82,7 +82,7 @@ def get_assignment_types_from_csv(csv_file):
 def main(arguments):
     # initialize logging
     logger = initialize_logging(arguments.log_file)
-    
+
     # Create the GIS
     logger.info("Authenticating...")
 
@@ -93,7 +93,7 @@ def main(arguments):
               verify_cert=not arguments.skip_ssl_verification)
     item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
-    
+
     logger.info("Reading CSV...")
     # Next we want to parse the CSV file and create a list of assignment types
     assignment_types = get_assignment_types_from_csv(arguments.csv_file)

@@ -70,26 +70,26 @@ def initialize_logging(log_file=None):
     return logger
 
 
-def main(arguments):
+def main(arguments):  # noqa: C901
     # initialize logging
     logger = initialize_logging(arguments.log_file)
-    
+
     # Create the GIS
     logger.info("Authenticating...")
-    
+
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,
               password=arguments.password,
               verify_cert=not arguments.skip_ssl_verification)
-    
+
     # Get the project and data
     item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
     dispatcher = project.dispatchers.search(where="{}='{}'".format(project._dispatcher_schema.user_id, arguments.username))
     if not dispatcher:
         log_critical_and_raise_exception("{} is not a dispatcher".format(args.username))
-        
+
     # Read the csv file
     logger.info("Reading CSV file: {}...".format(arguments.csv_file))
     assignments_in_csv = []
@@ -133,15 +133,15 @@ def main(arguments):
         # Create the geometry
         if args.x_field and args.y_field:
             geometry = dict(x=float(assignment[args.x_field]),
-                        y=float(assignment[args.y_field]),
-                        spatialReference=dict(
-                            wkid=int(args.wkid)))
+                            y=float(assignment[args.y_field]),
+                            spatialReference=dict(wkid=int(args.wkid)))
         else:
             try:
                 location_geometry = addresses[i]['location']
             except Exception as e:
                 logger.info(e)
-                logger.info("Geocoding did not work for the assignment with location {}. Please check your addresses again".format(assignment[args.location_field]))
+                logger.info("Geocoding did not work for the assignment with location {}. "
+                            "Please check your addresses again".format(assignment[args.location_field]))
                 logger.info("Continuing on to the next assignment")
                 continue
             location_geometry['spatialReference'] = dict(wkid=int(args.wkid))
@@ -212,8 +212,10 @@ if __name__ == "__main__":
     parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
     parser.add_argument('-project-id', dest='project_id', help="The id of the project to add assignments to", required=True)
-    parser.add_argument('-x-field', dest='x_field', help="The field that contains the x SHAPE information. Failing to pass this parameter will use geocoding", required=False)
-    parser.add_argument('-y-field', dest='y_field', help="The field that contains the y SHAPE information. Failing to pass this parameter will use geocoding", required=False)
+    parser.add_argument('-x-field', dest='x_field', help="The field that contains the x SHAPE information. Failing to pass this parameter will use geocoding",
+                        required=False)
+    parser.add_argument('-y-field', dest='y_field', help="The field that contains the y SHAPE information. Failing to pass this parameter will use geocoding",
+                        required=False)
     parser.add_argument('-custom-geocoder-id', dest='custom_geocoder', help="The item id of the custom geocoding service you would like to use", required=False)
     parser.add_argument('-assignment-type-field', dest='assignment_type_field',
                         help="The field that contains the assignmentType", required=True)

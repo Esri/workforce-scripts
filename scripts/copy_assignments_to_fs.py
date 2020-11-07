@@ -79,7 +79,7 @@ def main(arguments):
     target_fl = arcgis.features.FeatureLayer(arguments.target_fl, gis)
     # Check if layer exists
     try:
-        x = target_fl.properties
+        _ = target_fl.properties
     except Exception as e:
         logger.info(e)
         logger.info(
@@ -136,7 +136,8 @@ def main(arguments):
                 with tempfile.TemporaryDirectory() as d:
                     attachments = assignment.attachments.download(out_folder=d)
                     if attachments:
-                        feature = target_fl.query(where="{} = {}".format(field_mappings[project._assignment_schema.object_id], assignment.object_id)).features[0]
+                        feature = target_fl.query(where="{} = {}".format(field_mappings[project._assignment_schema.object_id],
+                                                                         assignment.object_id)).features[0]
                         for attachment in attachments:
                             target_fl.attachments.add(feature.attributes[target_fl.properties["objectIdField"]], attachment)
         else:

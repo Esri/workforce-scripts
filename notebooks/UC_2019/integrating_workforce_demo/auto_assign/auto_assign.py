@@ -54,7 +54,7 @@ def calculate_route_distance(p1, p2, project):
     try:
         route = route_layer.solve(stops, out_sr=102100, directions_length_units="esriNAUMeters")
         return route["directions"][0]["summary"]["totalLength"]
-    except Exception as e:
+    except Exception:
         return sys.maxsize
 
 
