@@ -63,9 +63,11 @@ be guaranteed.
 2. Clone or download this repository
 3. In terminal/cmd navigate to the `scripts` folder
 4. Create Conda environment (which automatically comes with 1.8.3 prerelease of the Python API)
-- Install Anaconda
-- Run `conda env create --file environment.yml` to create the virtual environment with the correct dependencies
-- Run `conda activate workforce-scripts` to activate the environment
+   1. Install Anaconda
+   2. Run `conda env create --file environment.yml` to create the virtual environment with the correct dependencies
+   3. Run `conda activate workforce-scripts` to activate the environment
+5. (Optional - dev only) Configure pre-commit to run flake8 linting on pushes
+   * `pre-commit install --hook-type pre-push`
 
 To run in ArcGIS Notebooks:
 1. Visit our [AGOL Hosted Notebooks group](https://arcgis.com/home/group.html?id=c1695c0c2f9945a8a7fee7dd106c74ae#overview)
