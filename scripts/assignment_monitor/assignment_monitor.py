@@ -172,8 +172,8 @@ def send_email(gmail_username, recipient_emails, assignment):
             assignment.object_id
         )
     )
-    client.send(to=recipient_emails, subject=subject,contents=body)
-    
+    client.send(to=recipient_emails, subject=subject, contents=body)
+
 
 if __name__ == "__main__":
     # parse the config file

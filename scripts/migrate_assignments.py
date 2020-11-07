@@ -90,19 +90,19 @@ def add_custom_fields(old_layer, new_layer):
     return custom_fields
 
 
-def main(arguments):
+def main(arguments):  # noqa: C901
     # Initialize logging
     logger = initialize_logging(arguments.log_file)
-    
+
     # Create the GIS
     logger.info("Authenticating...")
-    
+
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,
               password=arguments.password,
               verify_cert=not arguments.skip_ssl_verification)
-    
+
     # Get the old workforce project
     item = gis.content.get(arguments.classic_project_id)
     project = workforce.Project(item)
@@ -110,19 +110,20 @@ def main(arguments):
         if project._is_v2_project:
             raise Exception("The first project provided is a v2 project. Please migrate assignment data from v1 projects")
     except AttributeError:
-        raise Exception("Cannot find the attribute is v2 project. Are you sure you have the API version 1.8.3 or greater installed? Check with `arcgis.__version__` in your Python console")
-    
+        raise Exception("Cannot find the attribute is v2 project. Are you sure you have the API version 1.8.3 or greater installed? "
+                        "Check with `arcgis.__version__` in your Python console")
+
     # Get new workforce project
     v2_project = workforce.Project(gis.content.get(arguments.new_project_id))
     if not v2_project._is_v2_project:
         raise Exception("The second project provided is a v1 project. Please migrate assignment data to v2 projects")
-    
+
     # validate correct assignment types are present
     existing_assignment_types = project.assignment_types.search()
     for assignment_type in existing_assignment_types:
         if not v2_project.assignment_types.get(name=assignment_type.name):
             raise Exception("One of your assignment types in your classic project is not in your offline project")
-    
+
     # validate correct workers are present
     for worker in project.workers.search():
         if not v2_project.workers.get(user_id=worker.user_id):
@@ -131,19 +132,19 @@ def main(arguments):
     # Migrate Assignments
     logger.info("Migrating assignments")
     assignment_ghost = False
-    
+
     # Get Existing Assignments
     existing_assignments = project.assignments_layer.query(where=arguments.where, return_all_records=True).features
     assignments_to_add = []
     layer = v2_project.assignments_layer
-    
+
     # Set Custom Fields for Assignments and Templates
     custom_fields = add_custom_fields(project.assignments_layer, layer)
-    
+
     # Prepare Assignments to be Added
     for assignment in existing_assignments:
         if assignment.attributes[project._assignment_schema.assignment_type]:
-            
+
             # set attributes in case they are empty
             assignment_location = (str(assignment.geometry["x"]) + " " + str(assignment.geometry["y"])) if \
                 assignment.attributes[project._assignment_schema.location] is None else \
@@ -152,48 +153,38 @@ def main(arguments):
                 assignment.attributes[project._assignment_schema.status]
             assignment_priority = 0 if assignment.attributes[project._assignment_schema.priority] is None else \
                 assignment.attributes[project._assignment_schema.priority]
-            
+
             # get AT name based on code stored
             assignment_type_name = ""
             for at in existing_assignment_types:
                 if at.code == assignment.attributes[project._assignment_schema.assignment_type]:
                     assignment_type_name = at.name
                     break
-                    
+
             # Set attributes
             attributes = {v2_project._assignment_schema.status: assignment_status,
                           v2_project._assignment_schema.notes: assignment.attributes[project._assignment_schema.notes],
                           v2_project._assignment_schema.priority: assignment_priority,
-                          v2_project._assignment_schema.assignment_type: get_assignment_type_global_id(
-                              v2_project.assignment_types.search(), assignment_type_name),
-                          v2_project._assignment_schema.work_order_id: assignment.attributes[
-                              project._assignment_schema.work_order_id],
-                          v2_project._assignment_schema.due_date: assignment.attributes[
-                              project._assignment_schema.due_date],
-                          v2_project._assignment_schema.description: assignment.attributes[
-                              project._assignment_schema.description],
-                          v2_project._assignment_schema.worker_id: get_worker_global_id(project.workers.search(), v2_project.workers,
-                                                                                        assignment.attributes[ project._assignment_schema.worker_id]),
+                          v2_project._assignment_schema.assignment_type:
+                              get_assignment_type_global_id(v2_project.assignment_types.search(), assignment_type_name),
+                          v2_project._assignment_schema.work_order_id: assignment.attributes[project._assignment_schema.work_order_id],
+                          v2_project._assignment_schema.due_date: assignment.attributes[project._assignment_schema.due_date],
+                          v2_project._assignment_schema.description: assignment.attributes[project._assignment_schema.description],
+                          v2_project._assignment_schema.worker_id:
+                              get_worker_global_id(project.workers.search(), v2_project.workers, assignment.attributes[project._assignment_schema.worker_id]),
                           v2_project._assignment_schema.location: assignment_location,
-                          v2_project._assignment_schema.declined_comment: assignment.attributes[
-                              project._assignment_schema.declined_comment],
-                          v2_project._assignment_schema.assigned_date: assignment.attributes[
-                              project._assignment_schema.assigned_date],
-                          v2_project._assignment_schema.in_progress_date: assignment.attributes[
-                              project._assignment_schema.in_progress_date],
-                          v2_project._assignment_schema.completed_date: assignment.attributes[
-                              project._assignment_schema.completed_date],
-                          v2_project._assignment_schema.declined_date: assignment.attributes[
-                              project._assignment_schema.declined_date],
-                          v2_project._assignment_schema.paused_date: assignment.attributes[
-                              project._assignment_schema.paused_date],
-                          v2_project._assignment_schema.dispatcher_id: get_dispatcher_global_id(project.dispatchers.search(), v2_project.dispatchers,
-                              assignment.attributes[project._assignment_schema.dispatcher_id]),
-                          v2_project._assignment_schema.global_id: assignment.attributes[
-                              project._assignment_schema.global_id],
-                          v2_project._assignment_schema.object_id: assignment.attributes[
-                              project._assignment_schema.object_id]}
-            
+                          v2_project._assignment_schema.declined_comment: assignment.attributes[project._assignment_schema.declined_comment],
+                          v2_project._assignment_schema.assigned_date: assignment.attributes[project._assignment_schema.assigned_date],
+                          v2_project._assignment_schema.in_progress_date: assignment.attributes[project._assignment_schema.in_progress_date],
+                          v2_project._assignment_schema.completed_date: assignment.attributes[project._assignment_schema.completed_date],
+                          v2_project._assignment_schema.declined_date: assignment.attributes[project._assignment_schema.declined_date],
+                          v2_project._assignment_schema.paused_date: assignment.attributes[project._assignment_schema.paused_date],
+                          v2_project._assignment_schema.dispatcher_id:
+                              get_dispatcher_global_id(project.dispatchers.search(), v2_project.dispatchers,
+                                                       assignment.attributes[project._assignment_schema.dispatcher_id]),
+                          v2_project._assignment_schema.global_id: assignment.attributes[project._assignment_schema.global_id],
+                          v2_project._assignment_schema.object_id: assignment.attributes[project._assignment_schema.object_id]}
+
             # Add Custom Field Values
             for field in custom_fields:
                 attributes[field["name"]] = assignment.attributes[field["name"]]
@@ -202,7 +193,7 @@ def main(arguments):
         else:
             logger.info("One assignment's migration skipped - does not have an assignment type")
             assignment_ghost = True
-    
+
     # Add Assignments
     layer.edit_features(adds=FeatureSet(assignments_to_add), use_global_ids=True)
     new_assignments = v2_project.assignments_layer.query("1=1", return_all_records=True).features
@@ -211,7 +202,7 @@ def main(arguments):
         logger.info("Assignments successfully migrated")
     else:
         raise Exception("Assignments not migrated successfully. Unknown error")
-    
+
     # Migrate Attachments
     logger.info("Migrating Attachments")
     for assignment in existing_assignments:
@@ -241,9 +232,13 @@ if __name__ == "__main__":
     parser.add_argument('-p', dest='password', help="The password to authenticate with", required=True)
     parser.add_argument('-org', dest='org_url', help="The url of the org/portal to use", required=True)
     # Parameters for workforce
-    parser.add_argument('-classic-project-id', dest='classic_project_id', help="The id of the classic project whose assignments you want to migrate", required=True)
+    parser.add_argument('-classic-project-id', dest='classic_project_id', help="The id of the classic project whose assignments you want to migrate",
+                        required=True)
     parser.add_argument('-new-project-id', dest='new_project_id', help="The id of the v2 project who you want to have the new assignments", required=True)
-    parser.add_argument('-where', dest='where', help="The where clause to determine what assignments to migrate. Defaults to status IN (O, 1, 2, 4, 5) - completed and canceled assignments will not be migrated by default", default="status IN (0, 1, 2, 4, 5)")
+    parser.add_argument('-where', dest='where',
+                        help="The where clause to determine what assignments to migrate. "
+                             "Defaults to status IN (O, 1, 2, 4, 5) - completed and canceled assignments will not be migrated by default",
+                        default="status IN (0, 1, 2, 4, 5)")
     parser.add_argument('-log-file', dest='log_file', help='The log file to use')
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
                         help="Verify the SSL Certificate of the server")

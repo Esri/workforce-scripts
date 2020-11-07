@@ -90,34 +90,22 @@ def main(arguments):
         assignment_to_export = {}
         assignment_to_export["AssignedDate"] = assignment.assigned_date
         if assignment.assigned_date:
-            assignment_to_export["AssignedDate"] = \
-                arrow.get(assignment.assigned_date).to(timezone).strftime(
-                date_format)
+            assignment_to_export["AssignedDate"] = arrow.get(assignment.assigned_date).to(timezone).strftime(date_format)
         if assignment.due_date:
-            assignment_to_export["DueDate"] = \
-                arrow.get(assignment.due_date).to(timezone).strftime(date_format)
+            assignment_to_export["DueDate"] = arrow.get(assignment.due_date).to(timezone).strftime(date_format)
         if assignment.creation_date:
-            assignment_to_export["CreationDate"] = \
-                arrow.get(assignment.creation_date).to(timezone).strftime(
-                date_format)
+            assignment_to_export["CreationDate"] = arrow.get(assignment.creation_date).to(timezone).strftime(date_format)
         if assignment.declined_date:
-            assignment_to_export["DeclinedDate"] = \
-                arrow.get(assignment.declined_date).to(timezone).strftime(
-                date_format)
+            assignment_to_export["DeclinedDate"] = arrow.get(assignment.declined_date).to(timezone).strftime(date_format)
         if assignment.paused_date:
-            assignment_to_export["PausedDate"] = \
-                arrow.get(assignment.paused_date).to(timezone).strftime(date_format)
+            assignment_to_export["PausedDate"] = arrow.get(assignment.paused_date).to(timezone).strftime(date_format)
         if assignment.completed_date:
-            assignment_to_export["CompletedDate"] = \
-                arrow.get(assignment.completed_date).to(timezone).strftime(
-                date_format)
+            assignment_to_export["CompletedDate"] = arrow.get(assignment.completed_date).to(timezone).strftime(date_format)
         if assignment.edit_date:
             assignment_to_export["EditDate"] = \
                 arrow.get(assignment.edit_date).to(timezone).strftime(date_format)
         if assignment.in_progress_date:
-            assignment_to_export["InProgressDate"] = \
-                arrow.get(assignment.in_progress_date).to(timezone).strftime(
-                date_format)
+            assignment_to_export["InProgressDate"] = arrow.get(assignment.in_progress_date).to(timezone).strftime(date_format)
         assignment_to_export["X"] = assignment.geometry["x"]
         assignment_to_export["Y"] = assignment.geometry["y"]
         assignment_to_export["DispatcherId"] = assignment.dispatcher_id

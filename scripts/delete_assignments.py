@@ -54,7 +54,7 @@ def main(arguments):
 
     # Create the GIS
     logger.info("Authenticating...")
-    
+
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,

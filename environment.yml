@@ -11,6 +11,8 @@ dependencies:
   - shapely=1.6.4
   - requests
   - configparser
+  - flake8>=3.8.3
+  - pre-commit>=2.7.1
   - pip:
       - pyqrcode==1.2.1
       - pypng==0.0.18

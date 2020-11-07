@@ -34,7 +34,6 @@ from arcgis.apps.workforce.project import Project
 from arcgis.features import FeatureLayerCollection
 from arcgis.mapping import WebMap
 
-
 # Define the set of fields to include for each layer in the joined layer
 
 assignment_type_fields = [
@@ -44,7 +43,6 @@ assignment_type_fields = [
         "source": "description"
     }
 ]
-
 
 assignment_fields = [
     {
@@ -138,7 +136,6 @@ assignment_fields = [
         "source": "Editor"
     }
 ]
-
 
 worker_fields = [
     {
@@ -341,7 +338,8 @@ def main(args):
                 "The project provided is not a v2 project. You can only use v2 (offline-enabled) projects with this script")
     except AttributeError:
         raise Exception(
-            "Cannot find the attribute is v2 project. Are you sure you have the API version 1.8.3 or greater installed? Check with `arcgis.__version__` in your Python console")
+            "Cannot find the attribute is v2 project. Are you sure you have the API version 1.8.3 or greater installed? "
+            "Check with `arcgis.__version__` in your Python console")
     logger.info("Phase 1: Joining assignments to assignment types...")
     d = int(datetime.datetime.now().timestamp())
     assignments_to_types = create_joined_view(gis,
@@ -394,17 +392,17 @@ def main(args):
                                     project._assignment_schema.global_id,
                                     project._assignment_schema.global_id,
                                     name,
-                                    assignment_fields + assignment_type_fields+ worker_fields,
+                                    assignment_fields + assignment_type_fields + worker_fields,
                                     dispatcher_fields)
     logger.info(f"Final Item: {final_item.title}")
     if args.create_dashboard:
         logger.info("Creating dashboard")
-        
+
         # create new webmap
         map_item = project.dispatcher_webmap.save(
             item_properties={"title": project.title + " Dashboard Map", "tags": [], "snippet": "Dashboard Map"})
         new_webmap = WebMap(map_item)
-        
+
         # swizzle in joined layer instead of assignments layer
         for i, layer in enumerate(new_webmap.layers):
             if layer["id"] == "Assignments_0":
@@ -413,7 +411,7 @@ def main(args):
                 new_webmap.layers[i]["id"] = "Assignments_0"
                 break
         new_webmap.update()
-        
+
         # clone dashboard with your data instead of our data
         item = gis.content.get("af7cd356c21a4ded87d8cdd452fd8be3")
         item_mapping = {'377b2b2014f24b0ab9b053d9b2fed113': final_item.id,
@@ -422,7 +420,7 @@ def main(args):
         cloned_items = gis.content.clone_items([item], item_mapping=item_mapping, search_existing_items=False)
         if len(cloned_items) == 0:
             raise ValueError("Creating dashboard failed")
-            
+
         # Save new name and share to group
         logger.info("Updating title and sharing to project group")
         new_title = project.title + " Dashboard"
@@ -451,4 +449,3 @@ if __name__ == "__main__":
         logging.getLogger().critical("Exception detected, script exiting")
         logging.getLogger().critical(e)
         logging.getLogger().critical(traceback.format_exc().replace("\n", " | "))
-

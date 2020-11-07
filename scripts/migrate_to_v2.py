@@ -9,7 +9,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.​
-    
+
     This sample migrates version 1 projects to version 2
 """
 
@@ -154,7 +154,7 @@ def get_wf_operational_layer(data, layer_id):
             return layer
 
 
-def main(arguments):
+def main(arguments):  # noqa: C901
     # Initialize logging
     logger = initialize_logging(arguments.log_file)
 
@@ -175,7 +175,8 @@ def main(arguments):
             raise Exception("This is a v2 project. Please migrate v1 projects")
     except AttributeError:
         raise Exception(
-            "Cannot find the attribute is v2 project. Are you sure you have the API version 1.8.3 or greater installed? Check with `arcgis.__version__` in your Python console")
+            "Cannot find the attribute is v2 project. "
+            "Are you sure you have the API version 1.8.3 or greater installed? Check with `arcgis.__version__` in your Python console")
     logger.info(project)
     logger.info("Creating base v2 project...")
 
@@ -235,7 +236,8 @@ def main(arguments):
         # Prepare Dispatchers to be added
         for dispatcher in existing_dispatchers:
 
-            # Validate that there is a user id populated and that the user id isn't yourself (since that was added during project creation). Otherwise, skip adding the dispatcher
+            # Validate that there is a user id populated and that the user id isn't yourself (since that was added during project creation).
+            # Otherwise, skip adding the dispatcher
             if dispatcher.user_id and dispatcher.user_id != arguments.username:
 
                 # Validate a name exists, otherwise populate with an empty string
@@ -254,7 +256,8 @@ def main(arguments):
             else:
                 if not dispatcher.user_id:
                     logger.info(
-                        "Dispatcher was skipped from migrating. The dispatcher does not a valid user_id in the layer, or 2. The dispatcher was already added. Please check the original dispatchers layer.")
+                        "Dispatcher was skipped from migrating. The dispatcher does not a valid user_id in the layer, or 2. "
+                        "The dispatcher was already added. Please check the original dispatchers layer.")
                     dispatcher_ghost = True
                 else:
                     # update info for owner dispatcher
@@ -267,7 +270,8 @@ def main(arguments):
         max_add_per_call = 25
         for i in range(0, math.ceil(len(dispatchers_to_add) / max_add_per_call)):
             v2_project.group.add_users(
-                [d.attributes[v2_project._dispatcher_schema.user_id] for d in dispatchers_to_add[i * max_add_per_call:(i * max_add_per_call) + max_add_per_call]])
+                [d.attributes[v2_project._dispatcher_schema.user_id] for d in
+                 dispatchers_to_add[i * max_add_per_call:(i * max_add_per_call) + max_add_per_call]])
         new_dispatchers = v2_project.dispatchers_layer.query("1=1", return_all_records=True).features
         if len(existing_dispatchers) == len(new_dispatchers) or dispatcher_ghost:
             logger.info("Dispatchers successfully migrated")
@@ -288,15 +292,11 @@ def main(arguments):
     # Prepare Workers to be added
     for worker in existing_workers:
         if worker.attributes[project._worker_schema.user_id]:
-            worker_name = worker.attributes[project._worker_schema.user_id] if worker.attributes[
-                                                                                   project._worker_schema.name] is None else \
-            worker.attributes[
-                project._worker_schema.name]
-            worker_status = 0 if worker.attributes[project._worker_schema.status] is None else worker.attributes[
-                project._worker_schema.status]
+            worker_name = worker.attributes[project._worker_schema.user_id] if worker.attributes[project._worker_schema.name] is None else \
+                worker.attributes[project._worker_schema.name]
+            worker_status = 0 if worker.attributes[project._worker_schema.status] is None else worker.attributes[project._worker_schema.status]
             attributes = {v2_project._worker_schema.name: worker_name,
-                          v2_project._worker_schema.contact_number: worker.attributes[
-                              project._worker_schema.contact_number],
+                          v2_project._worker_schema.contact_number: worker.attributes[project._worker_schema.contact_number],
                           v2_project._worker_schema.notes: worker.attributes[project._worker_schema.notes],
                           v2_project._worker_schema.status: worker_status,
                           v2_project._worker_schema.title: worker.attributes[project._worker_schema.title],
@@ -342,16 +342,15 @@ def main(arguments):
     # Prepare Assignments to be Added
     for assignment in existing_assignments:
         if assignment.attributes[project._assignment_schema.assignment_type]:
-            
+
             # set attributes in case they are empty
             assignment_location = (str(assignment.geometry["x"]) + " " + str(assignment.geometry["y"])) if \
-            assignment.attributes[project._assignment_schema.location] is None else \
-                assignment.attributes[project._assignment_schema.location]
+                assignment.attributes[project._assignment_schema.location] is None else assignment.attributes[project._assignment_schema.location]
             assignment_status = 0 if assignment.attributes[project._assignment_schema.status] is None else \
                 assignment.attributes[project._assignment_schema.status]
             assignment_priority = 0 if assignment.attributes[project._assignment_schema.priority] is None else \
                 assignment.attributes[project._assignment_schema.priority]
-            
+
             assignment_type_name = ""
             for at in existing_assignment_types:
                 if at.code == assignment.attributes[project._assignment_schema.assignment_type]:
@@ -452,11 +451,11 @@ def main(arguments):
             v2_project.integrations.add(integration_id=integration["id"], prompt=integration["prompt"],
                                         url_template=integration["urlTemplate"])
     logger.info("Integrations migrated successfully")
-    
+
     # Get rid of old URL patterns
     integrations = v2_project.integrations.search()
     generate_universal_links(integrations)
-    
+
     # Migrate Webmaps - Retain non-WF layers
     logger.info("Migrating Webmaps")
     upgrade_webmaps(project.worker_webmap, v2_project.worker_webmap)

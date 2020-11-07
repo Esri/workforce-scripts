@@ -65,20 +65,20 @@ def initialize_logging(log_file=None):
 def main(arguments):
     # Initialize logging
     logger = initialize_logging(arguments.log_file)
-    
+
     # Create the GIS
     logger.info("Authenticating...")
-    
+
     # First step is to get authenticate and get a valid token
     gis = GIS(arguments.org_url,
               username=arguments.username,
               password=arguments.password,
               verify_cert=not arguments.skip_ssl_verification)
-    
+
     # Get the workforce project
     item = gis.content.get(arguments.project_id)
     project = workforce.Project(item)
-    
+
     # Read the CVS file and loop through the dispatchers information contained within this file
     logger.info("Parsing CSV...")
     with open(os.path.abspath(arguments.csv_file), 'r') as file:
