@@ -13,7 +13,7 @@ This script queries the assignment feature layer and exports the results to a CS
 - -csv-file \<csv\> - The csv file to write the results to
 - -where \<where\> - The where clause to use when querying the assignments to export (Optional - Defaults to '1=1')
 - -date-format \<date-format\> - The date format to use in the exported CSV file
-- -timezone \<timezone\> - The timezone to convert the dates to
+- -timezone \<timezone\> - The timezone to convert the dates to. You can find list available ones in Python with `pendulum.timezones`
 
 Example Usage:
 ```bash
