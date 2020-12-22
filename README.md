@@ -39,22 +39,22 @@ be guaranteed.
 
 | Functionality                                                        | Script                                                                            
 |----------------------------------------------------------------------|----------------------------------------------------------------------------------------|
-| [Create Assignment Types ](create_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
-| [Import Workers](import_workers.md)                                  | [import_workers.py](scripts/import_workers.py)                       |
-| [Import Dispatchers](import_dispatchers.md)                          | [import_dispatchers.py](scripts/import_dispatchers.py)
-| [Create Assignments From CSV](create_assignments_from_csv_readme.md) | [create_assignments_from_csv.py](scripts/create_assignments_from_csv.py)          |
-| [Copy Assignments To Feature Service](copy_assignments_to_fs_readme.md) | [copy_assignments_to_fs.py](scripts/copy_assignments_to_fs.py)                  |
-| [Export Assignments to CSV](export_assignments_to_csv_readme.md)     | [export_assignments_from_csv.py](scripts/export_assignments_from_csv.py)          |
-| [Check Assignment Completion Location](check_completion_location.md)         | [check_completion_location.py](scripts/check_completion_location.py)            |
-| [Delete Assignments](delete_assignments_readme.md)                   | [delete_assignments.py](scripts/delete_assignments.py)          |                   |
-| [Delete Assignment Types ](delete_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
-| [Assignment Monitor (Slack Integration)](assignment_monitor.md)                           | [assignment_monitor.py](scripts/assignment_monitor.py) |
-| [Migrate to Version 2 Project](migrate_to_v2.md) | [migrate_to_v2.py](scripts/migrate_to_v2.py) |
-| [Reset Stale Workers ](reset_stale_workers.md)               | [reset_stale_workers.py](scripts/reset_stale_workers.py)              |
-| [Report Incomplete Assignments with Work Orders ](report_incomplete_assignments_with_work_orders.md)               | [report_incomplete_assignments_with_work_orders.py](scripts/report_incomplete_assignments_with_work_orders.py)    
-| [Report Complete Assignments without Work Orders](report_complete_assignments_without_work_orders.md)               | [report_complete_assignments_without_work_orders.py](scripts/report_complete_assignments_without_work_orders.py)    
-| [Create Default Ops Dashboard](create_ops_dashboard.md)              | [create_ops_dashboard.py](scripts/create_ops_dashboard.py)|
-| [Create Joined View](create_joined_view.md) | [create_joined_view](scripts/created_joined_view.py) |
+| [Create Assignment Types ](markdown/create_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
+| [Import Workers](markdown/import_workers.md)                                  | [import_workers.py](scripts/import_workers.py)                       |
+| [Import Dispatchers](markdown/import_dispatchers.md)                          | [import_dispatchers.py](scripts/import_dispatchers.py)
+| [Create Assignments From CSV](markdown/create_assignments_from_csv_readme.md) | [create_assignments_from_csv.py](scripts/create_assignments_from_csv.py)          |
+| [Copy Assignments To Feature Service](markdown/copy_assignments_to_fs_readme.md) | [copy_assignments_to_fs.py](scripts/copy_assignments_to_fs.py)                  |
+| [Export Assignments to CSV](markdown/export_assignments_to_csv_readme.md)     | [export_assignments_from_csv.py](scripts/export_assignments_from_csv.py)          |
+| [Check Assignment Completion Location](markdown/check_completion_location.md)         | [check_completion_location.py](scripts/check_completion_location.py)            |
+| [Delete Assignments](markdown/delete_assignments_readme.md)                   | [delete_assignments.py](scripts/delete_assignments.py)          |                   |
+| [Delete Assignment Types ](markdown/delete_assignment_types.md)               | [create_assignment_types.py](scripts/create_assignment_types.py)              |
+| [Assignment Monitor (Slack Integration)](markdown/assignment_monitor.md)                           | [assignment_monitor.py](scripts/assignment_monitor.py) |
+| [Migrate to Version 2 Project](markdown/migrate_to_v2.md) | [migrate_to_v2.py](scripts/migrate_to_v2.py) |
+| [Reset Stale Workers ](markdown/reset_stale_workers.md)               | [reset_stale_workers.py](scripts/reset_stale_workers.py)              |
+| [Report Incomplete Assignments with Work Orders ](markdown/report_incomplete_assignments_with_work_orders.md)               | [report_incomplete_assignments_with_work_orders.py](scripts/report_incomplete_assignments_with_work_orders.py)    
+| [Report Complete Assignments without Work Orders](markdown/report_complete_assignments_without_work_orders.md)               | [report_complete_assignments_without_work_orders.py](scripts/report_complete_assignments_without_work_orders.py)    
+| [Create Default Ops Dashboard](markdown/create_ops_dashboard.md)              | [create_ops_dashboard.py](scripts/create_ops_dashboard.py)|
+| [Create Joined View](markdown/create_joined_view.md) | [create_joined_view](scripts/created_joined_view.py) |
 
 ### Instructions
 
@@ -81,7 +81,7 @@ To run in ArcGIS Notebooks:
  * [Workforce for ArcGIS](http://www.esri.com/products/workforce-for-arcgis)
  * [Usecases for the Workforce Python module](https://www.esri.com/arcgis-blog/products/workforce/field-mobility/automate-workforce-with-arcgis-api-for-python/)
  * [Scheduling Workforce Python scripts with Windows Task Scheduler](https://community.esri.com/groups/workforce-for-arcgis/blog/2020/05/14/schedule-tasks-for-workforce)
- * [Scheduling Workforce Python scripts in Linux / MacOS](scheduling_with_python.md)
+ * [Scheduling Workforce Python scripts in Linux / MacOS](markdown/scheduling_with_python.md)
 
 ## Issues
 
