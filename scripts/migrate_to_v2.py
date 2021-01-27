@@ -135,7 +135,7 @@ def add_custom_fields(old_layer, new_layer):
     types = new_layer.properties["types"]
     for old_field in old_fields:
         if not any(old_field["name"].lower() == new_field["name"].lower() for new_field in new_fields):
-            if old_field["name"] != "assignmentRead":
+            if old_field["name"].lower() != "assignmentread":
                 custom_fields.append(old_field)
                 for index, type in enumerate(types):
                     templates = type["templates"]
