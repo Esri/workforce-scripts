@@ -28,6 +28,7 @@ import logging
 import logging.handlers
 import sys
 import traceback
+import arcgis
 from arcgis.apps import workforce
 from arcgis.gis import GIS
 
@@ -93,13 +94,15 @@ def main(arguments):
 
     # Get example ops dashboard from workforce_scripts, map to your project
     logger.info("Getting example dashboard")
+    anon_agol_gis = GIS()
+    arcgis.env.active_gis = gis
     if arguments.light_mode:
-        item = gis.content.get('1cbac058ce1b4a008a6baa0f3cfd506a')
+        item = anon_agol_gis.content.get('1cbac058ce1b4a008a6baa0f3cfd506a')
         item_mapping = {'2249c41dcec34b91b3990074ed8c8ffc': project.assignments_item.id,
                         '6afe245f9f3f48e8884dc7e691841973': project.workers_item.id,
                         'e605c140ecf14cccaf1e7b3bcb4b1710': map_id}
     else:
-        item = gis.content.get("af7cd356c21a4ded87d8cdd452fd8be3")
+        item = anon_agol_gis.content.get("af7cd356c21a4ded87d8cdd452fd8be3")
         item_mapping = {'377b2b2014f24b0ab9b053d9b2fed113': project.assignments_item.id,
                         'e1904f5c56484163a021155f447adf34': project.workers_item.id,
                         'bb7d2b495ecc4ea7810b28f16ef71cba': map_id}
