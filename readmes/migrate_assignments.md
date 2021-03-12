@@ -3,7 +3,7 @@
 NOTE: This script migrates just the assignments from your Version 1 Workforce project to a Version 2 project. 
 It assumes you have already migrated the project using the "Migrate project" option in the Workforce web app.
 If you have not done so and want to migrate the entire project using Python, please see:
-[Migrate to V2 Project](readmes/migrate_to_v2.md)
+[Migrate to V2 Project](migrate_to_v2.md)
 
 This script takes a Version 1 Workforce Project and migrates the assignments to a Version 2 project. It will preserve your assignment data in the new project. 
 It assumes you have used the "Migrate Project" option in the Workforce web app to migrate the project already. 
