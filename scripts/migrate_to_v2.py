@@ -415,14 +415,18 @@ def main(arguments):  # noqa: C901
         object_id = assignment.attributes[project._assignment_schema.object_id]
         new_assignment_object_id = v2_project.assignments.get(global_id=assignment.attributes[project._assignment_schema.global_id]).object_id
         if len(project.assignments_layer.attachments.get_list(object_id)) > 0:
-            try:
-                with tempfile.TemporaryDirectory() as dirpath:
+            with tempfile.TemporaryDirectory() as dirpath:
+                try:
                     paths = project.assignments_layer.attachments.download(oid=object_id, save_path=dirpath)
-                    for path in paths:
+                except Exception as e:
+                    logger.info(f"Failed to download attachments for assignment: {assignment.attributes[project._assignment_schema.global_id]}")
+                    logger.exception(e)
+                for path in paths:
+                    try:
                         v2_project.assignments_layer.attachments.add(oid=new_assignment_object_id, file_path=path)
-            except Exception as e:
-                logger.info(e)
-                logger.info("Skipping migration of this attachment. It did not download successfully")
+                    except Exception as e:
+                        logger.info(f"Failed to upload attachment: {path} from assignment: {assignment.attributes[project._assignment_schema.global_id]}")
+                        logger.exception(e)
     if len(project.assignments_layer.attachments.search("1=1")) == len(
             v2_project.assignments_layer.attachments.search("1=1")):
         logger.info("Attachments successfully migrated")
@@ -442,19 +446,17 @@ def main(arguments):  # noqa: C901
             for key in key_list:
                 at_name = project.assignment_types.get(code=int(key)).name
                 guid = get_assignment_type_global_id(new_assignment_types, at_name)
+                url_template = update_url_protocol(types[key]["urlTemplate"])
                 v2_project.integrations.add(integration_id=integration["id"], prompt=integration["prompt"],
-                                            url_template=types[key]["urlTemplate"], assignment_types=guid)
+                                            url_template=url_template, assignment_types=guid)
         else:
             # default id changed
             if integration["id"] == "default-navigator":
                 integration["id"] = "arcgis-navigator"
+            url_template = update_url_protocol(integration["urlTemplate"])
             v2_project.integrations.add(integration_id=integration["id"], prompt=integration["prompt"],
-                                        url_template=integration["urlTemplate"])
+                                        url_template=url_template)
     logger.info("Integrations migrated successfully")
-
-    # Get rid of old URL patterns
-    integrations = v2_project.integrations.search()
-    generate_universal_links(integrations)
 
     # Migrate Webmaps - Retain non-WF layers
     logger.info("Migrating Webmaps")
@@ -463,18 +465,11 @@ def main(arguments):  # noqa: C901
     logger.info("Script Completed")
 
 
-def generate_universal_links(integrations):
-    for integration in integrations:
-        if integration.url_template:
-            url_template = None
-            if "arcgis-navigator://" in integration.url_template:
-                url_template = integration.url_template.replace("arcgis-navigator://", "https://navigator.arcgis.app")
-            if "arcgis-collector://" in integration.url_template:
-                url_template = integration.url_template.replace("arcgis-collector://", "https://collector.arcgis.app")
-            if "arcgis-explorer://" in integration.url_template:
-                url_template = integration.url_template.replace("arcgis-explorer://", "https://explorer.arcgis.app")
-            if url_template:
-                integration.update(url_template=url_template)
+def update_url_protocol(url_template):
+    url_template = url_template.replace("arcgis-navigator://", "https://navigator.arcgis.app")
+    url_template = url_template.replace("arcgis-collector://", "https://collector.arcgis.app")
+    url_template = url_template.replace("arcgis-explorer://", "https://explorer.arcgis.app")
+    return url_template
 
 
 def upgrade_webmaps(old_webmap, new_webmap):
