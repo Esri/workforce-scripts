@@ -85,7 +85,9 @@ To run in ArcGIS Notebooks:
 
 ## Issues
 
-Find a bug or want to request a new feature?  Please let us know by submitting an issue.
+Although we do our best to ensure these scripts and notebooks work as expected, they are provided as is and there is no official support.
+
+If you find a bug, please let us know by submitting an issue.
 
 ## Contributing
 
