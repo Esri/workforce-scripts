@@ -283,7 +283,9 @@ def main(arguments):  # noqa: C901
     worker_ghost = False
 
     # Get Existing Workers
-    existing_workers = project.workers_layer.query("1=1", return_all_records=True).features
+    existing_workers = project.workers_layer.query("1=1",
+                                                   return_all_records=True,
+                                                   out_sr=v2_project.assignments_layer.properties['extent']['spatialReference']).features
     workers_to_add = []
     layer = v2_project.workers_layer
 
@@ -332,7 +334,9 @@ def main(arguments):  # noqa: C901
     assignment_ghost = False
 
     # Get Existing Assignments
-    existing_assignments = project.assignments_layer.query("1=1", return_all_records=True).features
+    existing_assignments = project.assignments_layer.query("1=1",
+                                                           return_all_records=True,
+                                                           out_sr=v2_project.assignments_layer.properties['extent']['spatialReference']).features
     assignments_to_add = []
     layer = v2_project.assignments_layer
 

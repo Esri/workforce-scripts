@@ -134,7 +134,9 @@ def main(arguments):  # noqa: C901
     assignment_ghost = False
 
     # Get Existing Assignments
-    existing_assignments = project.assignments_layer.query(where=arguments.where, return_all_records=True).features
+    existing_assignments = project.assignments_layer.query(where=arguments.where,
+                                                           return_all_records=True,
+                                                           out_sr=v2_project.assignments_layer.properties['extent']['spatialReference']).features
     assignments_to_add = []
     layer = v2_project.assignments_layer
 
