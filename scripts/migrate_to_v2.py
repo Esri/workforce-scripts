@@ -266,7 +266,7 @@ def main(arguments):  # noqa: C901
 
         # Add Dispatchers
         for i in range(0, len(dispatchers_to_add), 100):
-            layer.edit_features(adds=FeatureSet(dispatchers_to_add[i:i+100]), use_global_ids=True)
+            layer.edit_features(adds=FeatureSet(dispatchers_to_add[i:i + 100]), use_global_ids=True)
         # add dispatcher named users to the project's group.
         max_add_per_call = 25
         for i in range(0, math.ceil(len(dispatchers_to_add) / max_add_per_call)):
@@ -317,7 +317,7 @@ def main(arguments):  # noqa: C901
 
     # Add Workers
     for i in range(0, len(workers_to_add), 100):
-        layer.edit_features(adds=FeatureSet(workers_to_add[i:i+100]), use_global_ids=True)
+        layer.edit_features(adds=FeatureSet(workers_to_add[i:i + 100]), use_global_ids=True)
     # add worker named users to the project's group.
     max_add_per_call = 25
     for i in range(0, math.ceil(len(workers_to_add) / max_add_per_call)):
@@ -412,7 +412,7 @@ def main(arguments):  # noqa: C901
 
     # Add Assignments
     for i in range(0, len(assignments_to_add), 100):
-        layer.edit_features(adds=FeatureSet(assignments_to_add[i:i+100]), use_global_ids=True)
+        layer.edit_features(adds=FeatureSet(assignments_to_add[i:i + 100]), use_global_ids=True)
     new_assignments = v2_project.assignments_layer.query("1=1", return_all_records=True).features
     if (len(new_assignments) == len(existing_assignments)) or assignment_ghost:
         logger.info("Assignments successfully migrated")
