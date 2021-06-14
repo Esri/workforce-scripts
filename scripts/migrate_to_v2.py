@@ -265,7 +265,8 @@ def main(arguments):  # noqa: C901
                     v2_dispatcher.update(contact_number=dispatcher.contact_number, name=dispatcher.name)
 
         # Add Dispatchers
-        layer.edit_features(adds=FeatureSet(dispatchers_to_add), use_global_ids=True)
+        for i in range(0, len(dispatchers_to_add), 100):
+            layer.edit_features(adds=FeatureSet(dispatchers_to_add[i:i + 100]), use_global_ids=True)
         # add dispatcher named users to the project's group.
         max_add_per_call = 25
         for i in range(0, math.ceil(len(dispatchers_to_add) / max_add_per_call)):
@@ -315,7 +316,8 @@ def main(arguments):  # noqa: C901
             logger.info("Worker migration skipped - does not have a user id")
 
     # Add Workers
-    layer.edit_features(adds=FeatureSet(workers_to_add), use_global_ids=True)
+    for i in range(0, len(workers_to_add), 100):
+        layer.edit_features(adds=FeatureSet(workers_to_add[i:i + 100]), use_global_ids=True)
     # add worker named users to the project's group.
     max_add_per_call = 25
     for i in range(0, math.ceil(len(workers_to_add) / max_add_per_call)):
@@ -342,6 +344,10 @@ def main(arguments):  # noqa: C901
 
     # Set Custom Fields for Assignments and Templates
     custom_fields = add_custom_fields(project.assignments_layer, layer)
+
+    # Get workers & dispatchers
+    workers = project.workers.search()
+    dispatchers = project.dispatchers.search()
 
     # Prepare Assignments to be Added
     for assignment in existing_assignments:
@@ -371,7 +377,7 @@ def main(arguments):  # noqa: C901
                               project._assignment_schema.due_date],
                           v2_project._assignment_schema.description: assignment.attributes[
                               project._assignment_schema.description],
-                          v2_project._assignment_schema.worker_id: get_worker_global_id(project.workers.search(),
+                          v2_project._assignment_schema.worker_id: get_worker_global_id(workers,
                                                                                         assignment.attributes[
                                                                                             project._assignment_schema.worker_id]),
                           v2_project._assignment_schema.location: assignment_location,
@@ -388,7 +394,7 @@ def main(arguments):  # noqa: C901
                           v2_project._assignment_schema.paused_date: assignment.attributes[
                               project._assignment_schema.paused_date],
                           v2_project._assignment_schema.dispatcher_id: get_dispatcher_global_id(
-                              arguments.skip_dispatchers, project.dispatchers.search(),
+                              arguments.skip_dispatchers, dispatchers,
                               assignment.attributes[project._assignment_schema.dispatcher_id]),
                           v2_project._assignment_schema.global_id: assignment.attributes[
                               project._assignment_schema.global_id],
@@ -405,7 +411,8 @@ def main(arguments):  # noqa: C901
             assignment_ghost = True
 
     # Add Assignments
-    layer.edit_features(adds=FeatureSet(assignments_to_add), use_global_ids=True)
+    for i in range(0, len(assignments_to_add), 100):
+        layer.edit_features(adds=FeatureSet(assignments_to_add[i:i + 100]), use_global_ids=True)
     new_assignments = v2_project.assignments_layer.query("1=1", return_all_records=True).features
     if (len(new_assignments) == len(existing_assignments)) or assignment_ghost:
         logger.info("Assignments successfully migrated")
@@ -415,8 +422,9 @@ def main(arguments):  # noqa: C901
 
     # Migrate Attachments
     logger.info("Migrating Attachments")
-    for assignment in existing_assignments:
+    for i, assignment in enumerate(existing_assignments):
         object_id = assignment.attributes[project._assignment_schema.object_id]
+        logger.info(f"Migrating attachments for assignment {i + 1}/{len(existing_assignments)} objectId: {object_id}")
         new_assignment_object_id = v2_project.assignments.get(global_id=assignment.attributes[project._assignment_schema.global_id]).object_id
         if len(project.assignments_layer.attachments.get_list(object_id)) > 0:
             with tempfile.TemporaryDirectory() as dirpath:
@@ -431,6 +439,8 @@ def main(arguments):  # noqa: C901
                     except Exception as e:
                         logger.info(f"Failed to upload attachment: {path} from assignment: {assignment.attributes[project._assignment_schema.global_id]}")
                         logger.exception(e)
+        else:
+            logger.info(f"No attachments to migrate for objectId: {object_id}")
     if len(project.assignments_layer.attachments.search("1=1")) == len(
             v2_project.assignments_layer.attachments.search("1=1")):
         logger.info("Attachments successfully migrated")
