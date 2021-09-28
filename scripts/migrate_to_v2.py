@@ -336,7 +336,7 @@ def main(arguments):  # noqa: C901
     assignment_ghost = False
 
     # Get Existing Assignments
-    existing_assignments = project.assignments_layer.query("1=1",
+    existing_assignments = project.assignments_layer.query(arguments.where,
                                                            return_all_records=True,
                                                            out_sr=v2_project.assignments_layer.properties['extent']['spatialReference']).features
     assignments_to_add = []
@@ -413,7 +413,7 @@ def main(arguments):  # noqa: C901
     # Add Assignments
     for i in range(0, len(assignments_to_add), 100):
         layer.edit_features(adds=FeatureSet(assignments_to_add[i:i + 100]), use_global_ids=True)
-    new_assignments = v2_project.assignments_layer.query("1=1", return_all_records=True).features
+    new_assignments = v2_project.assignments_layer.query(arguments.where, return_all_records=True).features
     if (len(new_assignments) == len(existing_assignments)) or assignment_ghost:
         logger.info("Assignments successfully migrated")
     else:
@@ -524,6 +524,10 @@ if __name__ == "__main__":
     parser.add_argument('-project-id', dest='project_id', help="The id of the project to migrate", required=True)
     parser.add_argument('-new-title', dest='title', help="The new title of the v2 project to migrate")
     parser.add_argument('-log-file', dest='log_file', help='The log file to use')
+    parser.add_argument('-where', dest='where',
+                        help="The where clause to determine what assignments to migrate. "
+                             "Defaults to status IN (O, 1, 2, 4, 5) - completed and canceled assignments will not be migrated by default",
+                        default="status IN (0, 1, 2, 4, 5)")
     parser.add_argument('--skip-dispatchers', dest='skip_dispatchers', action='store_true',
                         help='Do not migrate dispatchers from v1 project')
     parser.add_argument('--skip-ssl-verification', dest='skip_ssl_verification', action='store_true',
