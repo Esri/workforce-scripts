@@ -19,6 +19,7 @@ In addition to the authentication arguments, the script specific arguments are a
 - -project-id \<projectId\> - The workforce project ID (from AGOL)
 - -new-title \<title\> - (Optional) What you want your new V2 project to be called. If you do not provided a title, by default the name will be "{old title} Upgraded"
 - --skip-dispatchers - (Optional) If provided, the dispatcher data will not be migrated (in case you do not want your dispatchers seeing the project yet) 
+- -where - The where clause for the assignments you want to migrate. This is optional - by default, we migrate assignments that are not completed or canceled.
 
 Example Usage:
 ```bash
