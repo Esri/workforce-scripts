@@ -1,4 +1,4 @@
-name: workforce-scripts2
+name: workforce-scripts
 channels:
   - esri
   - conda-forge
