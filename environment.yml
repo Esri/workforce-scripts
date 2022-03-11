@@ -1,4 +1,4 @@
-name: workforce-scripts
+name: workforce-scripts2
 channels:
   - esri
   - conda-forge
@@ -15,4 +15,4 @@ dependencies:
   - pre-commit>=2.7.1
   - pip:
       - pyqrcode==1.2.1
-      - pypng==0.0.18
+      - pypng==0.0.21
