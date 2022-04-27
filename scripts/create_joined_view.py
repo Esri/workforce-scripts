@@ -29,6 +29,7 @@ import logging
 import logging.handlers
 import sys
 import traceback
+import re
 import arcgis
 from arcgis.gis import GIS
 from arcgis.apps.workforce.project import Project
@@ -194,6 +195,7 @@ def create_joined_view(gis, source_layer, join_layer, primary_key_field, foreign
     :param join_fields: The list of field configuration objects in the join layer to keep in the resulting joined layer
     :return: The new item
     """
+    name = re.sub(r'[^A-Za-z0-9 _]+', '', name)
     new_item = gis.content.create_service(
         name=name,
         is_view=True,
@@ -395,6 +397,7 @@ def main(args):
                                     name,
                                     assignment_fields + assignment_type_fields + worker_fields,
                                     dispatcher_fields)
+    final_item.update({'title': name})
     logger.info(f"Final Item: {final_item.title}")
     if args.create_dashboard:
         logger.info("Creating dashboard")
